@@ -1,11 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const userRoutes = require("../routes/user.routes");
-
-// Use the user routes
-app.use("/auth", userRoutes);
-
+const AuthRoutes = require("../routes/auth.routes");
 
 const publicPath = path.join(__dirname, "../../frontend/public");
 console.log(publicPath);
@@ -15,8 +11,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(publicPath));
 
-app.get("/test", (req, res) => {
-  res.send("Hello from the backend!");
-});
+// Use the auth routes
+app.use("/auth", AuthRoutes);
+app.use("/api/users", require("../routes/user.routes"));
+app.use("/api/predictions", require("../routes/prediction.routes"));
 
 module.exports = app;
