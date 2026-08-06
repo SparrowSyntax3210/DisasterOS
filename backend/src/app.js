@@ -7,7 +7,7 @@ const publicPath = path.join(__dirname, "../../frontend/public");
 console.log(publicPath);
 
 // Middleware
-app.use(express.json());    
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(publicPath));
 
@@ -15,5 +15,6 @@ app.use(express.static(publicPath));
 app.use("/auth", AuthRoutes);
 app.use("/api/users", require("../routes/user.routes"));
 app.use("/api/predictions", require("../routes/prediction.routes"));
+app.use("/api/map", require("../routes/user-map.routes"));
 
 module.exports = app;

@@ -41,7 +41,24 @@ const predictionSchema = new mongoose.Schema(
         },
       ],
     },
+    zones: [
+  {
+    priority: {
+      type: String,
+      enum: ["HIGH", "MEDIUM", "LOW"],
+      required: true,
+    },
+
+    coordinates: [
+      {
+        lat: Number,
+        lng: Number,
+      },
+    ],
   },
+],
+  },
+  
   {
     timestamps: true,
   }

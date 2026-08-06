@@ -1,0 +1,370 @@
+/* ===========================
+   USER DASHBOARD
+=========================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Inter, sans-serif;
+}
+
+body {
+  background: #07131f;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+.dashboard-header {
+  width: 100%;
+  padding: 18px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #08121d;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(14px);
+}
+
+.dashboard-header h1 {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.dashboard-header span {
+  color: #4db5ff;
+}
+
+.location-box {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.location-box input {
+  width: 170px;
+  padding: 11px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #102235;
+  color: white;
+  outline: none;
+}
+
+.location-box button {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #1d8cff;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.location-box button:hover {
+  background: #0f74dc;
+}
+
+/* ===========================
+   SUMMARY CARDS
+=========================== */
+
+.summary-grid {
+  width: 92%;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.summary-card {
+  background: #0e1d2d;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 15px;
+  padding: 22px;
+}
+
+.summary-card h4 {
+  color: #98a6b5;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.summary-card h2 {
+  font-size: 32px;
+  margin-top: 8px;
+}
+
+.summary-card p {
+  margin-top: 10px;
+  color: #b7c6d6;
+}
+
+/* ===========================
+   MAP SECTION
+=========================== */
+
+.map-wrapper {
+  width: 92%;
+  margin: auto;
+  display: none;
+}
+
+#map {
+  height: 650px;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ===========================
+   MAP CONTROLS
+=========================== */
+
+.map-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.filter-btn {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+  color: white;
+}
+
+.filter-btn:hover {
+  transform: translateY(-2px);
+}
+
+.all {
+  background: #2d88ff;
+}
+
+.hospital {
+  background: #d9534f;
+}
+
+.police {
+  background: #005eff;
+}
+
+.fire {
+  background: #ff8b2b;
+}
+
+.pharmacy {
+  background: #15c16f;
+}
+
+.shelter {
+  background: #875cff;
+}
+
+.school {
+  background: #00b5c8;
+}
+
+/* ===========================
+   AI PANEL
+=========================== */
+
+.ai-panel {
+  width: 92%;
+  margin: 30px auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.ai-card {
+  background: #0e1d2d;
+  padding: 25px;
+  border-radius: 16px;
+}
+
+.ai-card h3 {
+  margin-bottom: 15px;
+}
+
+.ai-card ul {
+  margin-left: 18px;
+  line-height: 1.9;
+}
+
+/* ===========================
+   WEATHER GRID
+=========================== */
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.weather-box {
+  background: #13283e;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+
+.weather-box h2 {
+  margin-top: 10px;
+}
+
+/* ===========================
+   HISTORY
+=========================== */
+
+.history {
+  width: 92%;
+  margin: 30px auto;
+}
+
+.history table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 15px;
+}
+
+.history th {
+  background: #0f2235;
+  padding: 18px;
+}
+
+.history td {
+  background: #13283e;
+  padding: 16px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ===========================
+   RISK LEGEND
+=========================== */
+
+.legend {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  color: black;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  z-index: 999;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.legend span {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.red {
+  background: #ff2c2c;
+}
+
+.orange {
+  background: #ffb300;
+}
+
+.green {
+  background: #27d34d;
+}
+
+/* ===========================
+   LOADING
+=========================== */
+
+.loader {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.15);
+  border-top: 5px solid #4aa7ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 1000px) {
+  .weather-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ai-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .location-box {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .location-box input {
+    width: 100%;
+  }
+
+  .location-box button {
+    width: 100%;
+  }
+
+  .weather-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #map {
+    height: 500px;
+  }
+}

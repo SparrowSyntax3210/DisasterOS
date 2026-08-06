@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DisasterOS Dashboard</title>
+
+    <link rel="stylesheet" href="./css/user-dashboard.css" />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <div class="dashboard">
+      <!-- ========================= -->
+      <!-- HEADER -->
+      <!-- ========================= -->
+
+      <header class="topbar">
+        <div class="logo">
+          <h2>Disaster<span>OS</span></h2>
+        </div>
+
+        <div class="status">
+          <div class="status-dot"></div>
+          <p>Live Monitoring</p>
+        </div>
+      </header>
+
+      <!-- ========================= -->
+      <!-- LOCATION INPUT -->
+      <!-- ========================= -->
+
+      <section class="location-section">
+        <h1>Flood Prediction Dashboard</h1>
+
+        <p>Use your current location or enter coordinates manually.</p>
+
+        <div class="location-box">
+          <button id="liveLocationBtn">📍 Use Current Location</button>
+
+          <div class="divider">OR</div>
+
+          <input type="number" id="latitude" placeholder="Latitude" />
+
+          <input type="number" id="longitude" placeholder="Longitude" />
+
+          <button id="predictBtn">Predict</button>
+        </div>
+      </section>
+
+      <!-- ========================= -->
+      <!-- DASHBOARD -->
+      <!-- Hidden Initially -->
+      <!-- ========================= -->
+
+      <section id="dashboardSection" class="hidden">
+        <!-- ========================= -->
+        <!-- SUMMARY CARDS -->
+        <!-- ========================= -->
+
+        <div class="summary-grid">
+          <div class="card">
+            <h3>Flood Risk</h3>
+
+            <h1 id="riskText">--</h1>
+
+            <p id="probabilityText">Probability --</p>
+          </div>
+
+          <div class="card">
+            <h3>Preparedness Score</h3>
+
+            <h1 id="preparednessScore">--</h1>
+          </div>
+
+          <div class="card">
+            <h3>Nearby Hospitals</h3>
+
+            <h1 id="hospitalCount">0</h1>
+          </div>
+
+          <div class="card">
+            <h3>Shelters</h3>
+
+            <h1 id="shelterCount">0</h1>
+          </div>
+
+          <div class="card">
+            <h3>Police Stations</h3>
+
+            <h1 id="policeCount">0</h1>
+          </div>
+
+          <div class="card">
+            <h3>Fire Stations</h3>
+
+            <h1 id="fireCount">0</h1>
+          </div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- MAP FILTERS -->
+        <!-- ========================= -->
+
+        <div class="map-toolbar">
+            <button class="filter-btn active" data-layer="all">All</button>
+<button class="filter-btn" data-layer="hospital">Hospitals</button>
+<button class="filter-btn" data-layer="shelter">Shelters</button>
+<button class="filter-btn" data-layer="police">Police</button>
+<button class="filter-btn" data-layer="fire">Fire Stations</button>
+<button class="filter-btn" data-layer="pharmacy">Pharmacies</button>
+<button class="filter-btn" data-layer="school">Schools</button>
+        </div>
+
+        <!-- ========================= -->
+        <!-- MAP -->
+        <!-- ========================= -->
+
+        <div id="mapContainer">
+          <div id="map"></div>
+        </div>
+
+        <!-- ========================= -->
+        <!-- AI RECOMMENDATIONS -->
+        <!-- ========================= -->
+
+        <section class="recommendation-section">
+          <h2>AI Recommendations</h2>
+
+          <div id="recommendations"></div>
+        </section>
+
+        <!-- ========================= -->
+        <!-- WEATHER -->
+        <!-- ========================= -->
+
+        <section class="weather-section">
+          <h2>Weather Summary</h2>
+
+          <div id="weatherCard"></div>
+        </section>
+
+        <!-- ========================= -->
+        <!-- PREDICTION HISTORY -->
+        <!-- ========================= -->
+
+        <section class="history-section">
+          <h2>Prediction History</h2>
+
+          <div id="history"></div>
+        </section>
+      </section>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="./js/user-dashboard.js"></script>
+  </body>
+</html>

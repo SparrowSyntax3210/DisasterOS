@@ -3,6 +3,7 @@ const router = express.Router();
 const Prediction = require("../models/prediction.models");
 const { getWeather } = require("../services/weather.service");
 const { askAi } = require("../services/openrouter.service");
+const { generateRiskZones } = require("../utils/zonegenerator");
 
 router.post("/predict", async (req, res) => {
   try {
@@ -57,32 +58,44 @@ Do not include explanations outside JSON.
       .replace(/```/g, "")
       .trim();
 
-    let aiPrediction;
+    // Parse AI response
+let aiPrediction;
 
-    try {
-      aiPrediction = JSON.parse(cleanResponse);
-    } catch (err) {
-      return res.status(500).json({
-        success: false,
-        message: "AI returned invalid JSON.",
-        response: aiResponse,
-      });
-    }
+try {
+  aiPrediction = JSON.parse(cleanResponse);
+} catch (err) {
+  return res.status(500).json({
+    success: false,
+    message: "AI returned invalid JSON.",
+    response: aiResponse,
+  });
+}
 
-    // Step 5: Save Report
-    const report = await Prediction.create({
-      latitude,
-      longitude,
-      weather: weatherData,
-      prediction: aiPrediction,
-    });
+// Generate risk zones
+const zones = generateRiskZones(
+  Number(latitude),
+  Number(longitude),
+  aiPrediction.probability
+);
+
+// Save report
+const report = await Prediction.create({
+  latitude,
+  longitude,
+  weather: weatherData,
+  prediction: aiPrediction,
+  zones,
+});
 
     // Step 6: Return Response
     return res.status(201).json({
-      success: true,
-      message: "Prediction generated successfully.",
-      data: report,
-    });
+    success: true,
+    message: "Prediction generated successfully.",
+    data: {
+        ...report.toObject(),
+        zones
+    }
+});
 
   } catch (err) {
     console.error(err);
