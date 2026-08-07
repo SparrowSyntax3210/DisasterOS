@@ -1,3 +1,5 @@
+console.log(__filename);
+
 const express = require("express");
 const router = express.Router();
 
@@ -5,8 +7,7 @@ const { getPlaces } = require("../services/geoapify.service");
 
 const DEFAULT_RADIUS = 5000;
 
-
-router.get("/hospital", async (req, res) => {
+router.get("/resources", async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
@@ -17,16 +18,55 @@ router.get("/hospital", async (req, res) => {
       "healthcare.hospital",
     );
 
-    res.status(200).json(hospitals);
+    const policeStations = await getPlaces(
+      lat,
+      lng,
+      DEFAULT_RADIUS,
+      "service.police",
+    );
+
+    const fireStations = await getPlaces(
+      lat,
+      lng,
+      DEFAULT_RADIUS,
+      "service.fire_station",
+    );
+
+    const pharmacies = await getPlaces(
+      lat,
+      lng,
+      DEFAULT_RADIUS,
+      "healthcare.pharmacy",
+    );
+
+    const schools = await getPlaces(
+      lat,
+      lng,
+      DEFAULT_RADIUS,
+      "education.school",
+    );
+
+    return res.json({
+      success: true,
+
+      resources: {
+        hospitals,
+        policeStations,
+        fireStations,
+        pharmacies,
+        schools,
+        shelters: schools,
+      },
+    });
   } catch (err) {
-    console.error(err);
+    console.log(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
     });
   }
 });
-
 
 router.get("/police", async (req, res) => {
   try {
@@ -143,62 +183,6 @@ router.get("/community-centres", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-});
-
-// =======================
-// All Nearby Resources
-// =======================
-router.get("/resources", async (req, res) => {
-  try {
-    const { lat, lng } = req.query;
-
-    if (!lat || !lng) {
-      return res.status(400).json({
-        success: false,
-        message: "Latitude and Longitude are required",
-      });
-    }
-
-    const results = await Promise.allSettled([
-      getPlaces(lat, lng, DEFAULT_RADIUS, "healthcare.hospital"),
-      getPlaces(lat, lng, DEFAULT_RADIUS, "service.police"),
-      getPlaces(lat, lng, DEFAULT_RADIUS, "service.fire_station"),
-      getPlaces(lat, lng, DEFAULT_RADIUS, "healthcare.pharmacy"),
-      getPlaces(lat, lng, DEFAULT_RADIUS, "education.school"),
-    ]);
-
-    const [
-      hospitals,
-      policeStations,
-      fireStations,
-      pharmacies,
-      schools,
-    ] = results.map((r) =>
-      r.status === "fulfilled" ? r.value : []
-    );
-
-    const resources = {
-      hospitals,
-      policeStations,
-      fireStations,
-      pharmacies,
-      schools,
-      shelters: [],
-    };
-
-    return res.json({
-      success: true,
-      resources,
-    });
-
-  } catch (err) {
-    console.error(err);
-
-    return res.status(500).json({
       success: false,
       message: err.message,
     });

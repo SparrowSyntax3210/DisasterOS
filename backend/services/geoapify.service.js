@@ -5,16 +5,16 @@ const API_KEY = process.env.GEOAPIFY_API_KEY;
 async function getPlaces(lat, lng, radius, category) {
   try {
     const { data } = await axios.get(
-      "https://api.geoapify.com/v2/places",
-      {
-        params: {
-          categories: category,
-          filter: `circle:${lng},${lat},${radius}`,
-          limit: 20,
-          apiKey: API_KEY,
-        },
-      }
-    );
+  "https://api.geoapify.com/v2/places",
+  {
+    params: {
+      categories: category,
+      filter: `circle:${lng},${lat},${radius}`,
+      limit: 20,
+      apiKey: API_KEY,
+    },
+  }
+);
 
     return data.features.map((place) => ({
       id: place.properties.place_id,

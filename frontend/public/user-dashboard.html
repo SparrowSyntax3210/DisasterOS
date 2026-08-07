@@ -2,161 +2,303 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DisasterOS Dashboard</title>
 
-    <link rel="stylesheet" href="./css/user-dashboard.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS | User Dashboard</title>
+
+    <!-- Google Font -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Leaflet -->
+
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
+
+    <!-- CSS -->
+
+    <link rel="stylesheet" href="./css/user-dashboard.css" />
   </head>
+
   <body>
-    <div class="dashboard">
-      <!-- ========================= -->
-      <!-- HEADER -->
-      <!-- ========================= -->
+    <!-- ===================================================== -->
+    <!-- TOP NAVBAR -->
+    <!-- ===================================================== -->
 
-      <header class="topbar">
-        <div class="logo">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo-circle">🌊</div>
+
+        <div>
           <h2>Disaster<span>OS</span></h2>
+
+          <p>AI Flood Intelligence Platform</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="status-chip">
+          <span class="pulse"></span>
+
+          Live Monitoring
         </div>
 
-        <div class="status">
-          <div class="status-dot"></div>
-          <p>Live Monitoring</p>
+        <div id="currentTime" class="time-chip">--:-- IST</div>
+      </div>
+    </header>
+
+    <!-- ===================================================== -->
+    <!-- HERO -->
+    <!-- ===================================================== -->
+
+    <section id="heroSection" class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">AI Powered Disaster Intelligence</div>
+
+        <h1>
+          Predict Flood Risk
+
+          <span> Before Disaster Strikes </span>
+        </h1>
+
+        <p>
+          Search any city, district or village. DisasterOS analyses weather,
+          terrain, rainfall, nearby rivers and emergency resources to estimate
+          flood risk.
+        </p>
+      </div>
+
+      <!-- ================= SEARCH CARD ================= -->
+
+      <div class="search-card">
+        <button id="liveLocationBtn" class="primary-outline">
+          📍 Use Current Location
+        </button>
+
+        <div class="divider">OR</div>
+
+        <div class="search-wrapper">
+          <input
+            id="placeInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Search City, District or Village"
+          />
+
+          <div id="placeSuggestions" class="suggestions"></div>
         </div>
-      </header>
 
-      <!-- ========================= -->
-      <!-- LOCATION INPUT -->
-      <!-- ========================= -->
+        <button id="predictBtn" class="primary-btn">Predict Area</button>
+      </div>
 
-      <section class="location-section">
-        <h1>Flood Prediction Dashboard</h1>
+      <!-- ================= FEATURES ================= -->
 
-        <p>Use your current location or enter coordinates manually.</p>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>🌦 Weather</h3>
 
-        <div class="location-box">
-          <button id="liveLocationBtn">📍 Use Current Location</button>
-
-          <div class="divider">OR</div>
-
-          <input type="number" id="latitude" placeholder="Latitude" />
-
-          <input type="number" id="longitude" placeholder="Longitude" />
-
-          <button id="predictBtn">Predict</button>
+          <p>Live Weather Engine</p>
         </div>
-      </section>
 
-      <!-- ========================= -->
-      <!-- DASHBOARD -->
-      <!-- Hidden Initially -->
-      <!-- ========================= -->
+        <div class="feature-card">
+          <h3>🛰 Satellite</h3>
 
-      <section id="dashboardSection" class="hidden">
-        <!-- ========================= -->
-        <!-- SUMMARY CARDS -->
-        <!-- ========================= -->
+          <p>Terrain Intelligence</p>
+        </div>
 
-        <div class="summary-grid">
-          <div class="card">
-            <h3>Flood Risk</h3>
+        <div class="feature-card">
+          <h3>🤖 AI</h3>
+
+          <p>Flood Prediction Model</p>
+        </div>
+
+        <div class="feature-card">
+          <h3>🚨 Response</h3>
+
+          <p>Emergency Resource Mapping</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- LOADING SCREEN -->
+    <!-- ===================================================== -->
+
+    <section id="loadingScreen" class="loading-screen hidden">
+      <div class="terminal-card">
+        <h2>DisasterOS Intelligence Engine</h2>
+
+        <div id="loadingLogs" class="terminal-body"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- DASHBOARD -->
+    <!-- ===================================================== -->
+
+    <section id="dashboardSection" class="dashboard hidden">
+      <div class="dashboard-grid">
+        <!-- ================= LEFT PANEL ================= -->
+
+        <aside class="left-panel">
+          <div class="panel-card risk-card">
+            <small> FLOOD RISK </small>
 
             <h1 id="riskText">--</h1>
 
-            <p id="probabilityText">Probability --</p>
+            <div class="progress">
+              <div id="riskProgress"></div>
+            </div>
+
+            <h3 id="probabilityText">--</h3>
           </div>
 
-          <div class="card">
-            <h3>Preparedness Score</h3>
+          <div class="panel-card">
+            <h3>Weather Conditions</h3>
 
-            <h1 id="preparednessScore">--</h1>
+            <div id="weatherCard">Loading...</div>
           </div>
 
-          <div class="card">
-            <h3>Nearby Hospitals</h3>
+          <div class="panel-card">
+            <h3>AI Recommendations</h3>
 
-            <h1 id="hospitalCount">0</h1>
+            <ul id="recommendations"></ul>
           </div>
+        </aside>
 
-          <div class="card">
-            <h3>Shelters</h3>
+        <!-- ================= MAP ================= -->
 
-            <h1 id="shelterCount">0</h1>
-          </div>
-
-          <div class="card">
-            <h3>Police Stations</h3>
-
-            <h1 id="policeCount">0</h1>
-          </div>
-
-          <div class="card">
-            <h3>Fire Stations</h3>
-
-            <h1 id="fireCount">0</h1>
-          </div>
-        </div>
-
-        <!-- ========================= -->
-        <!-- MAP FILTERS -->
-        <!-- ========================= -->
-
-        <div class="map-toolbar">
-            <button class="filter-btn active" data-layer="all">All</button>
-<button class="filter-btn" data-layer="hospital">Hospitals</button>
-<button class="filter-btn" data-layer="shelter">Shelters</button>
-<button class="filter-btn" data-layer="police">Police</button>
-<button class="filter-btn" data-layer="fire">Fire Stations</button>
-<button class="filter-btn" data-layer="pharmacy">Pharmacies</button>
-<button class="filter-btn" data-layer="school">Schools</button>
-        </div>
-
-        <!-- ========================= -->
-        <!-- MAP -->
-        <!-- ========================= -->
-
-        <div id="mapContainer">
+        <main class="map-panel">
           <div id="map"></div>
-        </div>
 
-        <!-- ========================= -->
-        <!-- AI RECOMMENDATIONS -->
-        <!-- ========================= -->
+          <!-- Floating Risk Card -->
 
-        <section class="recommendation-section">
-          <h2>AI Recommendations</h2>
+          <div class="floating-card" id="zonePopup">
+            <h3 id="popupRisk">Waiting...</h3>
 
-          <div id="recommendations"></div>
-        </section>
+            <p id="popupArea">Select a location to begin prediction.</p>
 
-        <!-- ========================= -->
-        <!-- WEATHER -->
-        <!-- ========================= -->
+            <small id="popupPopulation"> </small>
+          </div>
 
-        <section class="weather-section">
-          <h2>Weather Summary</h2>
+          <!-- Floating Layer Controls -->
 
-          <div id="weatherCard"></div>
-        </section>
+          <div class="layer-controls">
+            <button class="layer-btn active" data-layer="all">All</button>
 
-        <!-- ========================= -->
-        <!-- PREDICTION HISTORY -->
-        <!-- ========================= -->
+            <button class="layer-btn" data-layer="hospital">🏥</button>
 
-        <section class="history-section">
-          <h2>Prediction History</h2>
+            <button class="layer-btn" data-layer="shelter">🏠</button>
 
-          <div id="history"></div>
-        </section>
-      </section>
-    </div>
+            <button class="layer-btn" data-layer="police">🚓</button>
+
+            <button class="layer-btn" data-layer="fire">🚒</button>
+
+            <button class="layer-btn" data-layer="school">🏫</button>
+
+            <button class="layer-btn" data-layer="pharmacy">💊</button>
+          </div>
+        </main>
+
+        <!-- ================= RIGHT PANEL ================= -->
+
+        <aside class="right-panel">
+          <div class="panel-card">
+            <h3>AI Confidence</h3>
+
+            <div class="confidence-box">
+              <div class="ai-circle">AI</div>
+
+              <div>
+                <small> Model Confidence </small>
+
+                <h2 id="confidenceValue">--</h2>
+              </div>
+            </div>
+
+            <div class="progress">
+              <div id="confidenceProgress"></div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <h3>Nearby Resources</h3>
+
+            <div class="resource-grid">
+              <div class="resource-item">
+                <span>🏥</span>
+
+                <h2 id="hospitalCount">0</h2>
+
+                <small>Hospitals</small>
+              </div>
+
+              <div class="resource-item">
+                <span>🏠</span>
+
+                <h2 id="shelterCount">0</h2>
+
+                <small>Shelters</small>
+              </div>
+
+              <div class="resource-item">
+                <span>🚓</span>
+
+                <h2 id="policeCount">0</h2>
+
+                <small>Police</small>
+              </div>
+
+              <div class="resource-item">
+                <span>🚒</span>
+
+                <h2 id="fireCount">0</h2>
+
+                <small>Fire</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Prediction History</h3>
+
+              <button id="clearHistoryBtn">Clear</button>
+            </div>
+
+            <div id="history" class="history-list"></div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- ================= BOTTOM BAR ================= -->
+
+      <div class="bottom-toolbar">
+        <button id="refreshBtn" class="toolbar-btn">
+          🔄 Refresh Prediction
+        </button>
+
+        <button id="resetBtn" class="toolbar-btn">🏠 Home</button>
+
+        <button id="locateBtn" class="toolbar-btn">📍 Center Map</button>
+      </div>
+    </section>
+
+    <!-- ================= LIBRARIES ================= -->
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ================= MAIN JS ================= -->
 
     <script src="./js/user-dashboard.js"></script>
   </body>
