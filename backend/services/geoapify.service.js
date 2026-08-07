@@ -45,6 +45,46 @@ async function getPlaces(lat, lng, radius, category) {
   }
 }
 
+async function geocodeLocation(location) {
+  try {
+    const { data } = await axios.get(
+      "https://api.geoapify.com/v1/geocode/search",
+      {
+        params: {
+          text: location,
+          apiKey: API_KEY,
+          limit: 1,
+        },
+      }
+    );
+
+    if (!data.features || data.features.length === 0) {
+      return null;
+    }
+
+    const place = data.features[0].properties;
+
+    return {
+      name: place.formatted,
+      latitude: place.lat,
+      longitude: place.lon,
+      city: place.city || "",
+      state: place.state || "",
+      country: place.country || "",
+    };
+
+  } catch (err) {
+    console.log("Geoapify Geocode Error");
+
+    if (err.response) {
+      console.log(err.response.data);
+    }
+
+    return null;
+  }
+}
+
 module.exports = {
   getPlaces,
+  geocodeLocation,
 };

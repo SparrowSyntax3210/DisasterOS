@@ -1,9 +1,7 @@
 console.log(__filename);
-
 const express = require("express");
 const router = express.Router();
-
-const { getPlaces } = require("../services/geoapify.service");
+const { getPlaces, geocodeLocation } = require("../services/geoapify.service");
 
 const DEFAULT_RADIUS = 5000;
 
@@ -205,6 +203,41 @@ router.get("/safe-zones", async (req, res) => {
   res.json({
     message: "Coming Soon",
   });
+});
+
+router.get("/geocode", async (req, res) => {
+  try {
+    const location = req.query.location || req.query.place;
+
+    if (!location) {
+      return res.status(400).json({
+        success: false,
+        message: "Location is required",
+      });
+    }
+
+    const result = await geocodeLocation(location);
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Location not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      location: result,
+    });
+
+  } catch (err) {
+    console.error("Geocode Error:", err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
 });
 
 module.exports = router;

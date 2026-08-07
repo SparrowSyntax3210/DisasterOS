@@ -19,8 +19,8 @@ let zoneLayers = [];
 let selectedMarker = null;
 
 // Selected Location
-let selectedLatitude = null;
-let selectedLongitude = null;
+let selectedLat = null;
+let selectedLng = null;
 let selectedPlaceName = "";
 
 // Search debounce
@@ -54,10 +54,79 @@ const fireCount = document.getElementById("fireCount");
 
 const confidenceValue = document.getElementById("confidenceValue");
 const confidenceFill = document.getElementById("confidenceProgress");
+const historyContainer = document.getElementById("history");
+
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // ==========================================================
 // CLOCK
 // ==========================================================
+
+// ==========================================================
+// HOME BUTTON
+// ==========================================================
+
+const resetBtn = document.getElementById("resetBtn");
+
+if (resetBtn) {
+  resetBtn.addEventListener("click", () => {
+    // hide dashboard
+    dashboardSection.classList.add("hidden");
+
+    // show hero
+    heroSection.style.display = "";
+
+    // hide loading if active
+    loadingScreen.classList.add("hidden");
+
+    // clear selected location
+
+    selectedLat = null;
+    selectedLng = null;
+    selectedPlaceName = "";
+
+    // clear input
+
+    if (placeInput) {
+      placeInput.value = "";
+    }
+
+    // remove map
+
+    if (map) {
+      map.remove();
+
+      map = null;
+    }
+  });
+}
+
+// ==========================================================
+// CENTER MAP BUTTON
+// ==========================================================
+
+const locateBtn = document.getElementById("locateBtn");
+
+if (locateBtn) {
+  locateBtn.addEventListener("click", () => {
+    if (!map) {
+      alert("Map not initialized.");
+
+      return;
+    }
+
+    if (selectedLat === null || selectedLng === null) {
+      alert("No location selected.");
+
+      return;
+    }
+
+    map.flyTo([selectedLat, selectedLng], 13, {
+      animate: true,
+      duration: 1.2,
+    });
+  });
+}
 
 const currentTime = document.getElementById("currentTime");
 
@@ -123,82 +192,88 @@ async function runLoading() {
 if (liveBtn) {
   liveBtn.addEventListener("click", () => {
     if (!navigator.geolocation) {
-      alert("Geolocation not supported.");
-
+      alert("Geolocation is not supported by this browser.");
       return;
     }
 
     liveBtn.disabled = true;
-
     liveBtn.innerText = "Detecting...";
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        selectedLat = pos.coords.latitude;
-        selectedLng = pos.coords.longitude;
-        selectedPlace = "Current Location";
+      async (position) => {
+        selectedLat = position.coords.latitude;
+        selectedLng = position.coords.longitude;
+        selectedPlaceName = "Current Location";
 
-        if (placeInput) {
-          placeInput.value = "Current Location";
+        try {
+          await startPrediction();
+        } catch (error) {
+          console.error(error);
+        } finally {
+          liveBtn.disabled = false;
+          liveBtn.innerText = "Use Live Location";
         }
-
-        liveBtn.disabled = false;
-        liveBtn.innerText = "📍 Use Current Location";
       },
 
-      () => {
-        alert("Unable to detect location.");
+      (error) => {
+        console.error(error);
+
+        alert("Unable to detect your current location.");
 
         liveBtn.disabled = false;
-        liveBtn.innerText = "📍 Use Current Location";
+        liveBtn.innerText = "Use Live Location";
       },
 
       {
         enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
       },
     );
   });
 }
 
 // ==========================================================
-// GEOCODE
+// GEOCODE USING BACKEND API
 // ==========================================================
 
 async function geocode(place) {
-  const res = await fetch(
-    `${API}/map/geocode?place=${encodeURIComponent(place)}`,
-  );
 
-  if (!res.ok) {
-    throw new Error("Location not found.");
+  const query = place.trim();
+
+  if (!query) {
+    throw new Error("Enter a location.");
   }
+
+  const res = await fetch(
+    `${API}/map/geocode?location=${encodeURIComponent(query)}`
+  );
 
   const data = await res.json();
 
-  let item = null;
-
-  if (data.results?.length) item = data.results[0];
-  else if (data.data?.length) item = data.data[0];
-  else if (data.features?.length) item = data.features[0];
-  else if (data.latitude) item = data;
-  else if (data.data) item = data.data;
-
-  if (!item) {
-    throw new Error("Location not found.");
+  if (!res.ok || !data.success) {
+    throw new Error(
+      data.message || "Location not found."
+    );
   }
 
-  if (item.properties) {
-    return {
-      lat: item.properties.lat,
-      lng: item.properties.lon,
-      name: item.properties.formatted,
-    };
+
+  const item = data.location;
+
+
+  if (
+    !item ||
+    !item.latitude ||
+    !item.longitude
+  ) {
+    throw new Error("Invalid location data received.");
   }
+
 
   return {
-    lat: item.latitude ?? item.lat,
-    lng: item.longitude ?? item.lon ?? item.lng,
-    name: item.name ?? item.formatted ?? item.display_name,
+    lat: Number(item.latitude),
+    lng: Number(item.longitude),
+    name: item.name || query,
   };
 }
 
@@ -206,45 +281,43 @@ async function geocode(place) {
 // PREDICT BUTTON
 // ==========================================================
 
-if (predictBtn) {
-  predictBtn.addEventListener("click", async () => {
-    try {
-      // ----------------------------
-      // Resolve typed location
-      // ----------------------------
+predictBtn.addEventListener("click", async () => {
+  try {
+    if (selectedLat === null || selectedLng === null) {
+      const place = placeInput.value.trim();
 
-      if (selectedLat === null || selectedLng === null) {
-        const place = placeInput.value.trim();
+      if (!place) {
+        alert("Enter a location.");
 
-        if (!place) {
-          alert("Enter a location.");
-
-          return;
-        }
-
-        predictBtn.disabled = true;
-        predictBtn.innerText = "Finding...";
-
-        const result = await geocode(place);
-
-        selectedLat = Number(result.lat);
-        selectedLng = Number(result.lng);
-        selectedPlace = result.name;
-
-        placeInput.value = result.name;
+        return;
       }
 
-      await startPrediction();
-    } catch (err) {
-      console.error(err);
+      predictBtn.disabled = true;
 
-      alert(err.message);
+      predictBtn.innerText = "Finding...";
 
-      predictBtn.disabled = false;
-      predictBtn.innerText = "Predict Area";
+      const result = await geocode(place);
+
+      selectedLat = Number(result.lat);
+
+      selectedLng = Number(result.lng);
+
+      selectedPlaceName = result.name || place;
+
+      placeInput.value = selectedPlaceName;
     }
-  });
-}
+
+    await startPrediction();
+  } catch (err) {
+    console.error(err);
+
+    alert(err.message || "Prediction failed.");
+
+    predictBtn.disabled = false;
+
+    predictBtn.innerText = "Predict Area";
+  }
+});
 
 // ==========================================================
 // START PREDICTION
@@ -261,63 +334,87 @@ async function startPrediction() {
 
   predictBtn.innerText = "Predicting...";
 
-  const loadingPromise = runLoading();
+  try {
+    const loadingPromise = runLoading();
 
-  const predictionPromise = fetch(API + "/predictions/predict", {
-    method: "POST",
+    const predictionPromise = fetch(API + "/predictions/predict", {
+      method: "POST",
 
-    headers: {
-      "Content-Type": "application/json",
-    },
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-    body: JSON.stringify({
-      latitude: selectedLat,
-      longitude: selectedLng,
-    }),
-  });
+      body: JSON.stringify({
+        latitude: selectedLat,
+        longitude: selectedLng,
+      }),
+    });
 
-  const resourcePromise = fetch(
-    API + `/map/resources?lat=${selectedLat}&lng=${selectedLng}`,
-  );
+    const resourcePromise = fetch(
+      API + `/map/resources?lat=${selectedLat}&lng=${selectedLng}`,
+    );
 
-  const [predictionResponse, resourceResponse] = await Promise.all([
-    predictionPromise,
-    resourcePromise,
-  ]);
+    const [predictionResponse, resourceResponse] = await Promise.all([
+      predictionPromise,
+      resourcePromise,
+    ]);
 
-  predictionData = await predictionResponse.json();
-  resourcesData = await resourceResponse.json();
+    predictionData = await predictionResponse.json();
 
-  console.log("Prediction API", predictionData);
-  console.log("Resources API", resourcesData);
+    resourcesData = await resourceResponse.json();
 
-  if (!predictionData.success) {
-    throw new Error(predictionData.message);
+    if (!predictionData.success) {
+      throw new Error(predictionData.message || "Prediction failed.");
+    }
+
+    if (!resourcesData.success) {
+      throw new Error(resourcesData.message || "Resource lookup failed.");
+    }
+
+    /*
+     * Wait for terminal animation
+     */
+
+    await loadingPromise;
+
+    loadingScreen.classList.add("hidden");
+
+    dashboardSection.classList.remove("hidden");
+
+    initializeMap();
+
+    setTimeout(() => {
+      if (!map) return;
+
+      map.invalidateSize(true);
+
+      renderDashboard();
+
+      renderResources();
+
+      renderMarkers();
+
+      renderZones();
+
+      fitDashboardMap();
+    }, 300);
+
+    saveHistory();
+  } catch (error) {
+    console.error("Prediction Error:", error);
+
+    loadingScreen.classList.add("hidden");
+
+    dashboardSection.classList.add("hidden");
+
+    heroSection.style.display = "";
+
+    alert(error.message || "Something went wrong.");
+  } finally {
+    predictBtn.disabled = false;
+
+    predictBtn.innerText = "Predict Area";
   }
-
-  if (!resourcesData.success) {
-    throw new Error(resourcesData.message);
-  }
-
-  await loadingPromise;
-
-  loadingScreen.classList.add("hidden");
-
-  dashboardSection.classList.remove("hidden");
-
-  initializeMap();
-
-  renderDashboard();
-
-  renderResources();
-
-  renderMarkers();
-
-  renderZones();
-
-  predictBtn.disabled = false;
-
-  predictBtn.innerText = "Predict Area";
 }
 
 // ==========================================================
@@ -327,32 +424,69 @@ async function startPrediction() {
 function initializeMap() {
   if (map) {
     map.remove();
+    map = null;
   }
 
-  map = L.map("map").setView(
-    [selectedLat, selectedLng],
+  map = L.map("map", {
+    zoomControl: false,
+    attributionControl: true,
+    preferCanvas: true,
+  }).setView([selectedLat, selectedLng], 12.8);
 
-    13,
-  );
+  // =====================================================
+  // CUSTOM PANES
+  // =====================================================
 
-  L.tileLayer(
+  map.createPane("riskZones");
+  map.getPane("riskZones").style.zIndex = 350;
+
+  map.createPane("resourceMarkers");
+  map.getPane("resourceMarkers").style.zIndex = 650;
+
+  map.createPane("currentLocation");
+  map.getPane("currentLocation").style.zIndex = 800;
+
+  // =====================================================
+  // DARK TACTICAL BASEMAP
+  // =====================================================
+
+L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
     {
-      attribution: "© OpenStreetMap",
-    },
-  ).addTo(map);
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+    }
+).addTo(map);
 
-  L.marker([selectedLat, selectedLng])
+  // =====================================================
+  // CURRENT LOCATION
+  // =====================================================
 
-    .addTo(map)
+  const currentIcon = L.divIcon({
+    className: "current-location-wrapper",
 
-    .bindPopup(`<b>${selectedPlace}</b>`)
+    html: `
+            <div class="current-location-pulse">
+                <div class="current-location-core"></div>
+            </div>
+        `,
 
-    .openPopup();
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+
+  L.marker([selectedLat, selectedLng], {
+    icon: currentIcon,
+    pane: "currentLocation",
+    zIndexOffset: 5000,
+  }).addTo(map).bindPopup(`
+        <div class="resource-popup">
+            <strong>📍 Current Location</strong>
+        </div>
+    `);
 
   setTimeout(() => {
-    map.invalidateSize();
+    map.invalidateSize(true);
   }, 300);
 }
 
@@ -480,11 +614,68 @@ function renderResources() {
 // MAP MARKERS
 // ==========================================================
 
+function createResourceIcon(type){
+
+const colors={
+hospital:"#ff3b30",
+shelter:"#4ea8ff",
+police:"#00d26a",
+fire:"#ff9800",
+pharmacy:"#ff4f9a",
+school:"#ffd54f"
+};
+
+const emojis={
+hospital:"🏥",
+shelter:"🏠",
+police:"🚓",
+fire:"🚒",
+pharmacy:"💊",
+school:"🏫"
+};
+
+return L.divIcon({
+
+className:"",
+
+html:`
+
+<div style="
+width:18px;
+height:18px;
+border-radius:50%;
+background:${colors[type]};
+display:flex;
+align-items:center;
+justify-content:center;
+box-shadow:0 0 12px ${colors[type]};
+border:2px solid white;
+font-size:10px;
+">
+
+${emojis[type]}
+
+</div>
+
+`,
+
+iconSize:[18,18],
+iconAnchor:[9,9]
+
+});
+
+}
+
 function renderMarkers() {
-  // Remove previous markers
-  Object.values(markerLayers).forEach((arr) => {
-    arr.forEach((marker) => {
-      if (map.hasLayer(marker)) {
+  /*
+   * Remove previous marker layers
+   */
+
+  Object.values(markerLayers).forEach((markers) => {
+    if (!Array.isArray(markers)) return;
+
+    markers.forEach((marker) => {
+      if (map && map.hasLayer(marker)) {
         map.removeLayer(marker);
       }
     });
@@ -499,29 +690,59 @@ function renderMarkers() {
     school: [],
   };
 
-  if (!resourcesData?.resources) return;
+  if (!resourcesData?.resources) {
+    return;
+  }
 
   const resources = resourcesData.resources;
 
   const mapping = {
-    hospital: resources.hospitals,
-    shelter: resources.shelters,
-    police: resources.policeStations,
-    fire: resources.fireStations,
-    pharmacy: resources.pharmacies,
-    school: resources.schools,
+    hospital: resources.hospitals || [],
+
+    shelter: resources.shelters || [],
+
+    police: resources.policeStations || [],
+
+    fire: resources.fireStations || [],
+
+    pharmacy: resources.pharmacies || [],
+
+    school: resources.schools || [],
   };
 
   Object.entries(mapping).forEach(([type, places]) => {
-    (places || []).forEach((place) => {
-      if (!place.latitude || !place.longitude) return;
+    places.forEach((place) => {
+      const lat = Number(place.latitude ?? place.lat);
 
-      const marker = L.marker([place.latitude, place.longitude]);
+      const lng = Number(place.longitude ?? place.lng ?? place.lon);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
+      }
+
+      const marker = L.marker([lat, lng], {
+        icon: createResourceIcon(type),
+
+        pane: "resourceMarkers",
+
+        zIndexOffset: 1000,
+      });
 
       marker.bindPopup(`
-    <strong>${place.name}</strong><br>
-    ${type}
-`);
+                    <div class="resource-popup">
+
+                        <strong>
+                            ${escapeHtml(place.name || type.toUpperCase())}
+                        </strong>
+
+                        <br>
+
+                        <span>
+                            ${type.toUpperCase()}
+                        </span>
+
+                    </div>
+                `);
 
       marker.addTo(map);
 
@@ -554,45 +775,235 @@ function addMarkers(list, emoji, key) {
 // RISK ZONES
 // ==========================================================
 
+function getZoneColor(risk) {
+  risk = String(risk || "").toUpperCase();
+
+  if (risk === "EXTREME" || risk === "CRITICAL") {
+    return {
+      stroke: "#ff2525",
+      fill: "#ff2020",
+    };
+  }
+
+  if (risk === "HIGH") {
+    return {
+      stroke: "#ff3535",
+      fill: "#ff2525",
+    };
+  }
+
+  if (risk === "MEDIUM") {
+    return {
+      stroke: "#ff9d00",
+      fill: "#ff9d00",
+    };
+  }
+
+  return {
+    stroke: "#00a957",
+    fill: "#00b957",
+  };
+}
+
+function generateIrregularPolygon(lat, lng, radius, seed = 1) {
+  /*
+   * Convert radius from meters
+   * to approximate latitude/longitude degrees.
+   */
+
+  const latRadius = radius / 111320;
+
+  const lngRadius = radius / (111320 * Math.cos((lat * Math.PI) / 180));
+
+  const shape=[
+[0.00,1.00],
+[0.42,0.82],
+[0.90,0.55],
+[1.05,0.05],
+[0.70,-0.65],
+[0.25,-1.05],
+[-0.55,-0.92],
+[-0.95,-0.35],
+[-0.85,0.42],
+[-0.30,0.95]
+];
+
+  return shape.map(([x, y], index) => {
+    /*
+     * deterministic variation
+     * so zones don't look identical
+     */
+
+    const variation = 0.86 + Math.sin(index * 17 + seed * 9) * 0.08;
+
+    return [lat + y * latRadius * variation, lng + x * lngRadius * variation];
+  });
+}
+
 function renderZones() {
-  // remove old zones
-  zoneLayers.forEach((layer) => map.removeLayer(layer));
+  // Remove old zones
+  zoneLayers.forEach((layer) => {
+    if (map && map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    }
+  });
+
   zoneLayers = [];
 
-  if (!predictionData?.data?.zones) return;
+  const zones = predictionData?.data?.zones;
 
-  predictionData.data.zones.forEach((zone) => {
-    let color = "#16a34a";
+  if (!Array.isArray(zones) || zones.length === 0) {
+    console.warn("No risk zones received from API.");
+    return;
+  }
 
-    if (zone.risk === "MEDIUM") color = "#f59e0b";
+  zones.forEach((zone, index) => {
+    const lat = Number(zone.latitude ?? zone.lat ?? selectedLat);
 
-    if (zone.risk === "HIGH") color = "#ef4444";
+    const lng = Number(zone.longitude ?? zone.lng ?? zone.lon ?? selectedLng);
 
-    if (zone.risk === "EXTREME") color = "#8b0000";
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return;
+    }
 
-    const circle = L.circle([zone.latitude, zone.longitude], {
-      radius: zone.radius,
-      color,
-      fillColor: color,
-      fillOpacity: 0.28,
-      weight: 2,
-    }).addTo(map);
+    const risk = String(zone.risk || "LOW").toUpperCase();
 
-    circle.on("click", () => {
-      const popupRisk = document.getElementById("popupRisk");
-      const popupArea = document.getElementById("popupArea");
-      const popupPopulation = document.getElementById("popupPopulation");
+    let radius;
 
-      if (popupRisk) popupRisk.innerText = `${zone.risk} RISK`;
+    if (risk === "EXTREME" || risk === "CRITICAL") {
+      radius = Number(zone.radius) || 4000;
+    } else if (risk === "HIGH") {
+      radius = Number(zone.radius) || 3500;
+    } else if (risk === "MEDIUM") {
+      radius = Number(zone.radius) || 4500;
+    } else {
+      radius = Number(zone.radius) || 5500;
+    }
 
-      if (popupArea) popupArea.innerText = zone.name || "Risk Zone";
+    const colors = getZoneColor(risk);
 
-      if (popupPopulation)
-        popupPopulation.innerText = `Probability : ${zone.probability}%`;
+    const polygonPoints = generateIrregularPolygon(
+      lat,
+      lng,
+      radius,
+      index + 10,
+    );
+
+    const polygon = L.polygon(polygonPoints, {
+      pane: "riskZones",
+
+      color: colors.stroke,
+
+      weight:
+risk==="EXTREME"?4:
+risk==="HIGH"?3:2,
+
+      opacity: 0.9,
+
+      fillColor: colors.fill,
+
+      fillOpacity:
+        risk === "EXTREME" || risk === "CRITICAL"
+          ? 0.62
+          : risk === "HIGH"
+            ? 0.48
+            : risk === "MEDIUM"
+              ? 0.30
+              : 0.18,
+
+      className: `risk-zone risk-${risk.toLowerCase()}`,
     });
 
-    zoneLayers.push(circle);
+    polygon.addTo(map);
+    polygon.bringToBack();
+
+    // =================================================
+    // HOVER
+    // =================================================
+
+    polygon.on("mouseover", function () {
+      this.setStyle({
+        fillOpacity: risk === "HIGH" ? 0.48 : 0.35,
+
+        weight: 3,
+      });
+    });
+
+    polygon.on("mouseout", function () {
+      this.setStyle({
+        fillOpacity:
+          risk === "EXTREME" || risk === "CRITICAL"
+            ? 0.42
+            : risk === "HIGH"
+              ? 0.36
+              : risk === "MEDIUM"
+                ? 0.27
+                : 0.2,
+
+        weight: risk === "HIGH" ? 2.5 : 2,
+      });
+    });
+
+    // =================================================
+    // POPUP
+    // =================================================
+
+    polygon.bindPopup(`
+            <div class="zone-popup">
+
+                <div
+                    class="zone-popup-title"
+                    style="color:${colors.stroke}"
+                >
+                    ${risk} RISK ZONE
+                </div>
+
+                <div class="zone-popup-row">
+                    <span>Area</span>
+                    <strong>
+                        ${escapeHtml(zone.name || "Affected Area")}
+                    </strong>
+                </div>
+
+                <div class="zone-popup-row">
+                    <span>Probability</span>
+                    <strong>
+                        ${zone.probability ?? "--"}%
+                    </strong>
+                </div>
+
+                <div class="zone-popup-row">
+                    <span>Radius</span>
+                    <strong>
+                        ${(radius / 1000).toFixed(1)} km
+                    </strong>
+                </div>
+
+            </div>
+        `);
+
+    zoneLayers.push(polygon);
   });
+}
+
+function showZoneInformation(zone) {
+  const popupRisk = document.getElementById("popupRisk");
+
+  const popupArea = document.getElementById("popupArea");
+
+  const popupPopulation = document.getElementById("popupPopulation");
+
+  if (popupRisk) {
+    popupRisk.innerText = `${zone.risk || "UNKNOWN"} RISK ZONE`;
+  }
+
+  if (popupArea) {
+    popupArea.innerText = `Area: ${zone.name || "Affected Area"}`;
+  }
+
+  if (popupPopulation) {
+    popupPopulation.innerText = `Probability: ${zone.probability ?? "--"}%`;
+  }
 }
 
 // ==========================================================
@@ -628,40 +1039,125 @@ layerButtons.forEach((btn) => {
   });
 });
 
+const refreshBtn = document.getElementById("refreshBtn");
+
+if (refreshBtn) {
+  refreshBtn.addEventListener("click", async () => {
+    if (selectedLat == null || selectedLng == null) {
+      alert("No location selected.");
+
+      return;
+    }
+
+    await startPrediction();
+  });
+}
+
 // ==========================================================
 // HISTORY
 // ==========================================================
 
-function loadHistory() {
-  const history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
+function saveHistory() {
+  if (!predictionData) {
+    return;
+  }
+
+  let history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
+
+  const prediction = predictionData.data?.prediction || {};
 
   history.unshift({
-    place: selectedPlaceName || "Unknown",
+    place: selectedPlaceName || "Unknown Location",
 
-    probability: predictionData?.data?.prediction?.probability || 0,
+    risk: prediction.risk || "--",
 
-    date: new Date().toLocaleString(),
+    probability: prediction.probability || 0,
+
+    date: new Date().toLocaleString("en-IN"),
   });
 
-  localStorage.setItem(
-    "predictionHistory",
-    JSON.stringify(history.slice(0, 20)),
-  );
+  history = history.slice(0, 20);
 
-  if (!historyContainer) return;
+  localStorage.setItem("predictionHistory", JSON.stringify(history));
+
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!historyContainer) {
+    return;
+  }
+
+  const history = JSON.parse(localStorage.getItem("predictionHistory") || "[]");
 
   historyContainer.innerHTML = "";
 
-  history.forEach((item) => {
-    historyContainer.innerHTML += `
-            <div class="history-item">
-                <strong>${item.place}</strong>
-                <br>
-                ${item.probability}% Risk
-                <br>
-                <small>${item.date}</small>
+  if (!history.length) {
+    historyContainer.innerHTML = `
+            <div
+                style="
+                    color:#58758a;
+                    font-size:11px;
+                    padding:10px;
+                "
+            >
+                No prediction history.
             </div>
         `;
+
+    return;
+  }
+
+  history.forEach((item) => {
+    historyContainer.innerHTML += `
+
+            <div class="history-item">
+
+                <h4>
+                    ${escapeHtml(item.place)}
+                </h4>
+
+                <p>
+                    ${escapeHtml(item.risk)}
+                    Risk ·
+                    ${item.probability}%
+                </p>
+
+                <small>
+                    ${escapeHtml(item.date)}
+                </small>
+
+            </div>
+
+        `;
+  });
+}
+
+if (clearHistoryBtn) {
+  clearHistoryBtn.addEventListener("click", () => {
+    localStorage.removeItem("predictionHistory");
+
+    renderHistory();
+  });
+}
+
+function fitDashboardMap() {
+  if (!map) return;
+
+  if (zoneLayers.length) {
+    const zoneGroup = L.featureGroup(zoneLayers);
+
+    map.fitBounds(zoneGroup.getBounds().pad(0.22), {
+      maxZoom: 13,
+      minZoom: 10,
+      animate: true,
+    });
+
+    return;
+  }
+
+  map.setView([selectedLat, selectedLng], 11, {
+    animate: true,
   });
 }
 
@@ -669,8 +1165,25 @@ function loadHistory() {
 // ERROR RECOVERY
 // ==========================================================
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 window.addEventListener("unhandledrejection", (e) => {
   console.error(e.reason);
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    renderHistory();
+  } catch (error) {
+    console.error("History loading failed:", error);
+  }
 });
 
 window.addEventListener("error", (e) => {
