@@ -1,0 +1,25 @@
+# Node
+node_modules/
+
+# Capacitor / Android generated
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/local.properties/
+
+# Native generated files
+android/**/build/
+android/**/.cxx/
+
+# APK/AAB
+*.apk
+*.aab
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db

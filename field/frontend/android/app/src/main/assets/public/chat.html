@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>DisasterOS - Chat</title>
+
+    <!-- Socket.IO -->
+    <script src="http://localhost:4000/socket.io/socket.io.js"></script>
+
+    <!-- Your common Socket Service -->
+    <script src="./js/socket-client.js"></script>
+
+    <link rel="stylesheet" href="./css/chat.css" />
+  </head>
+
+  <body>
+    <div class="app">
+      <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+      <header class="chat-header">
+        <button class="back-btn" onclick="goBack()">←</button>
+
+        <div class="header-center">
+          <h1>Chat</h1>
+        </div>
+
+        <button class="header-action" id="searchBtn">⌕</button>
+      </header>
+
+      <!-- =====================================================
+         CHAT TABS
+    ====================================================== -->
+
+      <div class="chat-tabs">
+        <button class="chat-tab active" data-tab="team">Team Chat</button>
+
+        <button class="chat-tab" data-tab="groups">Groups</button>
+      </div>
+
+      <!-- =====================================================
+         TEAM INFO
+    ====================================================== -->
+
+      <section class="team-info">
+        <div class="team-avatar">🛡️</div>
+
+        <div class="team-details">
+          <strong id="teamName"> Rescue Team </strong>
+
+          <span id="teamMembers"> 12 members </span>
+        </div>
+
+        <button class="team-action" id="teamInfoBtn">+</button>
+      </section>
+
+      <!-- =====================================================
+         ONLINE STATUS
+    ====================================================== -->
+
+      <div class="connection-status">
+        <span class="status-dot"></span>
+
+        <span id="connectionText"> Connected to Command </span>
+      </div>
+
+      <!-- =====================================================
+         MESSAGES
+    ====================================================== -->
+
+      <main class="messages" id="messages">
+        <!-- Messages dynamically inserted here -->
+      </main>
+
+      <!-- =====================================================
+         TYPING INDICATOR
+    ====================================================== -->
+
+      <div class="typing-container" id="typingContainer">
+        <span id="typingText"> Someone is typing... </span>
+      </div>
+
+      <!-- =====================================================
+         MESSAGE INPUT
+    ====================================================== -->
+
+      <footer class="chat-input-area">
+        <button class="attach-btn" id="attachBtn">📎</button>
+
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="Type a message..."
+          autocomplete="off"
+        />
+
+        <button class="send-btn" id="sendBtn">➤</button>
+      </footer>
+
+      <!-- =====================================================
+         ATTACHMENT MENU
+    ====================================================== -->
+
+      <div class="attachment-menu hidden" id="attachmentMenu">
+        <button onclick="sendLocation()">
+          📍
+          <span>Location</span>
+        </button>
+
+        <button onclick="sendEmergencyUpdate()">
+          🚨
+          <span>Emergency</span>
+        </button>
+
+        <button onclick="sendMissionUpdate()">
+          🎯
+          <span>Mission</span>
+        </button>
+      </div>
+
+      <!-- =====================================================
+         TEAM INFO MODAL
+    ====================================================== -->
+
+      <div class="modal hidden" id="teamModal">
+        <div class="modal-card">
+          <button class="modal-close" onclick="closeTeamModal()">×</button>
+
+          <div class="modal-icon">🛡️</div>
+
+          <h2>Rescue Team</h2>
+
+          <p>Active disaster response communication channel.</p>
+
+          <div class="team-stat">
+            <div>
+              <strong>12</strong>
+              <span>Members</span>
+            </div>
+
+            <div>
+              <strong id="onlineMembers">8</strong>
+              <span>Online</span>
+            </div>
+          </div>
+
+          <button class="modal-primary" onclick="closeTeamModal()">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+      <div class="toast" id="toast">
+        <span id="toastMessage"></span>
+      </div>
+    </div>
+
+    <script src="./js/chat.js"></script>
+  </body>
+</html>

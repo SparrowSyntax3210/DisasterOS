@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>DisasterOS | Field App</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+
+  <body>
+    <div class="field-app">
+      <!-- =====================================================
+         TOP HEADER
+    ====================================================== -->
+
+      <header class="app-header">
+        <button class="menu-button" id="menuButton" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="header-title">
+          <h1>Field App</h1>
+
+          <p>You're on duty</p>
+        </div>
+
+        <button class="avatar" id="userAvatar" aria-label="User profile">
+          <div class="avatar">
+            <span class="avatar-face"> 👨🏻‍🚒 </span>
+          </div>
+
+          <span class="online-dot"></span>
+        </button>
+      </header>
+
+      <!-- =====================================================
+         ALERT CARD
+    ====================================================== -->
+
+      <section class="active-alert" id="alertsCard">
+        <div class="alert-icon">!</div>
+
+        <div class="alert-content">
+          <span class="alert-count"> 2 Active Alerts </span>
+
+          <h2>Heavy Flood in Riverside</h2>
+
+          <p>Rainfall continuing. Avoid low-lying areas.</p>
+
+          <button class="alert-view-button" id="viewAlertsButton">
+            View All
+          </button>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         QUICK ACTIONS
+    ====================================================== -->
+
+      <section class="quick-actions">
+        <!-- LIVE MAP -->
+
+        <button class="action-card" data-route="field-app.html">
+          <div class="action-icon blue">
+            <span>⌖</span>
+          </div>
+
+          <span> Live Map </span>
+        </button>
+
+        <!-- ALERTS -->
+
+        <button class="action-card" data-route="alerts.html">
+          <div class="action-icon red">
+            <span>!</span>
+          </div>
+
+          <span> Alerts </span>
+        </button>
+
+        <!-- USERS -->
+
+        <button class="action-card" data-route="users.html">
+          <div class="action-icon green">
+            <span>♟</span>
+          </div>
+
+          <span> Users </span>
+        </button>
+
+        <!-- SIGHTINGS -->
+
+        <button class="action-card" data-route="reports.html">
+          <div class="action-icon purple">
+            <span>◉</span>
+          </div>
+
+          <span> Sightings </span>
+        </button>
+
+        <!-- CHAT -->
+
+        <button class="action-card" data-route="chat.html">
+          <div class="action-icon cyan">
+            <span>•••</span>
+          </div>
+
+          <span> Chat </span>
+        </button>
+
+        <!-- SOS -->
+
+        <button class="action-card sos-action" data-route="sos.html">
+          <div class="action-icon sos">SOS</div>
+
+          <span> SOS </span>
+        </button>
+      </section>
+
+      <!-- =====================================================
+         QUICK STATUS
+    ====================================================== -->
+
+      <section class="quick-status">
+        <div class="section-title">Quick Status</div>
+
+        <div class="status-grid">
+          <!-- PEOPLE HELPED -->
+
+          <div class="status-item">
+            <div class="status-icon blue-icon">♧</div>
+
+            <div>
+              <span> People Helped </span>
+
+              <strong> 24 </strong>
+            </div>
+          </div>
+
+          <!-- TASKS COMPLETED -->
+
+          <div class="status-item">
+            <div class="status-icon green-icon">✓</div>
+
+            <div>
+              <span> Tasks Completed </span>
+
+              <strong> 7 </strong>
+            </div>
+          </div>
+
+          <!-- TEAM MEMBERS -->
+
+          <div class="status-item">
+            <div class="status-icon blue-icon">♧</div>
+
+            <div>
+              <span> Team Members </span>
+
+              <strong> 18 </strong>
+            </div>
+          </div>
+
+          <!-- AREA COVERED -->
+
+          <div class="status-item">
+            <div class="status-icon red-icon">△</div>
+
+            <div>
+              <span> Area Covered </span>
+
+              <strong> 12 km² </strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         BOTTOM NAVIGATION
+    ====================================================== -->
+
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-route="field-app.html">
+          <span class="nav-icon"> ⌂ </span>
+
+          <span> Home </span>
+        </button>
+
+        <button class="nav-item" data-route="field-app.html">
+          <span class="nav-icon"> ⌖ </span>
+
+          <span> Map </span>
+        </button>
+
+        <!-- CENTER ACTION -->
+
+        <button
+          class="nav-add"
+          id="quickActionButton"
+          aria-label="Quick action"
+        >
+          +
+        </button>
+
+        <button class="nav-item" data-route="chat.html">
+          <span class="nav-icon"> ▢ </span>
+
+          <span> Chat </span>
+        </button>
+
+        <button class="nav-item" data-route="profile.html">
+          <span class="nav-icon"> ♙ </span>
+
+          <span> Profile </span>
+        </button>
+      </nav>
+
+      <!-- =====================================================
+         SIDE MENU
+    ====================================================== -->
+
+      <div class="menu-overlay" id="menuOverlay"></div>
+
+      <aside class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+          <div>
+            <strong> Disaster<span>OS</span> </strong>
+
+            <small> FIELD OPERATIONS </small>
+          </div>
+
+          <button id="closeMenu" class="close-menu">×</button>
+        </div>
+
+        <div class="duty-status">
+          <span class="duty-dot"></span>
+
+          <div>
+            <strong> FIELD UNIT ONLINE </strong>
+
+            <small> You're currently on duty </small>
+          </div>
+        </div>
+
+        <button class="menu-link" data-route="field-app.html">
+          ⌖ Live Map
+        </button>
+
+        <button class="menu-link" data-route="alerts.html">! Alerts</button>
+
+        <button class="menu-link" data-route="users.html">♟ Users</button>
+
+        <button class="menu-link" data-route="reports.html">◉ Sightings</button>
+
+        <button class="menu-link" data-route="chat.html">
+          ••• Command Chat
+        </button>
+
+        <button class="menu-link danger-link" data-route="sos.html">
+          SOS Emergency SOS
+        </button>
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-link" data-route="profile.html">
+          ♙ Profile / Logout
+        </button>
+      </aside>
+
+      <!-- =====================================================
+         QUICK ACTION SHEET
+    ====================================================== -->
+
+      <div class="quick-sheet-overlay" id="quickSheetOverlay"></div>
+
+      <div class="quick-sheet" id="quickSheet">
+        <div class="sheet-handle"></div>
+
+        <h3>Quick Action</h3>
+
+        <p>What do you need to do?</p>
+
+        <button data-route="sos.html" class="sheet-action danger">
+          <span>!</span>
+          Emergency SOS
+        </button>
+
+        <button data-route="reports.html" class="sheet-action">
+          <span>◉</span>
+          Report Sighting
+        </button>
+
+        <button data-route="field-app.html" class="sheet-action">
+          <span>⌖</span>
+          Open Live Map
+        </button>
+      </div>
+    </div>
+       <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+<script src="./js/auth.js"></script>
+
+    <script src="./js/script.js"></script>
+  </body>
+</html>

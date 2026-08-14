@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS — Profile</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./css/profile.css" />
+  </head>
+
+  <body>
+    <!-- =====================================================
+       WATER / RAIN BACKGROUND
+  ====================================================== -->
+
+    <div class="water-background">
+      <div class="water-glow"></div>
+
+      <div class="rain-layer" id="rainLayer"></div>
+
+      <div class="water-wave wave-one"></div>
+      <div class="water-wave wave-two"></div>
+    </div>
+
+    <!-- =====================================================
+       PAGE
+  ====================================================== -->
+
+    <main class="profile-page">
+      <!-- ===================================================
+         TOP HEADER
+    ==================================================== -->
+
+      <header class="profile-header">
+        <div class="brand">
+          <div class="brand-mark">
+            <span>◆</span>
+          </div>
+
+          <div>
+            <span class="brand-name">DisasterOS</span>
+            <span class="brand-subtitle">DISASTER INTELLIGENCE</span>
+          </div>
+        </div>
+
+        <button
+          class="settings-button"
+          id="settingsButton"
+          aria-label="Settings"
+        >
+          <i data-lucide="settings"></i>
+        </button>
+      </header>
+
+      <!-- ===================================================
+         LOADING
+    ==================================================== -->
+
+      <section id="profileLoading" class="profile-loading">
+        <div class="loading-ring"></div>
+
+        <p>Loading DisasterOS profile...</p>
+      </section>
+
+      <!-- ===================================================
+         ERROR
+    ==================================================== -->
+
+      <section id="profileError" class="profile-error hidden">
+        <div class="error-icon">
+          <i data-lucide="shield-alert"></i>
+        </div>
+
+        <h2>Authentication Required</h2>
+
+        <p>Your DisasterOS session could not be verified.</p>
+
+        <button id="loginButton">Return to Login</button>
+      </section>
+
+      <!-- ===================================================
+         PROFILE
+    ==================================================== -->
+
+      <section id="profileContent" class="profile-content hidden">
+        <!-- =================================================
+           PROFILE IDENTITY
+      ================================================== -->
+
+        <section class="identity-card">
+          <div class="identity-main">
+            <div class="avatar-container">
+              <div class="avatar" id="avatarPreview">--</div>
+
+              <label
+                class="camera-button"
+                for="profileImage"
+                title="Change profile image"
+              >
+                <i data-lucide="camera"></i>
+              </label>
+
+              <input id="profileImage" type="file" accept="image/*" hidden />
+            </div>
+
+            <div class="identity-info">
+              <h1 id="profileUsername">Loading...</h1>
+
+              <p id="profileRole">Loading...</p>
+
+              <div class="duty-status">
+                <span class="status-dot"></span>
+
+                <span>Authenticated</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================
+           STATISTICS
+      ================================================== -->
+
+        <section class="stats-card">
+          <div class="stat">
+            <span class="stat-label"> Missions </span>
+
+            <strong id="missionsCount"> 0 </strong>
+          </div>
+
+          <div class="stat-divider"></div>
+
+          <div class="stat">
+            <span class="stat-label"> Hours </span>
+
+            <strong id="hoursCount"> 0 </strong>
+          </div>
+
+          <div class="stat-divider"></div>
+
+          <div class="stat">
+            <span class="stat-label"> People Helped </span>
+
+            <strong id="peopleHelpedCount"> 0 </strong>
+          </div>
+        </section>
+
+        <!-- =================================================
+           PROFILE ACTIONS
+      ================================================== -->
+
+        <section class="action-list">
+          <!-- MY TASKS -->
+
+          <button class="action-card" id="tasksButton">
+            <div class="action-icon">
+              <i data-lucide="clipboard-list"></i>
+            </div>
+
+            <div class="action-content">
+              <strong>My Tasks</strong>
+
+              <span> View assigned disaster response missions </span>
+            </div>
+
+            <i class="action-arrow" data-lucide="chevron-right"></i>
+          </button>
+
+          <!-- OFFLINE MAPS -->
+
+          <button class="action-card" id="offlineMapsButton">
+            <div class="action-icon">
+              <i data-lucide="map"></i>
+            </div>
+
+            <div class="action-content">
+              <strong>Offline Maps</strong>
+
+              <span> Download maps for low-signal areas </span>
+            </div>
+
+            <div class="download-indicator">
+              <i data-lucide="download"></i>
+            </div>
+          </button>
+
+          <!-- SETTINGS -->
+
+          <button class="action-card" id="profileSettingsButton">
+            <div class="action-icon">
+              <i data-lucide="settings"></i>
+            </div>
+
+            <div class="action-content">
+              <strong>Settings</strong>
+
+              <span> Manage your DisasterOS preferences </span>
+            </div>
+
+            <i class="action-arrow" data-lucide="chevron-right"></i>
+          </button>
+
+          <!-- HELP -->
+
+          <button class="action-card" id="helpButton">
+            <div class="action-icon">
+              <i data-lucide="circle-help"></i>
+            </div>
+
+            <div class="action-content">
+              <strong>Help & Support</strong>
+
+              <span> Get assistance with DisasterOS </span>
+            </div>
+
+            <i class="action-arrow" data-lucide="chevron-right"></i>
+          </button>
+        </section>
+
+        <!-- =================================================
+           ACCOUNT INFORMATION
+      ================================================== -->
+
+        <section class="account-section">
+          <div class="section-title">ACCOUNT INFORMATION</div>
+
+          <div class="account-grid">
+            <div class="account-item">
+              <i data-lucide="mail"></i>
+
+              <div>
+                <small>Email</small>
+                <strong id="profileEmail">--</strong>
+              </div>
+            </div>
+
+            <div class="account-item">
+              <i data-lucide="phone"></i>
+
+              <div>
+                <small>Phone</small>
+                <strong id="profilePhone">--</strong>
+              </div>
+            </div>
+
+            <div class="account-item">
+              <i data-lucide="map-pin"></i>
+
+              <div>
+                <small>Location</small>
+                <strong id="profileLocation">--</strong>
+              </div>
+            </div>
+
+            <div class="account-item">
+              <i data-lucide="shield-check"></i>
+
+              <div>
+                <small>DisasterOS Role</small>
+                <strong id="profileRoleBadge">--</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================
+           SESSION
+      ================================================== -->
+
+        <section class="session-card">
+          <div class="session-left">
+            <div class="session-icon">
+              <i data-lucide="shield-check"></i>
+            </div>
+
+            <div>
+              <strong>Secure Session</strong>
+
+              <span> Your DisasterOS session is active </span>
+            </div>
+          </div>
+
+          <span class="session-active"> ACTIVE </span>
+        </section>
+
+        <!-- =================================================
+           LOGOUT
+      ================================================== -->
+
+        <button id="logoutButton" class="logout-button">
+          <i data-lucide="log-out"></i>
+
+          <span> Sign Out </span>
+        </button>
+      </section>
+    </main>
+
+    <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+    <div class="toast" id="toast"></div>
+
+    <!-- =====================================================
+       LIBRARIES
+  ====================================================== -->
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="./js/auth.js"></script>
+
+    <script src="./js/profile.js"></script>
+  </body>
+</html>

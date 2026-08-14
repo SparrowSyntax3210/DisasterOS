@@ -1,0 +1,401 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Inter, Arial, sans-serif;
+  background: #020b13;
+  color: #f4f8fb;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* =========================================
+   PAGE
+========================================= */
+
+.mission-page {
+  min-height: 100vh;
+  padding: 32px;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.mission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: #00aaff;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.mission-header h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.mission-header p {
+  margin: 8px 0 0;
+  color: #8193a5;
+}
+
+.back-btn {
+  background: #0a1620;
+  border: 1px solid #1b3344;
+  color: #dbe8f1;
+  padding: 11px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+/* =========================================
+   LAYOUT
+========================================= */
+
+.mission-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 20px;
+  min-height: calc(100vh - 150px);
+}
+
+/* =========================================
+   FORM PANEL
+========================================= */
+
+.mission-form-panel,
+.mission-map-panel {
+  background: #07131d;
+  border: 1px solid #163040;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mission-form-panel {
+  padding: 24px;
+}
+
+/* =========================================
+   SECTION HEADING
+========================================= */
+
+.section-heading,
+.map-header > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 30px;
+  height: 30px;
+
+  border: 1px solid #087db5;
+  border-radius: 7px;
+
+  color: #00aaff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.section-heading h2,
+.map-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.section-heading p,
+.map-header p {
+  margin: 4px 0 0;
+  color: #718697;
+  font-size: 12px;
+}
+
+/* =========================================
+   FORM
+========================================= */
+
+.form-group {
+  margin-top: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #9db0bf;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  border: 1px solid #1b3545;
+  background: #041019;
+  color: #edf5fa;
+
+  border-radius: 9px;
+  padding: 12px 13px;
+
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #008ed0;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.coordinate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* =========================================
+   ROUTE INFO
+========================================= */
+
+.route-info {
+  margin-top: 24px;
+
+  border: 1px solid #183444;
+  border-radius: 10px;
+
+  padding: 14px;
+
+  background: #041019;
+}
+
+.route-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #6b7c87;
+}
+
+.route-status strong {
+  display: block;
+  font-size: 13px;
+}
+
+.route-status small {
+  display: block;
+  margin-top: 3px;
+  color: #718697;
+}
+
+.route-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.route-actions button {
+  flex: 1;
+
+  border: 1px solid #203b4b;
+  background: #0a1822;
+  color: #aebfcb;
+
+  padding: 9px;
+  border-radius: 7px;
+
+  cursor: pointer;
+}
+
+/* =========================================
+   CREATE
+========================================= */
+
+.create-btn {
+  width: 100%;
+
+  margin-top: 18px;
+
+  padding: 14px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: #008ed0;
+  color: white;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.create-btn:hover {
+  background: #00a1e8;
+}
+
+.create-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-message {
+  margin-top: 12px;
+  font-size: 12px;
+  min-height: 18px;
+}
+
+/* =========================================
+   MAP
+========================================= */
+
+.mission-map-panel {
+  position: relative;
+  min-height: 600px;
+}
+
+.map-header {
+  position: absolute;
+  z-index: 1000;
+
+  top: 16px;
+  left: 16px;
+  right: 16px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px;
+
+  background: rgba(4, 16, 25, 0.94);
+  border: 1px solid #1b3a4c;
+  border-radius: 10px;
+
+  backdrop-filter: blur(10px);
+}
+
+.map-header button {
+  border: 1px solid #1e566e;
+  background: #071d29;
+  color: #7edcff;
+
+  padding: 9px 12px;
+  border-radius: 7px;
+
+  cursor: pointer;
+}
+
+#routeMap {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+}
+
+/* =========================================
+   MAP INSTRUCTIONS
+========================================= */
+
+.map-instructions {
+  position: absolute;
+
+  z-index: 1000;
+
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 13px;
+
+  background: rgba(4, 16, 25, 0.94);
+
+  border: 1px solid #193847;
+  border-radius: 8px;
+}
+
+.map-instructions span {
+  color: #00aaff;
+}
+
+.map-instructions p {
+  margin: 0;
+  color: #9aadb9;
+  font-size: 11px;
+}
+
+/* =========================================
+   LEAFLET
+========================================= */
+
+.leaflet-container {
+  background: #020b13;
+}
+
+.leaflet-control-zoom a {
+  background: #07131d !important;
+  color: white !important;
+  border-color: #1b3545 !important;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .mission-page {
+    padding: 16px;
+  }
+
+  .mission-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-map-panel {
+    min-height: 500px;
+  }
+
+  #routeMap {
+    min-height: 500px;
+  }
+}

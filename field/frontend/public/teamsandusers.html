@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Projectera Disaster OS — Team & Users</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/teamsandusers.css" />
+</head>
+<body>
+  <main class="phone">
+    <section class="screen">
+      <header>
+        <button class="back" id="backButton" aria-label="Go back">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <h1>Team &amp; Users</h1>
+      </header>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-filter="all" role="tab">All Users</button>
+        <button class="tab" data-filter="team" role="tab">My Team</button>
+      </div>
+
+      <p class="online-count"><span></span>23 Volunteers Online</p>
+
+      <section class="users" id="userList" aria-label="Volunteers"></section>
+
+      <button class="map-button" id="mapButton">View Team on Map</button>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+  <script src="./js/teamsandusers.js"></script>
+</body>
+</html>

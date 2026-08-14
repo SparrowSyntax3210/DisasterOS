@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>DisasterOS | Field Operations</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- Field App CSS -->
+    <link rel="stylesheet" href="./css/field.css" />
+  </head>
+
+  <body>
+    <div id="fieldApp">
+      <!-- =====================================================
+         MAP
+    ====================================================== -->
+
+      <div id="fieldMap"></div>
+
+      <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+      <header class="field-topbar">
+        <button id="menuBtn" class="map-button" aria-label="Menu">☰</button>
+
+        <div class="page-title">Live Map</div>
+
+        <button id="filterBtn" class="map-button" aria-label="Filters">
+          ⚑
+        </button>
+      </header>
+
+      <!-- =====================================================
+         SEARCH
+    ====================================================== -->
+
+      <div class="search-container">
+        <div class="search-box">
+          <span class="search-icon"> ⌕ </span>
+
+          <input
+            id="locationSearch"
+            type="text"
+            placeholder="Search location"
+            autocomplete="off"
+          />
+
+          <button id="searchBtn" class="search-submit">→</button>
+        </div>
+      </div>
+
+      <!-- =====================================================
+         MAP CONTROLS
+    ====================================================== -->
+
+      <div class="map-controls">
+        <button id="layersBtn" class="map-control-button" title="Map layers">
+          ◈
+        </button>
+
+        <button
+          id="myLocationBtn"
+          class="map-control-button location-control"
+          title="My location"
+        >
+          ➤
+        </button>
+      </div>
+
+      <!-- =====================================================
+         LAYER PANEL
+    ====================================================== -->
+
+      <section id="layerPanel" class="floating-panel hidden">
+        <div class="panel-title">MAP LAYERS</div>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="incidents" checked />
+          <span class="layer-dot incident-dot"></span>
+          Incidents
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="sos" checked />
+          <span class="layer-dot sos-dot"></span>
+          SOS
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="missions" checked />
+          <span class="layer-dot mission-dot"></span>
+          Missions
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="teams" checked />
+          <span class="layer-dot team-dot"></span>
+          Responders
+        </label>
+
+        <!-- =====================================================
+     NEARBY RESOURCES
+====================================================== -->
+
+        <div class="layer-section-title">NEARBY RESOURCES</div>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="hospitals" checked />
+          <span class="layer-dot hospital-dot"></span>
+          Hospitals
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="shelters" checked />
+          <span class="layer-dot shelter-dot"></span>
+          Shelters
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="policeStations" checked />
+          <span class="layer-dot police-dot"></span>
+          Police Stations
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="fireStations" checked />
+          <span class="layer-dot fire-dot"></span>
+          Fire Stations
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="pharmacies" checked />
+          <span class="layer-dot pharmacy-dot"></span>
+          Pharmacies
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="schools" checked />
+          <span class="layer-dot school-dot"></span>
+          Schools
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="riskZones" checked />
+          <span class="layer-dot risk-dot"></span>
+          Risk Zones
+        </label>
+      </section>
+
+      <!-- =====================================================
+         LIVE ALERT BUTTON
+    ====================================================== -->
+
+      <button id="notificationBtn" class="notification-button">
+        <span class="notification-dot"></span>
+        <span id="notificationCount">3</span>
+      </button>
+
+      <!-- =====================================================
+         SOS BUTTON
+    ====================================================== -->
+
+      <button id="sosButton" class="sos-button">
+        <span class="sos-inner"> SOS </span>
+      </button>
+
+      <!-- =====================================================
+         CURRENT LOCATION CARD
+    ====================================================== -->
+
+      <section class="location-card">
+        <div class="location-icon">⌖</div>
+
+        <div class="location-content">
+          <strong> Current Location </strong>
+
+          <span id="currentLocationName"> Locating... </span>
+
+          <small>
+            Lat
+            <b id="currentLatitude">--</b>
+            | Long
+            <b id="currentLongitude">--</b>
+          </small>
+        </div>
+
+        <div id="locationAccuracy" class="accuracy-badge">GPS</div>
+      </section>
+
+      <!-- =====================================================
+         ALERT / UPDATE SHEET
+    ====================================================== -->
+
+      <section id="updatesPanel" class="updates-panel hidden">
+        <div class="sheet-handle"></div>
+
+        <div class="updates-header">
+          <div>
+            <span class="eyebrow"> DISASTEROS </span>
+
+            <h2>Field Updates</h2>
+          </div>
+
+          <button id="closeUpdatesBtn" class="close-button">×</button>
+        </div>
+
+        <div id="updatesList">
+          <!-- JS inserts updates -->
+        </div>
+      </section>
+
+      <!-- =====================================================
+         MENU PANEL
+    ====================================================== -->
+
+      <section id="menuPanel" class="side-panel hidden">
+        <div class="side-panel-header">
+          <div class="brand">
+            <div class="brand-mark">D</div>
+
+            <div>
+              <strong> Disaster<span>OS</span> </strong>
+
+              <small> FIELD OPERATIONS </small>
+            </div>
+          </div>
+
+          <button id="closeMenuBtn" class="close-button">×</button>
+        </div>
+
+        <div class="field-status">
+          <span class="status-indicator"></span>
+
+          <div>
+            <strong> FIELD UNIT ONLINE </strong>
+
+            <small> Ready for operations </small>
+          </div>
+        </div>
+
+        <button id="missionsBtn" class="menu-action" data-action="missions">
+          <span>◆</span>
+          My Missions
+        </button>
+
+        <button class="menu-action" data-action="sightings">
+          <span>◉</span>
+          Report Sighting
+        </button>
+
+        <button class="menu-action" data-action="chat">
+          <span>◌</span>
+          Command Center Chat
+        </button>
+
+        <button class="menu-action" data-action="updates">
+          <span>!</span>
+          Command Updates
+        </button>
+
+        <button class="menu-action" data-action="resources">
+          <span>+</span>
+          Nearby Resources
+        </button>
+      </section>
+
+      <!-- =====================================================
+         SIGHTING REPORT MODAL
+    ====================================================== -->
+
+      <section id="sightingModal" class="modal hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <span class="eyebrow"> FIELD REPORT </span>
+
+              <h2>Report Sighting</h2>
+            </div>
+
+            <button class="close-button" data-close="sightingModal">×</button>
+          </div>
+
+          <label> What did you observe? </label>
+
+          <textarea
+            id="sightingDescription"
+            placeholder="Describe the person, vehicle, hazard or situation..."
+          ></textarea>
+
+          <label> Sighting Type </label>
+
+          <select id="sightingType">
+            <option value="PERSON">Person / Missing Person</option>
+
+            <option value="HAZARD">Civic / Disaster Hazard</option>
+
+            <option value="RESOURCE">Resource</option>
+
+            <option value="OTHER">Other</option>
+          </select>
+
+          <div class="report-location">
+            <span> Location </span>
+
+            <strong id="sightingLocation"> Current GPS location </strong>
+          </div>
+
+          <button id="submitSightingBtn" class="primary-button">
+            SUBMIT SIGHTING
+          </button>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         SOS CONFIRMATION
+    ====================================================== -->
+
+      <section id="sosModal" class="modal hidden">
+        <div class="modal-card sos-card">
+          <div class="sos-warning">!</div>
+
+          <h2>Send Emergency SOS?</h2>
+
+          <p>
+            Your current location will be shared with the DisasterOS response
+            system.
+          </p>
+
+          <div class="sos-actions">
+            <button id="cancelSOS" class="secondary-button">CANCEL</button>
+
+            <button id="confirmSOS" class="danger-button">SEND SOS</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         MISSION DETAILS
+    ====================================================== -->
+
+      <section id="missionModal" class="modal hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <span class="eyebrow"> FIELD MISSION </span>
+
+              <h2 id="missionTitle">Mission</h2>
+            </div>
+
+            <button class="close-button" data-close="missionModal">×</button>
+          </div>
+
+          <div class="mission-priority">HIGH PRIORITY</div>
+
+          <p id="missionDescription">Mission details will appear here.</p>
+
+          <div class="mission-location">
+            <span> TARGET LOCATION </span>
+
+            <strong id="missionLocation"> -- </strong>
+          </div>
+
+          <button id="acceptMissionBtn" class="primary-button">
+            ACCEPT MISSION
+          </button>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         CHAT PANEL
+    ====================================================== -->
+
+      <section id="chatModal" class="modal hidden">
+        <div class="modal-card chat-card">
+          <div class="modal-header">
+            <div>
+              <span class="eyebrow"> COMMUNICATION </span>
+
+              <h2>Command Center</h2>
+            </div>
+
+            <button class="close-button" data-close="chatModal">×</button>
+          </div>
+
+          <div id="chatMessages" class="chat-messages">
+            <div class="chat-message incoming">
+              <strong> COMMAND CENTER </strong>
+
+              <p>Field units maintain position until further instructions.</p>
+
+              <small> Just now </small>
+            </div>
+          </div>
+
+          <div class="chat-input">
+            <input
+              id="chatInput"
+              type="text"
+              placeholder="Message Command Center..."
+            />
+
+            <button id="sendChatBtn">➤</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+      <div id="toast" class="toast hidden">
+        <span id="toastIcon">!</span>
+
+        <div>
+          <strong id="toastTitle"> Update </strong>
+
+          <p id="toastMessage">New update received.</p>
+        </div>
+      </div>
+
+      <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+      <div id="fieldLoader" class="field-loader">
+        <div class="loader-ring"></div>
+
+        <strong> DISASTEROS </strong>
+
+        <span> INITIALIZING FIELD SYSTEM </span>
+      </div>
+    </div>
+
+    <!-- =========================================================
+     LEAFLET
+========================================================== -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+
+    <!-- =========================================================
+     FIELD APP JS
+========================================================== -->
+
+    <script src="./js/field.js"></script>
+  </body>
+</html>

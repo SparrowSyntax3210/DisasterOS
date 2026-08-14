@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS | Command Center</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./css/command-center.css" />
+  </head>
+
+  <body>
+    <!-- =========================================================
+     COMMAND CENTER
+========================================================= -->
+
+    <div id="commandCenter">
+      <!-- =====================================================
+         MAP
+    ====================================================== -->
+
+      <div id="commandMap"></div>
+
+      <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+      <header class="command-topbar">
+        <div class="brand">
+          <div class="brand-mark">D</div>
+
+          <div class="brand-text">
+            <h1>Disaster<span>OS</span></h1>
+
+            <p>COMMAND & CONTROL</p>
+          </div>
+        </div>
+
+        <div class="operation-status">
+          <div class="live-indicator">
+            <span></span>
+            LIVE OPERATIONS
+          </div>
+
+          <div id="currentTime">--:--:--</div>
+
+          <button
+            id="refreshBtn"
+            class="icon-button"
+            title="Refresh operational data"
+          >
+            ↻
+          </button>
+        </div>
+      </header>
+
+      <!-- =====================================================
+         LEFT TOP SITUATION OVERLAY
+    ====================================================== -->
+
+      <section class="overlay situation-overlay">
+        <div class="overlay-label">SITUATION OVERVIEW</div>
+
+        <div class="status-grid">
+          <div class="status-item critical">
+            <span class="status-icon">!</span>
+
+            <div>
+              <strong id="incidentCount">0</strong>
+              <small>INCIDENTS</small>
+            </div>
+          </div>
+
+          <div class="status-item danger">
+            <span class="status-icon">SOS</span>
+
+            <div>
+              <strong id="sosCount">0</strong>
+              <small>SOS</small>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <span class="status-icon">◆</span>
+
+            <div>
+              <strong id="missionCount">0</strong>
+              <small>MISSIONS</small>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <span class="status-icon">●</span>
+
+            <div>
+              <strong id="teamCount">0</strong>
+              <small>RESPONDERS</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         RIGHT TOP AI OVERLAY
+    ====================================================== -->
+
+      <section class="overlay intelligence-overlay">
+        <div class="overlay-header">
+          <div>
+            <span class="eyebrow"> DISASTEROS INTELLIGENCE </span>
+
+            <h2>Situation Status</h2>
+          </div>
+
+          <div class="ai-status">AI</div>
+        </div>
+
+        <div class="intelligence-content">
+          <div class="risk-row">
+            <div>
+              <small> OPERATIONAL RISK </small>
+
+              <strong id="riskLevel"> AWAITING DATA </strong>
+            </div>
+
+            <div class="risk-score">
+              <span id="riskScore">--</span>
+            </div>
+          </div>
+
+          <div class="intelligence-line"></div>
+
+          <p id="situationSummary">
+            Monitoring operational data from active incidents, missions and
+            responder units.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         LEFT BOTTOM ALERTS
+    ====================================================== -->
+
+      <section class="overlay alerts-overlay">
+        <div class="overlay-header">
+          <div>
+            <span class="eyebrow"> LIVE OPERATIONS </span>
+
+            <h2>Priority Alerts</h2>
+          </div>
+
+          <span id="alertCount" class="counter-badge"> 0 </span>
+        </div>
+
+        <div id="alertsList" class="alerts-list">
+          <div class="empty-state">No active alerts</div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         RIGHT MIDDLE RESOURCES
+    ====================================================== -->
+
+      <section class="overlay resources-overlay">
+        <div class="overlay-header">
+          <div>
+            <span class="eyebrow"> FIELD CAPACITY </span>
+
+            <h2>Resources</h2>
+          </div>
+        </div>
+
+        <div class="resource-grid">
+          <div class="resource-stat">
+            <span class="resource-symbol"> ◉ </span>
+
+            <div>
+              <strong id="resourceTeams"> 0 </strong>
+
+              <small> TEAMS </small>
+            </div>
+          </div>
+
+          <div class="resource-stat">
+            <span class="resource-symbol"> + </span>
+
+            <div>
+              <strong id="resourceAmbulance"> 0 </strong>
+
+              <small> AMBULANCE </small>
+            </div>
+          </div>
+
+          <div class="resource-stat">
+            <span class="resource-symbol"> ◈ </span>
+
+            <div>
+              <strong id="resourceBoats"> 0 </strong>
+
+              <small> BOATS </small>
+            </div>
+          </div>
+
+          <div class="resource-stat">
+            <span class="resource-symbol"> □ </span>
+
+            <div>
+              <strong id="resourceSupplies"> 0 </strong>
+
+              <small> SUPPLIES </small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <label class="layer-option">
+        <input type="checkbox" data-layer="zones" checked />
+
+        <span class="legend zone"></span>
+
+        Risk Zones
+      </label>
+
+      <!-- =====================================================
+         SELECTED OPERATION PANEL
+    ====================================================== -->
+
+      <section id="selectedPanel" class="overlay selected-panel hidden">
+        <button id="closeSelected" class="close-button">×</button>
+
+        <div class="selected-type">INCIDENT</div>
+
+        <h2 id="selectedTitle">--</h2>
+
+        <div class="selected-meta">
+          <div>
+            <span>STATUS</span>
+            <strong id="selectedStatus"> -- </strong>
+          </div>
+
+          <div>
+            <span>SEVERITY</span>
+            <strong id="selectedSeverity"> -- </strong>
+          </div>
+        </div>
+
+        <p id="selectedDescription">--</p>
+
+        <div class="selected-location">
+          <span>LOCATION</span>
+
+          <strong id="selectedLocation"> -- </strong>
+        </div>
+
+        <div class="selected-actions">
+          <button>ASSIGN</button>
+
+          <button id="createMissionBtn" class="create-mission-btn">
+            + Create Mission
+          </button>
+        </div>
+      </section>
+
+      <!-- =====================================================
+         MAP LAYER CONTROL
+    ====================================================== -->
+
+      <section class="map-layer-control">
+        <div class="layer-title">MAP LAYERS</div>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="incidents" checked />
+
+          <span class="legend incident"></span>
+
+          Incidents
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="sos" checked />
+
+          <span class="legend sos"></span>
+
+          SOS
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="missions" checked />
+
+          <span class="legend mission"></span>
+
+          Missions
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="teams" checked />
+
+          <span class="legend team"></span>
+
+          Responders
+        </label>
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="resources" checked />
+
+          <span class="legend resource"></span>
+
+          Resources
+        </label>
+      </section>
+
+      <!-- =====================================================
+         BOTTOM OPERATION BAR
+    ====================================================== -->
+
+      <footer class="operation-bar">
+        <div class="map-status">
+          <span class="map-status-dot"></span>
+
+          GIS SYSTEM
+
+          <strong> ONLINE </strong>
+        </div>
+
+        <div class="map-legend">
+          <span>
+            <i class="legend-dot critical"></i>
+            Critical
+          </span>
+
+          <span>
+            <i class="legend-dot high"></i>
+            High
+          </span>
+
+          <span>
+            <i class="legend-dot medium"></i>
+            Medium
+          </span>
+
+          <span>
+            <i class="legend-dot low"></i>
+            Low
+          </span>
+        </div>
+
+        <div class="coordinates">
+          <span> LAT </span>
+
+          <strong id="mapLat"> -- </strong>
+
+          <span> LNG </span>
+
+          <strong id="mapLng"> -- </strong>
+        </div>
+      </footer>
+
+      <!-- =====================================================
+         LOADING
+    ====================================================== -->
+<!-- 
+      <div id="dataLoader" class="data-loader">
+        <div class="loader-ring"></div>
+
+        <span> CONNECTING TO DISASTEROS </span>
+      </div>
+    </div> -->
+
+    <!-- =========================================================
+     LEAFLET
+========================================================= -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- =========================================================
+     COMMAND CENTER JS
+========================================================= -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="./js/socket-client.js"></script>
+
+    <script src="./js/command-center.js"></script>
+  </body>
+</html>

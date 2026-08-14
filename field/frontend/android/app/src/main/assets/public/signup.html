@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>DisasterOS — Create Account</title>
+
+    <link rel="stylesheet" href="./css/auth.css" />
+  </head>
+
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="auth-page">
+      <!-- ===================================================
+         HEADER
+    ==================================================== -->
+
+      <header class="auth-header">
+        <div class="brand-mark">
+          <div class="brand-icon">+</div>
+
+          <div>
+            <div class="brand-name">DisasterOS</div>
+
+            <div class="brand-subtitle">FIELD RESPONSE NETWORK</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===================================================
+         SIGNUP
+    ==================================================== -->
+
+      <section class="auth-container">
+        <div class="auth-card signup-card">
+          <div class="auth-icon-wrap">
+            <div class="auth-icon">+</div>
+          </div>
+
+          <div class="auth-heading">
+            <span class="eyebrow"> FIELD NETWORK </span>
+
+            <h1>Create account</h1>
+
+            <p>Join the DisasterOS emergency response network.</p>
+          </div>
+
+          <!-- ERROR -->
+
+          <div id="authError" class="auth-message error-message hidden"></div>
+
+          <!-- SUCCESS -->
+
+          <div
+            id="authSuccess"
+            class="auth-message success-message hidden"
+          ></div>
+
+          <!-- =================================================
+             FORM
+        ================================================== -->
+
+          <form id="signupForm">
+            <!-- NAME -->
+
+            <div class="input-group">
+              <label for="name"> Full Name </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> ◉ </span>
+
+                <input
+                  type="text"
+                  id="name"
+                  name="Name"
+                  placeholder="Enter your full name"
+                  autocomplete="name"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- EMAIL -->
+
+            <div class="input-group">
+              <label for="signupEmail"> Email </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> @ </span>
+
+                <input
+                  type="email"
+                  id="signupEmail"
+                  name="Email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- PHONE -->
+
+            <div class="input-group">
+              <label for="contactNumber"> Contact Number </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> # </span>
+
+                <input
+                  type="tel"
+                  id="contactNumber"
+                  name="ContactNumber"
+                  placeholder="Enter contact number"
+                  autocomplete="tel"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- ROLE -->
+
+            <div class="input-group">
+              <label> Response Role </label>
+
+              <div class="role-grid">
+                <label class="role-option">
+                  <input type="radio" name="Role" value="Volunteer" checked />
+
+                  <div class="role-card">
+                    <span class="role-icon"> ◉ </span>
+
+                    <div>
+                      <strong>Volunteer</strong>
+                      <small>Field responder</small>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="role-option">
+                  <input type="radio" name="Role" value="Guardian" />
+
+                  <div class="role-card">
+                    <span class="role-icon"> ◆ </span>
+
+                    <div>
+                      <strong>Guardian</strong>
+                      <small>Case coordinator</small>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- PASSWORD -->
+
+            <div class="input-group">
+              <label for="signupPassword"> Password </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> •• </span>
+
+                <input
+                  type="password"
+                  id="signupPassword"
+                  name="Password"
+                  placeholder="Create a password"
+                  autocomplete="new-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="toggleSignupPassword"
+                  class="password-toggle"
+                >
+                  SHOW
+                </button>
+              </div>
+            </div>
+
+            <!-- SUBMIT -->
+
+            <button type="submit" id="signupButton" class="primary-btn">
+              <span id="signupButtonText"> Create Account </span>
+
+              <span id="signupLoader" class="button-loader hidden"></span>
+            </button>
+          </form>
+
+          <!-- =================================================
+             LOGIN
+        ================================================== -->
+
+          <div class="divider">
+            <span></span>
+
+            <p>ALREADY REGISTERED?</p>
+
+            <span></span>
+          </div>
+
+          <a href="./login.html" class="secondary-btn">
+            Sign in instead
+
+            <span> → </span>
+          </a>
+
+          <div class="security-note">
+            <span class="lock-icon"> ◈ </span>
+
+            <span> Your account is protected </span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="auth-footer">
+        <span>DISASTEROS</span>
+
+        <span class="footer-dot">•</span>
+
+        <span>FIELD NETWORK</span>
+
+        <span class="footer-dot">•</span>
+
+        <span>v1.0</span>
+      </footer>
+    </main>
+
+    <script src="./js/auth.js"></script>
+  </body>
+</html>

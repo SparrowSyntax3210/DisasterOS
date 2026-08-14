@@ -1,0 +1,79 @@
+# ==========================================================
+# Node
+# ==========================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================================================
+# Environment / secrets
+# ==========================================================
+
+.env
+.env.*
+!.env.example
+
+# ==========================================================
+# Android SDK accidentally placed inside project
+# ==========================================================
+
+**/android/emulator/
+**/android/platforms/
+**/android/build-tools/
+**/android/system-images/
+**/android/sources/
+**/android/cmdline-tools/
+**/android/ndk/
+
+# ==========================================================
+# Gradle generated
+# ==========================================================
+
+**/.gradle/
+**/build/
+**/.cxx/
+
+# ==========================================================
+# Android Studio
+# ==========================================================
+
+**/.idea/
+**/local.properties
+*.iml
+
+# ==========================================================
+# APK / AAB
+# ==========================================================
+
+*.apk
+*.aab
+
+# ==========================================================
+# OS
+# ==========================================================
+
+.DS_Store
+Thumbs.db
+
+# Android SDK - DO NOT COMMIT
+**/android/emulator/
+**/android/platforms/
+**/android/build-tools/
+**/android/platform-tools/
+**/android/system-images/
+**/android/sources/
+**/android/cmdline-tools/
+**/android/ndk/
+**/android/licenses/
+
+# Gradle generated files
+**/.gradle/
+**/build/
+**/.cxx/
+
+# Android Studio
+**/.idea/
+**/local.properties
+*.iml

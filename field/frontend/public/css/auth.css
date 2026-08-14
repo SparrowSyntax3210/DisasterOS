@@ -1,0 +1,782 @@
+/* ==========================================================
+   DISASTEROS AUTH
+   ========================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #02070d;
+  --bg-secondary: #06111b;
+
+  --card: rgba(5, 14, 23, 0.92);
+  --card-light: rgba(8, 20, 32, 0.9);
+
+  --border: rgba(75, 135, 185, 0.18);
+  --border-active: rgba(55, 145, 255, 0.55);
+
+  --text: #f2f7fb;
+  --muted: #7e919f;
+  --muted-light: #a9b8c2;
+
+  --blue: #1687ff;
+  --blue-light: #49a8ff;
+  --blue-glow: rgba(22, 135, 255, 0.25);
+
+  --danger: #ff4f68;
+  --success: #19d889;
+
+  --radius: 18px;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at 50% 20%,
+      rgba(14, 86, 145, 0.12),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #02070d 0%, #030b13 100%);
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  overflow-x: hidden;
+}
+
+/* ==========================================================
+   AMBIENT LIGHT
+   ========================================================== */
+
+.ambient {
+  position: fixed;
+
+  width: 280px;
+  height: 280px;
+
+  border-radius: 50%;
+
+  filter: blur(100px);
+
+  pointer-events: none;
+
+  opacity: 0.12;
+}
+
+.ambient-one {
+  top: -150px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  background: #087cff;
+}
+
+.ambient-two {
+  right: -180px;
+  bottom: 0;
+
+  background: #004f9e;
+}
+
+/* ==========================================================
+   PAGE
+   ========================================================== */
+
+.auth-page {
+  min-height: 100vh;
+
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  position: relative;
+
+  z-index: 1;
+}
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.auth-header {
+  width: 100%;
+
+  max-width: 440px;
+
+  padding: 26px 20px 12px;
+}
+
+.brand-mark {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  color: white;
+
+  font-size: 21px;
+  font-weight: 700;
+
+  background: linear-gradient(145deg, #1286ff, #0753b8);
+
+  box-shadow: 0 0 20px rgba(15, 125, 255, 0.3);
+}
+
+.brand-name {
+  font-size: 15px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+
+  color: #617683;
+
+  font-size: 7px;
+
+  font-weight: 600;
+
+  letter-spacing: 1.4px;
+}
+
+/* ==========================================================
+   CONTAINER
+   ========================================================== */
+
+.auth-container {
+  width: 100%;
+
+  max-width: 440px;
+
+  padding: 15px 16px 25px;
+}
+
+/* ==========================================================
+   CARD
+   ========================================================== */
+
+.auth-card {
+  width: 100%;
+
+  padding: 28px 20px 22px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(8, 22, 34, 0.94),
+    rgba(3, 11, 19, 0.96)
+  );
+
+  border: 1px solid var(--border);
+
+  border-radius: 22px;
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+/* ==========================================================
+   ICON
+   ========================================================== */
+
+.auth-icon-wrap {
+  display: flex;
+
+  justify-content: center;
+
+  margin-bottom: 19px;
+}
+
+.auth-icon {
+  width: 56px;
+  height: 56px;
+
+  border-radius: 17px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: radial-gradient(
+    circle at center,
+    rgba(26, 137, 255, 0.22),
+    rgba(5, 20, 33, 0.9)
+  );
+
+  border: 1px solid rgba(34, 142, 255, 0.3);
+
+  box-shadow: 0 0 30px rgba(20, 128, 255, 0.12);
+}
+
+.auth-icon span {
+  color: var(--blue-light);
+
+  font-size: 28px;
+
+  transform: rotate(-45deg);
+}
+
+/* ==========================================================
+   HEADING
+   ========================================================== */
+
+.auth-heading {
+  text-align: center;
+
+  margin-bottom: 26px;
+}
+
+.eyebrow {
+  display: inline-block;
+
+  color: #328ee3;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.8px;
+
+  margin-bottom: 8px;
+}
+
+.auth-heading h1 {
+  font-size: 25px;
+
+  line-height: 1.15;
+
+  font-weight: 650;
+
+  letter-spacing: -0.6px;
+}
+
+.auth-heading p {
+  max-width: 290px;
+
+  margin: 9px auto 0;
+
+  color: var(--muted);
+
+  font-size: 12px;
+
+  line-height: 1.55;
+}
+
+/* ==========================================================
+   FORM
+   ========================================================== */
+
+.input-group {
+  margin-bottom: 17px;
+}
+
+.input-group label {
+  display: block;
+
+  color: #b7c6cf;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  margin-bottom: 7px;
+}
+
+.input-wrapper {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+}
+
+.input-wrapper input {
+  width: 100%;
+
+  height: 48px;
+
+  padding: 0 45px 0 40px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(85, 126, 155, 0.18);
+
+  outline: none;
+
+  background: rgba(1, 9, 16, 0.78);
+
+  color: white;
+
+  font-size: 13px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+  color: #4f626e;
+}
+
+.input-wrapper input:focus {
+  border-color: var(--border-active);
+
+  background: rgba(3, 14, 23, 0.95);
+
+  box-shadow: 0 0 0 3px rgba(20, 133, 255, 0.08);
+}
+
+.input-icon {
+  position: absolute;
+
+  left: 14px;
+
+  z-index: 2;
+
+  color: #58717f;
+
+  font-size: 12px;
+
+  pointer-events: none;
+}
+
+.password-toggle {
+  position: absolute;
+
+  right: 11px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #397cae;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.7px;
+
+  cursor: pointer;
+}
+
+/* ==========================================================
+   PASSWORD LABEL
+   ========================================================== */
+
+.password-label {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.password-label label {
+  margin-bottom: 7px;
+}
+
+.forgot-btn {
+  border: 0;
+
+  background: transparent;
+
+  color: #368dd0;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+/* ==========================================================
+   PRIMARY BUTTON
+   ========================================================== */
+
+.primary-btn {
+  width: 100%;
+
+  height: 49px;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #168bff, #0864c6);
+
+  color: white;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+
+  cursor: pointer;
+
+  position: relative;
+
+  box-shadow: 0 10px 25px rgba(0, 105, 225, 0.18);
+
+  transition:
+    transform 0.15s ease,
+    filter 0.2s ease;
+}
+
+.primary-btn:hover {
+  filter: brightness(1.08);
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* ==========================================================
+   LOADER
+   ========================================================== */
+
+.button-loader {
+  position: absolute;
+
+  width: 16px;
+  height: 16px;
+
+  border: 2px solid rgba(255, 255, 255, 0.3);
+
+  border-top-color: white;
+
+  border-radius: 50%;
+
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================
+   DIVIDER
+   ========================================================== */
+
+.divider {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 23px 0 15px;
+}
+
+.divider span {
+  flex: 1;
+
+  height: 1px;
+
+  background: rgba(83, 119, 143, 0.13);
+}
+
+.divider p {
+  color: #536874;
+
+  font-size: 7px;
+
+  letter-spacing: 1.2px;
+
+  white-space: nowrap;
+}
+
+/* ==========================================================
+   SECONDARY BUTTON
+   ========================================================== */
+
+.secondary-btn {
+  width: 100%;
+
+  min-height: 45px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  border-radius: 11px;
+
+  border: 1px solid rgba(64, 115, 151, 0.2);
+
+  background: rgba(7, 20, 31, 0.55);
+
+  color: #9eb0bb;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  text-decoration: none;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.secondary-btn span {
+  color: #378fda;
+
+  font-size: 15px;
+}
+
+.secondary-btn:hover {
+  border-color: rgba(55, 145, 255, 0.4);
+
+  background: rgba(12, 34, 51, 0.7);
+}
+
+/* ==========================================================
+   SECURITY
+   ========================================================== */
+
+.security-note {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-top: 19px;
+
+  color: #536874;
+
+  font-size: 8px;
+}
+
+.lock-icon {
+  color: #2d82c6;
+}
+
+/* ==========================================================
+   MESSAGES
+   ========================================================== */
+
+.auth-message {
+  border-radius: 10px;
+
+  padding: 11px 12px;
+
+  margin-bottom: 16px;
+
+  font-size: 10px;
+
+  line-height: 1.4;
+}
+
+.error-message {
+  color: #ff8292;
+
+  background: rgba(255, 55, 80, 0.07);
+
+  border: 1px solid rgba(255, 65, 90, 0.15);
+}
+
+.success-message {
+  color: #55e6a3;
+
+  background: rgba(20, 210, 125, 0.07);
+
+  border: 1px solid rgba(20, 210, 125, 0.15);
+}
+
+/* ==========================================================
+   ROLE SELECTION
+   ========================================================== */
+
+.role-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 9px;
+}
+
+.role-option {
+  margin: 0 !important;
+
+  cursor: pointer;
+}
+
+.role-option input {
+  display: none;
+}
+
+.role-card {
+  min-height: 64px;
+
+  padding: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  border-radius: 11px;
+
+  border: 1px solid rgba(80, 123, 150, 0.17);
+
+  background: rgba(2, 10, 17, 0.65);
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+
+.role-option input:checked + .role-card {
+  border-color: rgba(35, 143, 255, 0.55);
+
+  background: rgba(9, 57, 92, 0.35);
+
+  box-shadow: inset 0 0 20px rgba(20, 130, 255, 0.04);
+}
+
+.role-icon {
+  width: 28px;
+  height: 28px;
+
+  flex-shrink: 0;
+
+  border-radius: 8px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #4da7f4;
+
+  background: rgba(24, 126, 220, 0.1);
+
+  font-size: 12px;
+}
+
+.role-card strong {
+  display: block;
+
+  color: #c5d1d8;
+
+  font-size: 9px;
+
+  font-weight: 650;
+}
+
+.role-card small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #536a77;
+
+  font-size: 7px;
+}
+
+/* ==========================================================
+   FOOTER
+   ========================================================== */
+
+.auth-footer {
+  width: 100%;
+
+  max-width: 440px;
+
+  padding: 0 20px 25px;
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  color: #3e535f;
+
+  font-size: 7px;
+
+  letter-spacing: 1px;
+}
+
+.footer-dot {
+  color: #1d3d51;
+}
+
+/* ==========================================================
+   UTILITY
+   ========================================================== */
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================
+   DESKTOP
+   ========================================================== */
+
+@media (min-width: 700px) {
+  .auth-header {
+    padding-top: 45px;
+  }
+
+  .auth-container {
+    padding-top: 30px;
+  }
+
+  .auth-card {
+    padding: 35px 32px 28px;
+  }
+}

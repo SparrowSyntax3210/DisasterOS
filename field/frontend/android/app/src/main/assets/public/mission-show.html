@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width,
+        initial-scale=1.0,
+        maximum-scale=1.0,
+        user-scalable=no"
+    />
+
+    <title>DisasterOS | Mission</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link rel="stylesheet" href="./css/mission-show.css" />
+  </head>
+
+  <body>
+    <div id="missionApp">
+      <!-- =====================================================
+         MAP
+    ====================================================== -->
+
+      <div id="missionMap"></div>
+
+      <!-- =====================================================
+         TOP BAR
+    ====================================================== -->
+
+      <header class="mission-topbar">
+        <button id="backBtn" class="topbar-button">←</button>
+
+        <div class="mission-page-title">Mission</div>
+
+        <button id="menuBtn" class="topbar-button">☰</button>
+      </header>
+
+      <!-- =====================================================
+         MAP STATUS
+    ====================================================== -->
+
+      <div class="map-status">
+        <span class="status-dot"></span>
+
+        <span id="mapStatusText"> LIVE ROUTE </span>
+      </div>
+
+      <!-- =====================================================
+         CURRENT LOCATION BUTTON
+    ====================================================== -->
+
+      <button id="myLocationBtn" class="location-button">➤</button>
+
+      <!-- =====================================================
+         BOTTOM MISSION PANEL
+    ====================================================== -->
+
+      <section class="mission-bottom-panel">
+        <div class="panel-handle"></div>
+
+        <!-- Mission heading -->
+
+        <div class="mission-heading">
+          <div>
+            <span class="eyebrow"> FIELD MISSION </span>
+
+            <h1 id="missionTitle">Loading mission...</h1>
+          </div>
+
+          <span id="missionPriority" class="priority-badge"> -- </span>
+        </div>
+
+        <!-- Recommended Route -->
+
+        <div class="route-card recommended">
+          <div class="route-card-top">
+            <div>
+              <span class="route-label"> Recommended Route </span>
+
+              <strong id="routeDuration"> -- min </strong>
+
+              <small id="routeDistance"> Calculating route... </small>
+            </div>
+
+            <button id="followRouteBtn" class="follow-button">
+              Follow Route
+            </button>
+          </div>
+
+          <div id="routeDescription" class="route-description">
+            Safest available route
+          </div>
+        </div>
+
+        <!-- Alternative route -->
+
+        <div id="alternativeRouteCard" class="route-card alternative">
+          <div class="route-card-top">
+            <div>
+              <span class="route-label"> Alternative Route </span>
+
+              <strong id="alternativeDuration"> -- </strong>
+
+              <small id="alternativeDistance"> -- </small>
+            </div>
+
+            <button id="viewAlternativeBtn" class="view-button">
+              View Route
+            </button>
+          </div>
+
+          <div id="alternativeDescription">Alternative route</div>
+        </div>
+
+        <!-- =================================================
+             MISSION DETAILS
+        ================================================== -->
+
+        <div class="mission-details">
+          <div class="details-header">
+            <span> MISSION DETAILS </span>
+
+            <button id="detailsToggle">Details</button>
+          </div>
+
+          <div id="detailsContent" class="details-content">
+            <div class="detail-row">
+              <span> Status </span>
+
+              <strong id="missionStatus"> -- </strong>
+            </div>
+
+            <div class="detail-row">
+              <span> Destination </span>
+
+              <strong id="missionDestination"> -- </strong>
+            </div>
+
+            <div class="detail-row">
+              <span> Assigned Team </span>
+
+              <strong id="missionTeam"> -- </strong>
+            </div>
+
+            <div class="detail-row">
+              <span> Created By </span>
+
+              <strong id="missionCreatedBy"> Command Center </strong>
+            </div>
+
+            <div class="mission-description">
+              <span> INSTRUCTIONS </span>
+
+              <p id="missionDescription">--</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- =================================================
+             ACTION
+        ================================================== -->
+
+        <button id="acceptMissionBtn" class="accept-button">
+          ACCEPT MISSION
+        </button>
+      </section>
+
+      <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+      <div id="missionLoader" class="mission-loader">
+        <div class="loader-ring"></div>
+
+        <strong> DISASTEROS </strong>
+
+        <span> LOADING MISSION </span>
+      </div>
+
+      <!-- =====================================================
+         TOAST
+    ====================================================== -->
+
+      <div id="missionToast" class="mission-toast">Mission updated</div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+      <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+
+    <script src="./js/mission-show.js"></script>
+  </body>
+</html>

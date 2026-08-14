@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DisasterOS - Alerts</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      :root {
+        --bg-base: #060913;
+        --card-bg: rgba(18, 26, 46, 0.65);
+        --card-hover: rgba(26, 37, 64, 0.85);
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-blue: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.35);
+        --danger-red: #ef4444;
+        --warning-yellow: #f59e0b;
+        --border-glass: rgba(255, 255, 255, 0.08);
+      }
+
+      body {
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        background-image:
+          radial-gradient(
+            circle at 20% 10%,
+            rgba(37, 99, 235, 0.15) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 80% 90%,
+            rgba(239, 68, 68, 0.08) 0%,
+            transparent 40%
+          );
+        min-height: 100vh;
+      }
+
+      .alerts-container {
+        width: 100%;
+        max-width: 440px;
+        padding: 24px 20px;
+        box-sizing: border-box;
+      }
+
+      /* Header */
+      .alerts-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .back-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-glass);
+        color: var(--text-primary);
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateX(-2px);
+      }
+
+      .alerts-header h1 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        margin: 0;
+        background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Segmented Glass Tabs */
+      .alert-tabs {
+        display: flex;
+        background: rgba(11, 17, 32, 0.8);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 5px;
+        margin-bottom: 22px;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .tab-btn {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        box-shadow: 0 4px 16px var(--accent-glow);
+      }
+
+      /* Alert Cards List */
+      .alerts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .alert-card {
+        display: flex;
+        gap: 16px;
+        padding: 18px;
+        border-radius: 20px;
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-glass);
+        border-left: 4px solid transparent;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .alert-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.03) 0%,
+          transparent 100%
+        );
+        pointer-events: none;
+      }
+
+      .alert-card:hover {
+        transform: translateY(-3px);
+        background: var(--card-hover);
+        border-color: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+      }
+
+      /* Priority Custom Themes */
+      .alert-card.priority-high {
+        border-left-color: var(--danger-red);
+        background: linear-gradient(
+          90deg,
+          rgba(239, 68, 68, 0.14) 0%,
+          rgba(18, 26, 46, 0.75) 45%
+        );
+      }
+
+      .alert-card.priority-medium {
+        border-left-color: var(--warning-yellow);
+        background: linear-gradient(
+          90deg,
+          rgba(245, 158, 11, 0.1) 0%,
+          rgba(18, 26, 46, 0.75) 45%
+        );
+      }
+
+      .alert-card.priority-notice {
+        border-left-color: var(--accent-blue);
+        background: linear-gradient(
+          90deg,
+          rgba(59, 130, 246, 0.08) 0%,
+          rgba(18, 26, 46, 0.75) 45%
+        );
+      }
+
+      .alert-icon {
+        font-size: 22px;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 2px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      }
+
+      .alert-content {
+        flex: 1;
+        z-index: 1;
+      }
+
+      .alert-content h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0 0 6px 0;
+        color: #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .alert-content p {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+      }
+
+      .alert-time {
+        font-size: 11px;
+        color: #64748b;
+        font-weight: 500;
+        letter-spacing: 0.2px;
+      }
+
+      /* =========================================================
+   ALERT BADGES
+========================================================= */
+
+      .alert-badges {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-left: 8px;
+      }
+
+      .source-badge {
+        font-size: 8px;
+        font-weight: 700;
+        padding: 3px 6px;
+        border-radius: 5px;
+        letter-spacing: 0.5px;
+      }
+
+      .incident-badge {
+        background: rgba(245, 158, 11, 0.12);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+
+      .mission-badge {
+        background: rgba(59, 130, 246, 0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+      }
+
+      /* =========================================================
+   ALERT META
+========================================================= */
+
+      .alert-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 8px;
+        margin-bottom: 10px;
+      }
+
+      .alert-meta span {
+        font-size: 10px;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 4px 7px;
+        border-radius: 6px;
+      }
+
+      /* =========================================================
+   ALERT FOOTER
+========================================================= */
+
+      .alert-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .alert-action {
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        background: rgba(59, 130, 246, 0.1);
+        color: #60a5fa;
+        border-radius: 8px;
+        padding: 5px 9px;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .alert-action:hover {
+        background: rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.6);
+      }
+
+      /* Glowing Live Pulse Tag */
+      .live-badge {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #fca5a5;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 6px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        animation: pulseGlow 2s infinite;
+      }
+
+      @keyframes pulseGlow {
+        0% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="alerts-container">
+      <header class="alerts-header">
+        <button class="back-btn" onclick="history.back()">&larr;</button>
+        <h1>Alerts</h1>
+      </header>
+
+      <div class="alert-tabs">
+        <button class="tab-btn active">Active</button>
+        <button class="tab-btn">All Alerts</button>
+      </div>
+
+      <div class="alerts-list"></div>
+    </div>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+
+
+    <script>
+      /* =========================================================
+   CONFIG
+========================================================= */
+
+      const API_BASE = "http://localhost:4000/api";
+
+      let alertsData = [];
+
+      /* =========================================================
+   ELEMENTS
+========================================================= */
+
+      const alertsListContainer = document.querySelector(".alerts-list");
+      const tabButtons = document.querySelectorAll(".tab-btn");
+
+      /* =========================================================
+   LOAD ALERT DATA
+========================================================= */
+
+      async function loadAlerts() {
+        try {
+          alertsListContainer.innerHTML = `
+            <div style="
+                text-align:center;
+                color:#64748b;
+                padding:40px 10px;
+            ">
+                Loading alerts...
+            </div>
+        `;
+
+          const [incidentsResponse, missionsResponse] = await Promise.all([
+            fetch(`${API_BASE}/incidents`),
+            fetch(`${API_BASE}/missions`),
+          ]);
+
+          if (!incidentsResponse.ok) {
+            throw new Error("Failed to fetch incidents");
+          }
+
+          if (!missionsResponse.ok) {
+            throw new Error("Failed to fetch missions");
+          }
+
+          const incidentsResult = await incidentsResponse.json();
+          const missionsResult = await missionsResponse.json();
+
+          const incidents = incidentsResult.data || [];
+          const missions = missionsResult.data || [];
+
+          console.log("🚨 Incidents:", incidents);
+          console.log("🎯 Missions:", missions);
+
+          /*
+           * Convert backend data into one common alert format.
+           */
+          const incidentAlerts = incidents.map(convertIncidentToAlert);
+          const missionAlerts = missions.map(convertMissionToAlert);
+
+          alertsData = [...incidentAlerts, ...missionAlerts];
+
+          /*
+           * Newest alerts first
+           */
+          alertsData.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+
+          console.log("📢 Final Alerts:", alertsData);
+
+          renderAlerts("active");
+        } catch (error) {
+          console.error("❌ Failed to load alerts:", error);
+
+          alertsListContainer.innerHTML = `
+            <div style="
+                text-align:center;
+                padding:35px 15px;
+                color:#ef4444;
+            ">
+                <div style="font-size:30px; margin-bottom:10px;">
+                    ⚠️
+                </div>
+
+                <div style="font-weight:600;">
+                    Unable to load alerts
+                </div>
+
+                <div style="
+                    font-size:12px;
+                    color:#64748b;
+                    margin-top:6px;
+                ">
+                    Please check your server connection.
+                </div>
+            </div>
+        `;
+        }
+      }
+
+      /* =========================================================
+   INCIDENT → ALERT
+========================================================= */
+
+      function convertIncidentToAlert(incident) {
+        const severity = normalizeSeverity(incident.severity);
+
+        return {
+          id: incident._id,
+
+          source: "incident",
+
+          type: "active",
+
+          severity: severity,
+
+          title: getIncidentTitle(incident),
+
+          message:
+            incident.description ||
+            `${incident.type} reported in the affected area.`,
+
+          status: incident.status || "REPORTED",
+
+          createdAt: incident.createdAt,
+
+          incidentId: incident.incidentId,
+
+          incidentType: incident.type,
+
+          peopleAffected: incident.peopleAffected || 0,
+
+          latitude: incident.latitude,
+
+          longitude: incident.longitude,
+
+          reportedBy: incident.reportedBy,
+
+          assignedTeam: incident.assignedTeam,
+
+          requiredResources: incident.requiredResources || [],
+        };
+      }
+
+      /* =========================================================
+   MISSION → ALERT
+========================================================= */
+
+      function convertMissionToAlert(mission) {
+        const severity = normalizeSeverity(mission.priority);
+
+        return {
+          id: mission._id,
+
+          source: "mission",
+
+          type: "active",
+
+          severity: severity,
+
+          title: mission.title || "New Mission",
+
+          message:
+            mission.description || "A new field mission has been created.",
+
+          status: mission.status || "CREATED",
+
+          createdAt: mission.createdAt,
+
+          missionId: mission._id,
+
+          priority: mission.priority,
+
+          destination: mission.destination,
+
+          route: mission.route,
+
+          incident: mission.incident,
+
+          assignedTeam: mission.assignedTeam,
+
+          createdBy: mission.createdBy,
+        };
+      }
+
+      /* =========================================================
+   INCIDENT TITLE
+========================================================= */
+
+      function getIncidentTitle(incident) {
+        const type = incident.type || "Incident";
+
+        const titleMap = {
+          flood: "Flood Emergency",
+          fire: "Fire Emergency",
+          missing_person: "Missing Person",
+          medical: "Medical Emergency",
+          accident: "Accident Reported",
+          landslide: "Landslide Risk",
+          road_block: "Road Blocked",
+          women_safety: "Women Safety Alert",
+          elderly: "Elderly Assistance",
+          sos: "Emergency SOS",
+        };
+
+        return titleMap[type.toLowerCase()] || `${type} Alert`;
+      }
+
+      /* =========================================================
+   NORMALIZE PRIORITY / SEVERITY
+========================================================= */
+
+      function normalizeSeverity(value) {
+        if (!value) {
+          return "notice";
+        }
+
+        const normalized = value.toString().toLowerCase();
+
+        if (
+          normalized === "high" ||
+          normalized === "critical" ||
+          normalized === "severe"
+        ) {
+          return "high";
+        }
+
+        if (normalized === "medium" || normalized === "moderate") {
+          return "medium";
+        }
+
+        return "notice";
+      }
+
+      /* =========================================================
+   ACTIVE STATUS
+========================================================= */
+
+      function isAlertActive(alert) {
+        const status = String(alert.status || "").toUpperCase();
+
+        /*
+         * These statuses are considered finished.
+         */
+        const closedStatuses = [
+          "RESOLVED",
+          "CLOSED",
+          "COMPLETED",
+          "CANCELLED",
+          "REJECTED",
+        ];
+
+        return !closedStatuses.includes(status);
+      }
+
+      /* =========================================================
+   TIME FORMAT
+========================================================= */
+
+      function formatTime(dateString) {
+        if (!dateString) {
+          return "Unknown time";
+        }
+
+        const date = new Date(dateString);
+
+        if (isNaN(date.getTime())) {
+          return "Unknown time";
+        }
+
+        const now = new Date();
+
+        const diff = now - date;
+
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (seconds < 60) {
+          return "Just now";
+        }
+
+        if (minutes < 60) {
+          return `${minutes} min ago`;
+        }
+
+        if (hours < 24) {
+          return `${hours} hr ago`;
+        }
+
+        if (days < 7) {
+          return `${days} day${days > 1 ? "s" : ""} ago`;
+        }
+
+        return date.toLocaleDateString();
+      }
+
+      /* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+      function escapeHTML(value) {
+        if (value === null || value === undefined) {
+          return "";
+        }
+
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      /* =========================================================
+   RENDER ALERTS
+========================================================= */
+
+      function renderAlerts(filterType) {
+        alertsListContainer.innerHTML = "";
+
+        let filteredAlerts = alertsData;
+
+        if (filterType === "active") {
+          filteredAlerts = alertsData.filter((alert) => {
+            return isAlertActive(alert);
+          });
+        }
+
+        if (filteredAlerts.length === 0) {
+          alertsListContainer.innerHTML = `
+            <div style="
+                text-align:center;
+                color:#64748b;
+                padding:40px 10px;
+            ">
+                <div style="font-size:32px; margin-bottom:10px;">
+                    ✓
+                </div>
+
+                <div style="
+                    font-size:14px;
+                    font-weight:600;
+                    color:#94a3b8;
+                ">
+                    No alerts found
+                </div>
+
+                <div style="
+                    font-size:12px;
+                    margin-top:5px;
+                ">
+                    Everything looks clear.
+                </div>
+            </div>
+        `;
+
+          return;
+        }
+
+        filteredAlerts.forEach((alert) => {
+          const card = document.createElement("div");
+
+          card.className = `alert-card priority-${alert.severity}`;
+
+          /*
+           * Different icons for incidents and missions.
+           */
+          let icon = "ℹ️";
+
+          if (alert.source === "incident") {
+            icon = "⚠️";
+          }
+
+          if (alert.source === "mission") {
+            icon = "🎯";
+          }
+
+          if (alert.severity === "high") {
+            icon = alert.source === "mission" ? "🚨" : "⚠️";
+          }
+
+          /*
+           * Live badge
+           */
+          let badgeHTML = "";
+
+          if (isAlertActive(alert)) {
+            badgeHTML = `
+                <span class="live-badge">
+                    LIVE
+                </span>
+            `;
+          }
+
+          /*
+           * Source badge
+           */
+          const sourceBadge =
+            alert.source === "mission"
+              ? `<span class="source-badge mission-badge">MISSION</span>`
+              : `<span class="source-badge incident-badge">INCIDENT</span>`;
+
+          /*
+           * Extra information
+           */
+          let extraHTML = "";
+
+          if (alert.source === "incident") {
+            extraHTML = `
+                <div class="alert-meta">
+
+                    <span>
+                        📍 ${escapeHTML(
+                          alert.latitude?.toFixed?.(4) ??
+                            alert.latitude ??
+                            "N/A",
+                        )}
+                        ,
+                        ${escapeHTML(
+                          alert.longitude?.toFixed?.(4) ??
+                            alert.longitude ??
+                            "N/A",
+                        )}
+                    </span>
+
+                    <span>
+                        👥 ${alert.peopleAffected} affected
+                    </span>
+
+                    <span>
+                        ${escapeHTML(alert.status)}
+                    </span>
+
+                </div>
+            `;
+          } else {
+            const routePoints = alert.route?.coordinates?.length || 0;
+
+            extraHTML = `
+                <div class="alert-meta">
+
+                    <span>
+                        🎯 ${escapeHTML(alert.status)}
+                    </span>
+
+                    <span>
+                        🛣️ ${routePoints} route points
+                    </span>
+
+                    ${
+                      alert.assignedTeam
+                        ? `<span>👥 Team Assigned</span>`
+                        : `<span>👤 Unassigned</span>`
+                    }
+
+                </div>
+            `;
+          }
+
+          /*
+           * Mission button
+           */
+          let actionHTML = "";
+
+          if (alert.source === "mission") {
+            actionHTML = `
+                <button
+                    class="alert-action"
+                    onclick="openMission('${alert.missionId}')"
+                >
+                    View Mission →
+                </button>
+            `;
+          }
+
+          card.innerHTML = `
+
+            <div class="alert-icon">
+                ${icon}
+            </div>
+
+            <div class="alert-content">
+
+                <h3>
+
+                    <span>
+                        ${escapeHTML(alert.title)}
+                    </span>
+
+                    <span class="alert-badges">
+                        ${sourceBadge}
+                        ${badgeHTML}
+                    </span>
+
+                </h3>
+
+                <p>
+                    ${escapeHTML(alert.message)}
+                </p>
+
+                ${extraHTML}
+
+                <div class="alert-footer">
+
+                    <span class="alert-time">
+                        ${formatTime(alert.createdAt)}
+                    </span>
+
+                    ${actionHTML}
+
+                </div>
+
+            </div>
+        `;
+
+          /*
+           * Clicking mission card also opens mission.
+           */
+          if (alert.source === "mission") {
+            card.style.cursor = "pointer";
+
+            card.addEventListener("click", function (event) {
+              /*
+               * Don't trigger twice if button was clicked.
+               */
+              if (event.target.closest(".alert-action")) {
+                return;
+              }
+
+              openMission(alert.missionId);
+            });
+          }
+
+          alertsListContainer.appendChild(card);
+        });
+      }
+
+      /* =========================================================
+   OPEN MISSION
+========================================================= */
+
+      function openMission(missionId) {
+        if (!missionId) {
+          console.error("❌ Mission ID missing");
+          return;
+        }
+
+        console.log("🎯 Opening mission:", missionId);
+
+        window.location.href = `mission-show.html?id=${encodeURIComponent(missionId)}`;
+      }
+
+      /* =========================================================
+   TAB SWITCHING
+========================================================= */
+
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          tabButtons.forEach((btn) => {
+            btn.classList.remove("active");
+          });
+
+          button.classList.add("active");
+
+          const tabName = button.textContent.toLowerCase().includes("active")
+            ? "active"
+            : "all";
+
+          renderAlerts(tabName);
+        });
+      });
+
+      /* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+      document.addEventListener("DOMContentLoaded", () => {
+        loadAlerts();
+      });
+    </script>
+  </body>
+</html>

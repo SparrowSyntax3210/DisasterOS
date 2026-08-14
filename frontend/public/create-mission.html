@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS | Create Mission</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link rel="stylesheet" href="./css/create-mission.css" />
+  </head>
+
+  <body>
+    <div class="mission-page">
+      <!-- HEADER -->
+
+      <header class="mission-header">
+        <div>
+          <span class="eyebrow"> DISASTEROS COMMAND CENTER </span>
+
+          <h1>Create Mission</h1>
+
+          <p>Create an operational mission and define its safe route.</p>
+        </div>
+
+        <button id="backBtn" class="back-btn">← Back</button>
+      </header>
+
+      <!-- MAIN -->
+
+      <main class="mission-layout">
+        <!-- LEFT SIDE -->
+
+        <section class="mission-form-panel">
+          <div class="section-heading">
+            <span class="step"> 01 </span>
+
+            <div>
+              <h2>Mission Details</h2>
+
+              <p>Define the operation.</p>
+            </div>
+          </div>
+
+          <!-- TITLE -->
+
+          <div class="form-group">
+            <label> Mission Title </label>
+
+            <input
+              id="missionTitle"
+              type="text"
+              placeholder="e.g. Evacuate Sector 12 residents"
+            />
+          </div>
+
+          <!-- DESCRIPTION -->
+
+          <div class="form-group">
+            <label> Description </label>
+
+            <textarea
+              id="missionDescription"
+              placeholder="Describe the mission objective..."
+            ></textarea>
+          </div>
+
+          <!-- PRIORITY -->
+
+          <div class="form-group">
+            <label> Priority </label>
+
+            <select id="missionPriority">
+              <option value="">Select Priority</option>
+
+              <option value="LOW">Low</option>
+
+              <option value="MEDIUM">Medium</option>
+
+              <option value="HIGH">High</option>
+
+              <option value="CRITICAL">Critical</option>
+            </select>
+          </div>
+
+          <!-- DESTINATION -->
+
+          <div class="form-group">
+            <label> Destination Name </label>
+
+            <input
+              id="destinationName"
+              type="text"
+              placeholder="e.g. Community Shelter A"
+            />
+          </div>
+
+          <!-- DESTINATION COORDINATES -->
+
+          <div class="coordinate-grid">
+            <div class="form-group">
+              <label> Destination Latitude </label>
+
+              <input
+                id="destinationLat"
+                type="number"
+                step="any"
+                placeholder="28.6139"
+              />
+            </div>
+
+            <div class="form-group">
+              <label> Destination Longitude </label>
+
+              <input
+                id="destinationLng"
+                type="number"
+                step="any"
+                placeholder="77.2090"
+              />
+            </div>
+          </div>
+
+          <!-- ROUTE SECTION -->
+
+          <div class="route-info">
+            <div class="route-status">
+              <span id="routeStatusDot" class="status-dot"></span>
+
+              <div>
+                <strong id="routeStatus"> No route created </strong>
+
+                <small id="routePointCount">
+                  Click on the map to start drawing.
+                </small>
+              </div>
+            </div>
+
+            <div class="route-actions">
+              <button id="undoPointBtn" type="button">Undo</button>
+
+              <button id="clearRouteBtn" type="button">Clear Route</button>
+            </div>
+          </div>
+
+          <!-- CREATE -->
+
+          <button id="createMissionBtn" class="create-btn">
+            CREATE MISSION
+          </button>
+
+          <div id="formMessage" class="form-message"></div>
+        </section>
+
+        <!-- MAP -->
+
+        <section class="mission-map-panel">
+          <div class="map-header">
+            <div>
+              <span class="step"> 02 </span>
+
+              <div>
+                <h2>Safe Route</h2>
+
+                <p>Click the map to draw the route.</p>
+              </div>
+            </div>
+
+            <button id="useLocationBtn" type="button">
+              ◎ Use Current Location
+            </button>
+          </div>
+
+          <div id="routeMap"></div>
+
+          <div class="map-instructions">
+            <span> ● </span>
+
+            <p>
+              Click points along the safest path. Double-click to finish the
+              route.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+ <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="./js/socket-client.js"></script>
+
+  </body>
+</html>

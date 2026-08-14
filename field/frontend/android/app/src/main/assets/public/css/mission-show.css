@@ -1,0 +1,707 @@
+/* ==========================================================
+   DISASTEROS MISSION SCREEN
+========================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  font-family: "Inter", sans-serif;
+
+  background: #020a12;
+  color: #ffffff;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ==========================================================
+   APP
+========================================================== */
+
+#missionApp {
+  position: relative;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  background: #020a12;
+}
+
+/* ==========================================================
+   MAP
+========================================================== */
+
+#missionMap {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 1;
+}
+
+/* Darken map slightly */
+
+#missionMap::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 10, 18, 0.45),
+    transparent 25%,
+    transparent 60%,
+    rgba(2, 10, 18, 0.7)
+  );
+
+  z-index: 400;
+}
+
+/* ==========================================================
+   LEAFLET
+========================================================== */
+
+.leaflet-control-attribution {
+  display: none;
+}
+
+.leaflet-control-zoom {
+  display: none;
+}
+
+/* ==========================================================
+   TOP BAR
+========================================================== */
+
+.mission-topbar {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 16px;
+
+  z-index: 1000;
+
+  background: linear-gradient(to bottom, rgba(2, 10, 18, 0.9), transparent);
+}
+
+.mission-page-title {
+  font-size: 15px;
+  font-weight: 700;
+
+  letter-spacing: 0.2px;
+}
+
+.topbar-button {
+  width: 40px;
+  height: 40px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  border-radius: 12px;
+
+  background: rgba(4, 15, 25, 0.82);
+
+  backdrop-filter: blur(12px);
+
+  color: white;
+
+  font-size: 20px;
+}
+
+/* ==========================================================
+   MAP STATUS
+========================================================== */
+
+.map-status {
+  position: absolute;
+
+  top: 78px;
+  left: 16px;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 7px 11px;
+
+  border-radius: 20px;
+
+  background: rgba(3, 15, 24, 0.82);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  backdrop-filter: blur(12px);
+
+  color: #cbd5df;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  z-index: 1000;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #27e08b;
+
+  box-shadow: 0 0 8px rgba(39, 224, 139, 0.8);
+}
+
+/* ==========================================================
+   LOCATION BUTTON
+========================================================== */
+
+.location-button {
+  position: absolute;
+
+  right: 16px;
+  bottom: 350px;
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: rgba(3, 15, 24, 0.9);
+
+  color: #fff;
+
+  font-size: 19px;
+
+  z-index: 1000;
+
+  backdrop-filter: blur(12px);
+
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================================================
+   ROUTE MARKERS
+========================================================== */
+
+.route-marker {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+
+  color: #fff;
+
+  border: 3px solid rgba(255, 255, 255, 0.9);
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.route-start {
+  background: #27e08b;
+}
+
+.route-end {
+  background: #ff404f;
+}
+
+.route-current {
+  background: #1499ff;
+}
+
+/* ==========================================================
+   BOTTOM PANEL
+========================================================== */
+
+.mission-bottom-panel {
+  position: absolute;
+
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+
+  max-height: 58vh;
+
+  padding: 12px;
+
+  overflow-y: auto;
+
+  border-radius: 20px;
+
+  background: rgba(3, 13, 21, 0.95);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  backdrop-filter: blur(22px);
+
+  box-shadow: 0 -15px 50px rgba(0, 0, 0, 0.4);
+
+  z-index: 1100;
+
+  scrollbar-width: none;
+}
+
+.mission-bottom-panel::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================
+   HANDLE
+========================================================== */
+
+.panel-handle {
+  width: 38px;
+  height: 4px;
+
+  margin: 0 auto 12px;
+
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ==========================================================
+   HEADING
+========================================================== */
+
+.mission-heading {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 12px;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6c91a8;
+
+  font-size: 8px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.5px;
+}
+
+.mission-heading h1 {
+  max-width: 230px;
+
+  font-size: 19px;
+
+  line-height: 1.25;
+}
+
+.priority-badge {
+  padding: 6px 9px;
+
+  border-radius: 7px;
+
+  background: rgba(255, 117, 24, 0.13);
+
+  border: 1px solid rgba(255, 117, 24, 0.3);
+
+  color: #ff9b57;
+
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.8px;
+}
+
+/* ==========================================================
+   ROUTE CARD
+========================================================== */
+
+.route-card {
+  padding: 13px;
+
+  border-radius: 14px;
+
+  margin-bottom: 9px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.route-card.recommended {
+  border-color: rgba(39, 224, 139, 0.18);
+}
+
+.route-card-top {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.route-label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  font-size: 11px;
+
+  color: #dbe5eb;
+
+  font-weight: 600;
+}
+
+.route-card strong {
+  display: block;
+
+  font-size: 12px;
+
+  margin-bottom: 3px;
+}
+
+.route-card small {
+  color: #8397a5;
+
+  font-size: 10px;
+}
+
+.route-description {
+  margin-top: 8px;
+
+  color: #8295a2;
+
+  font-size: 10px;
+}
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.follow-button,
+.view-button {
+  border: none;
+
+  padding: 9px 12px;
+
+  border-radius: 10px;
+
+  font-size: 9px;
+
+  font-weight: 700;
+}
+
+.follow-button {
+  background: #27a85f;
+
+  color: white;
+
+  box-shadow: 0 4px 15px rgba(39, 168, 95, 0.2);
+}
+
+.view-button {
+  background: rgba(255, 255, 255, 0.04);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  color: #dbe5eb;
+}
+
+/* ==========================================================
+   MISSION DETAILS
+========================================================== */
+
+.mission-details {
+  margin-top: 10px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+  padding-top: 11px;
+}
+
+.details-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+}
+
+.details-header > span {
+  color: #708897;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+.details-header button {
+  border: none;
+
+  background: none;
+
+  color: #4aa9ff;
+
+  font-size: 10px;
+}
+
+.details-content {
+  margin-top: 10px;
+}
+
+.detail-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 7px 0;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.detail-row span {
+  color: #718591;
+
+  font-size: 10px;
+}
+
+.detail-row strong {
+  max-width: 190px;
+
+  text-align: right;
+
+  color: #dce7ed;
+
+  font-size: 10px;
+}
+
+.mission-description {
+  padding-top: 10px;
+}
+
+.mission-description span {
+  display: block;
+
+  color: #718591;
+
+  font-size: 8px;
+
+  letter-spacing: 1px;
+
+  margin-bottom: 5px;
+}
+
+.mission-description p {
+  color: #b6c4cc;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+/* ==========================================================
+   ACCEPT
+========================================================== */
+
+.accept-button {
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding: 13px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #27a85f;
+
+  color: white;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: 0.5px;
+
+  box-shadow: 0 8px 25px rgba(39, 168, 95, 0.2);
+}
+
+.accept-button.accepted {
+  background: rgba(39, 224, 139, 0.12);
+
+  border: 1px solid rgba(39, 224, 139, 0.3);
+
+  color: #27e08b;
+}
+
+/* ==========================================================
+   LOADER
+========================================================== */
+
+.mission-loader {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  background: #020a12;
+
+  z-index: 5000;
+
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s ease;
+}
+
+.mission-loader.loaded {
+  opacity: 0;
+
+  visibility: hidden;
+}
+
+.mission-loader strong {
+  font-size: 24px;
+
+  letter-spacing: 1px;
+}
+
+.mission-loader span {
+  color: #4782a4;
+
+  font-size: 9px;
+
+  letter-spacing: 2px;
+}
+
+.loader-ring {
+  width: 44px;
+  height: 44px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255, 255, 255, 0.08);
+
+  border-top-color: #00a8ff;
+
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================
+   TOAST
+========================================================== */
+
+.mission-toast {
+  position: absolute;
+
+  left: 50%;
+  top: 80px;
+
+  transform: translateX(-50%) translateY(-20px);
+
+  padding: 10px 15px;
+
+  border-radius: 10px;
+
+  background: rgba(3, 15, 24, 0.95);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  color: #fff;
+
+  font-size: 10px;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  z-index: 6000;
+
+  transition: 0.25s ease;
+}
+
+.mission-toast.show {
+  opacity: 1;
+
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ==========================================================
+   DESKTOP
+========================================================== */
+
+@media (min-width: 700px) {
+  .mission-bottom-panel {
+    left: auto;
+    right: 25px;
+    bottom: 25px;
+
+    width: 390px;
+
+    max-height: 650px;
+  }
+
+  .location-button {
+    right: 435px;
+    bottom: 40px;
+  }
+}

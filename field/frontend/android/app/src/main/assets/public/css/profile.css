@@ -1,0 +1,1029 @@
+/* =========================================================
+   DISASTEROS PROFILE
+========================================================= */
+
+:root {
+  --bg: #050a12;
+  --bg-soft: #08111d;
+
+  --card: rgba(10, 20, 33, 0.78);
+  --card-hover: rgba(14, 29, 46, 0.9);
+
+  --border: rgba(83, 154, 201, 0.18);
+  --border-bright: rgba(0, 191, 255, 0.4);
+
+  --cyan: #08bfff;
+  --cyan-soft: #53d8ff;
+
+  --text: #f4f8fc;
+  --text-secondary: #91a3b7;
+  --text-muted: #64768b;
+
+  --green: #2edb72;
+
+  --radius: 18px;
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 157, 255, 0.1), transparent 40%),
+    var(--bg);
+
+  color: var(--text);
+
+  font-family: "Inter", sans-serif;
+
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   WATER BACKGROUND
+========================================================= */
+
+.water-background {
+  position: fixed;
+
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  z-index: 0;
+}
+
+.water-glow {
+  position: absolute;
+
+  width: 650px;
+  height: 650px;
+
+  top: -300px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  background: radial-gradient(circle, rgba(0, 184, 255, 0.14), transparent 68%);
+
+  filter: blur(30px);
+}
+
+/* =========================================================
+   RAIN
+========================================================= */
+
+.rain-layer {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0.2;
+}
+
+.rain-drop {
+  position: absolute;
+
+  width: 1px;
+  height: 70px;
+
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(117, 211, 255, 0.75)
+  );
+
+  transform: rotate(15deg);
+
+  animation: rainFall linear infinite;
+}
+
+@keyframes rainFall {
+  from {
+    transform: translate3d(0, -120px, 0) rotate(15deg);
+  }
+
+  to {
+    transform: translate3d(-120px, 110vh, 0) rotate(15deg);
+  }
+}
+
+/* =========================================================
+   WATER WAVES
+========================================================= */
+
+.water-wave {
+  position: absolute;
+
+  left: -10%;
+
+  width: 120%;
+
+  height: 130px;
+
+  bottom: -90px;
+
+  border-radius: 50%;
+
+  border-top: 1px solid rgba(0, 191, 255, 0.15);
+
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 163, 255, 0.09),
+    transparent 65%
+  );
+}
+
+.wave-one {
+  animation: waveMove 9s ease-in-out infinite alternate;
+}
+
+.wave-two {
+  bottom: -110px;
+
+  opacity: 0.5;
+
+  animation: waveMove 13s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes waveMove {
+  from {
+    transform: translateX(-3%) scaleX(1);
+  }
+
+  to {
+    transform: translateX(3%) scaleX(1.05);
+  }
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.profile-page {
+  position: relative;
+
+  z-index: 2;
+
+  width: min(100%, 620px);
+
+  margin: 0 auto;
+
+  padding: 28px 22px 60px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.profile-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 30px;
+}
+
+.brand {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  color: var(--cyan);
+
+  border: 1px solid rgba(0, 191, 255, 0.35);
+
+  background: linear-gradient(
+    145deg,
+    rgba(0, 191, 255, 0.18),
+    rgba(0, 80, 130, 0.08)
+  );
+
+  box-shadow: 0 0 25px rgba(0, 191, 255, 0.12);
+}
+
+.brand-name {
+  display: block;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  display: block;
+
+  margin-top: 2px;
+
+  font-size: 8px;
+
+  color: var(--text-muted);
+
+  letter-spacing: 1.4px;
+}
+
+.settings-button {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 13px;
+
+  border: 1px solid var(--border);
+
+  background: rgba(8, 17, 29, 0.75);
+
+  color: var(--text-secondary);
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.settings-button:hover {
+  color: var(--cyan);
+
+  border-color: var(--border-bright);
+
+  background: rgba(0, 191, 255, 0.08);
+
+  transform: rotate(15deg);
+}
+
+/* =========================================================
+   IDENTITY CARD
+========================================================= */
+
+.identity-card {
+  padding: 20px;
+
+  border: 1px solid var(--border);
+
+  border-radius: var(--radius);
+
+  background: linear-gradient(
+    135deg,
+    rgba(15, 32, 50, 0.92),
+    rgba(7, 16, 27, 0.88)
+  );
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+  backdrop-filter: blur(18px);
+}
+
+.identity-main {
+  display: flex;
+
+  align-items: center;
+
+  gap: 17px;
+}
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.avatar-container {
+  position: relative;
+
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 76px;
+  height: 76px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(145deg, #0a7ea9, #062538);
+
+  border: 2px solid rgba(0, 191, 255, 0.65);
+
+  color: white;
+
+  font-size: 22px;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 0 0 5px rgba(0, 191, 255, 0.05),
+    0 0 30px rgba(0, 191, 255, 0.18);
+}
+
+.camera-button {
+  position: absolute;
+
+  right: -2px;
+  bottom: -2px;
+
+  width: 27px;
+  height: 27px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  border: 2px solid var(--bg);
+
+  background: var(--cyan);
+
+  color: #02121b;
+
+  cursor: pointer;
+}
+
+.camera-button svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* =========================================================
+   IDENTITY
+========================================================= */
+
+.identity-info h1 {
+  font-size: 22px;
+
+  font-weight: 700;
+
+  letter-spacing: -0.7px;
+
+  margin-bottom: 5px;
+}
+
+.identity-info > p {
+  font-size: 13px;
+
+  color: var(--text-secondary);
+
+  margin-bottom: 9px;
+}
+
+.duty-status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 11px;
+
+  color: var(--green);
+
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--green);
+
+  box-shadow: 0 0 10px rgba(46, 219, 114, 0.7);
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats-card {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1px
+    1fr
+    1px
+    1fr;
+
+  align-items: center;
+
+  margin-top: 10px;
+
+  padding: 19px 10px;
+
+  border-radius: var(--radius);
+
+  border: 1px solid var(--border);
+
+  background: rgba(7, 16, 27, 0.78);
+
+  backdrop-filter: blur(15px);
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+
+  color: var(--text-secondary);
+
+  font-size: 11px;
+
+  margin-bottom: 6px;
+}
+
+.stat strong {
+  display: block;
+
+  font-size: 20px;
+
+  font-weight: 700;
+}
+
+.stat-divider {
+  height: 34px;
+
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* =========================================================
+   ACTION LIST
+========================================================= */
+
+.action-list {
+  margin-top: 10px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.action-card {
+  width: 100%;
+
+  min-height: 70px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 13px 15px;
+
+  border-radius: 15px;
+
+  border: 1px solid var(--border);
+
+  background: rgba(7, 16, 27, 0.78);
+
+  color: var(--text);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(14px);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.action-card:hover {
+  transform: translateX(4px);
+
+  background: var(--card-hover);
+
+  border-color: rgba(0, 191, 255, 0.3);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.action-icon {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  color: var(--cyan);
+
+  background: rgba(0, 191, 255, 0.08);
+
+  border: 1px solid rgba(0, 191, 255, 0.12);
+}
+
+.action-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.action-content {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.action-content strong {
+  display: block;
+
+  font-size: 14px;
+
+  margin-bottom: 4px;
+}
+
+.action-content span {
+  display: block;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+
+  line-height: 1.4;
+}
+
+.action-arrow {
+  width: 17px;
+
+  color: var(--text-muted);
+
+  flex-shrink: 0;
+}
+
+.download-indicator {
+  color: var(--cyan);
+
+  display: flex;
+
+  align-items: center;
+}
+
+.download-indicator svg {
+  width: 18px;
+}
+
+/* =========================================================
+   ACCOUNT
+========================================================= */
+
+.account-section {
+  margin-top: 28px;
+}
+
+.section-title {
+  color: var(--text-muted);
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  letter-spacing: 1.6px;
+
+  margin-bottom: 10px;
+
+  padding-left: 4px;
+}
+
+.account-grid {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 8px;
+}
+
+.account-item {
+  min-width: 0;
+
+  display: flex;
+
+  gap: 10px;
+
+  align-items: center;
+
+  padding: 13px;
+
+  border-radius: 13px;
+
+  border: 1px solid var(--border);
+
+  background: rgba(7, 16, 27, 0.68);
+}
+
+.account-item > svg {
+  flex-shrink: 0;
+
+  width: 17px;
+
+  color: var(--cyan);
+}
+
+.account-item small {
+  display: block;
+
+  font-size: 9px;
+
+  color: var(--text-muted);
+
+  margin-bottom: 4px;
+}
+
+.account-item strong {
+  display: block;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+/* =========================================================
+   SESSION
+========================================================= */
+
+.session-card {
+  margin-top: 10px;
+
+  padding: 14px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  border-radius: 14px;
+
+  border: 1px solid rgba(46, 219, 114, 0.12);
+
+  background: rgba(46, 219, 114, 0.035);
+}
+
+.session-left {
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+}
+
+.session-icon {
+  width: 35px;
+  height: 35px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  color: var(--green);
+
+  background: rgba(46, 219, 114, 0.08);
+}
+
+.session-icon svg {
+  width: 17px;
+}
+
+.session-left strong {
+  display: block;
+
+  font-size: 12px;
+
+  margin-bottom: 3px;
+}
+
+.session-left span {
+  display: block;
+
+  color: var(--text-muted);
+
+  font-size: 10px;
+}
+
+.session-active {
+  font-size: 8px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+
+  color: var(--green);
+
+  padding: 5px 8px;
+
+  border-radius: 20px;
+
+  background: rgba(46, 219, 114, 0.08);
+}
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+.logout-button {
+  width: 100%;
+
+  margin-top: 14px;
+
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  border-radius: 13px;
+
+  border: 1px solid rgba(255, 75, 75, 0.18);
+
+  background: rgba(255, 75, 75, 0.04);
+
+  color: #ff7272;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255, 75, 75, 0.1);
+
+  border-color: rgba(255, 75, 75, 0.35);
+}
+
+.logout-button svg {
+  width: 16px;
+}
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.profile-loading {
+  min-height: 400px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 15px;
+
+  color: var(--text-secondary);
+
+  font-size: 12px;
+}
+
+.loading-ring {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(0, 191, 255, 0.12);
+
+  border-top-color: var(--cyan);
+
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.profile-error {
+  min-height: 500px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+}
+
+.error-icon {
+  width: 60px;
+  height: 60px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #ff6565;
+
+  background: rgba(255, 70, 70, 0.08);
+
+  margin-bottom: 18px;
+}
+
+.error-icon svg {
+  width: 26px;
+}
+
+.profile-error h2 {
+  font-size: 20px;
+
+  margin-bottom: 8px;
+}
+
+.profile-error p {
+  color: var(--text-secondary);
+
+  font-size: 12px;
+
+  margin-bottom: 20px;
+}
+
+.profile-error button {
+  padding: 11px 18px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: var(--cyan);
+
+  color: #031019;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+  position: fixed;
+
+  left: 50%;
+
+  bottom: 25px;
+
+  transform: translate(-50%, 20px);
+
+  padding: 11px 18px;
+
+  border-radius: 30px;
+
+  background: rgba(10, 22, 35, 0.95);
+
+  border: 1px solid rgba(0, 191, 255, 0.25);
+
+  color: white;
+
+  font-size: 11px;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+
+  z-index: 100;
+}
+
+.toast.show {
+  opacity: 1;
+
+  transform: translate(-50%, 0);
+}
+
+/* =========================================================
+   UTILITY
+========================================================= */
+
+.hidden {
+  display: none !important;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 500px) {
+  .profile-page {
+    padding: 20px 16px 45px;
+  }
+
+  .profile-header {
+    margin-bottom: 22px;
+  }
+
+  .identity-card {
+    padding: 17px;
+  }
+
+  .avatar {
+    width: 67px;
+    height: 67px;
+
+    font-size: 19px;
+  }
+
+  .identity-info h1 {
+    font-size: 19px;
+  }
+
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-card {
+    min-height: 66px;
+  }
+}

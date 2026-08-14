@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket Test</title>
+  </head>
+
+  <body>
+    <h1>Socket.IO Test</h1>
+
+    <div id="status">Connecting...</div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script src="/js/socket-client.js"></script>
+
+    <script>
+      SocketService.connect();
+
+      SocketService.on("incident:created", (data) => {
+        console.log("🚨 INCIDENT CREATED:", data);
+
+        document.getElementById("status").innerText = "New incident received!";
+      });
+
+      SocketService.on("incident:updated", (data) => {
+        console.log("🔄 INCIDENT UPDATED:", data);
+      });
+
+      SocketService.on("incident:deleted", (data) => {
+        console.log("🗑️ INCIDENT DELETED:", data);
+      });
+    </script>
+  </body>
+</html>

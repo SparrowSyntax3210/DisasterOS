@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>DisasterOS — Login</title>
+
+    <link rel="stylesheet" href="./css/auth.css" />
+  </head>
+
+  <body>
+    <!-- =====================================================
+       BACKGROUND
+  ====================================================== -->
+
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <main class="auth-page">
+      <!-- ===================================================
+         HEADER
+    ==================================================== -->
+
+      <header class="auth-header">
+        <div class="brand-mark">
+          <div class="brand-icon">+</div>
+
+          <div>
+            <div class="brand-name">DisasterOS</div>
+            <div class="brand-subtitle">FIELD RESPONSE NETWORK</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===================================================
+         LOGIN CARD
+    ==================================================== -->
+
+      <section class="auth-container">
+        <div class="auth-card">
+          <!-- top icon -->
+
+          <div class="auth-icon-wrap">
+            <div class="auth-icon">
+              <span>⌁</span>
+            </div>
+          </div>
+
+          <div class="auth-heading">
+            <span class="eyebrow"> SECURE ACCESS </span>
+
+            <h1>Welcome back</h1>
+
+            <p>Sign in to continue to your DisasterOS response network.</p>
+          </div>
+
+          <!-- =================================================
+             ERROR
+        ================================================== -->
+
+          <div id="authError" class="auth-message error-message hidden"></div>
+
+          <!-- =================================================
+             LOGIN FORM
+        ================================================== -->
+
+          <form id="loginForm">
+            <div class="input-group">
+              <label for="email"> Email </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> @ </span>
+
+                <input
+                  type="email"
+                  id="email"
+                  name="Email"
+                  placeholder="Enter your email"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="input-group">
+              <div class="password-label">
+                <label for="password"> Password </label>
+
+                <button type="button" id="forgotPassword" class="forgot-btn">
+                  Forgot?
+                </button>
+              </div>
+
+              <div class="input-wrapper">
+                <span class="input-icon"> •• </span>
+
+                <input
+                  type="password"
+                  id="password"
+                  name="Password"
+                  placeholder="Enter your password"
+                  autocomplete="current-password"
+                  required
+                />
+
+                <button
+                  type="button"
+                  id="togglePassword"
+                  class="password-toggle"
+                >
+                  SHOW
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" id="loginButton" class="primary-btn">
+              <span id="loginButtonText"> Sign In </span>
+
+              <span id="loginLoader" class="button-loader hidden"></span>
+            </button>
+          </form>
+
+          <!-- =================================================
+             DIVIDER
+        ================================================== -->
+
+          <div class="divider">
+            <span></span>
+            <p>NEW TO DISASTEROS?</p>
+            <span></span>
+          </div>
+
+          <!-- =================================================
+             SIGN UP
+        ================================================== -->
+
+          <a href="./signup.html" class="secondary-btn">
+            Create an account
+            <span>→</span>
+          </a>
+
+          <!-- =================================================
+             SECURITY
+        ================================================== -->
+
+          <div class="security-note">
+            <span class="lock-icon"> ◈ </span>
+
+            <span> Secure emergency response access </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================================
+         FOOTER
+    ==================================================== -->
+
+      <footer class="auth-footer">
+        <span>DISASTEROS</span>
+
+        <span class="footer-dot">•</span>
+
+        <span>FIELD NETWORK</span>
+
+        <span class="footer-dot">•</span>
+
+        <span>v1.0</span>
+      </footer>
+    </main>
+    <script src="./js/script.js"></script>
+    <script src="./js/auth.js"></script>
+  </body>
+</html>

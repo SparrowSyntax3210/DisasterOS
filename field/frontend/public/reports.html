@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DisasterOS - Report Incident</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      :root {
+        --bg-base: #060913;
+        --card-bg: rgba(18, 26, 46, 0.75);
+        --card-hover: rgba(26, 37, 64, 0.85);
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-blue: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.35);
+        --border-glass: rgba(255, 255, 255, 0.08);
+        --danger-red: #ef4444;
+        --warning-yellow: #f59e0b;
+        --success-green: #22c55e;
+      }
+
+      body {
+        background-color: var(--bg-base);
+        color: var(--text-primary);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        background-image:
+          radial-gradient(
+            circle at 15% 15%,
+            rgba(37, 99, 235, 0.12) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 85% 85%,
+            rgba(239, 68, 68, 0.06) 0%,
+            transparent 45%
+          );
+        min-height: 100vh;
+      }
+
+      .report-container {
+        width: 100%;
+        max-width: 440px;
+        padding: 28px 20px;
+        box-sizing: border-box;
+      }
+
+      /* Command Center Header */
+      .report-header-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+        background: linear-gradient(
+          135deg,
+          rgba(30, 41, 59, 0.6) 0%,
+          rgba(15, 23, 42, 0.8) 100%
+        );
+        border: 1px solid var(--border-glass);
+        border-radius: 20px;
+        padding: 16px 18px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      }
+
+      .header-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .back-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: var(--text-primary);
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateX(-2px);
+      }
+
+      .sys-status-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(59, 130, 246, 0.12);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #60a5fa;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        background-color: #3b82f6;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #3b82f6;
+        animation: pulseGlow 1.8s infinite;
+      }
+
+      @keyframes pulseGlow {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(1.4);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .header-titles h1 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        margin: 0 0 4px 0;
+        background: linear-gradient(135deg, #ffffff 20%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .header-titles p {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin: 0;
+        font-weight: 400;
+      }
+
+      /* Form Container */
+      .report-form {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        background: rgba(15, 23, 42, 0.4);
+        padding: 22px;
+        border-radius: 24px;
+        border: 1px solid var(--border-glass);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        padding: 12px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 0.3s ease;
+      }
+
+      /* Colored Background Tints for Different Input Boxes */
+      .box-title {
+        background: rgba(59, 130, 246, 0.05);
+      }
+      .box-category {
+        background: rgba(168, 85, 247, 0.05);
+      }
+      .box-urgency {
+        background: rgba(239, 68, 68, 0.05);
+      }
+      .box-desc {
+        background: rgba(245, 158, 11, 0.05);
+      }
+      .box-photo {
+        background: rgba(20, 184, 166, 0.05);
+      }
+
+      /* Location box with soft light-greenish background tint */
+      .box-location {
+        background: rgba(34, 197, 94, 0.08);
+        border-color: rgba(34, 197, 94, 0.2);
+      }
+
+      .form-group label {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+      }
+
+      .form-group input[type="text"],
+      .form-group select,
+      .form-group textarea {
+        background: var(--card-bg);
+        backdrop-filter: blur(8px);
+        border: 1px solid var(--border-glass);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.25s ease;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: var(--accent-blue);
+        background: var(--card-hover);
+        box-shadow:
+          0 0 0 3px var(--accent-glow),
+          inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .form-group select option {
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 10px;
+      }
+
+      /* Urgency / Priority Toggle Pill Buttons */
+      .urgency-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .urgency-radio {
+        display: none;
+      }
+
+      .urgency-pill {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 8px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-secondary);
+        transition: all 0.2s ease;
+      }
+
+      /* Custom selected states for pills */
+      #urgencyLow:checked + .urgency-pill {
+        background: rgba(59, 130, 246, 0.25);
+        border-color: var(--accent-blue);
+        color: #60a5fa;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+      }
+
+      #urgencyMed:checked + .urgency-pill {
+        background: rgba(245, 158, 11, 0.25);
+        border-color: var(--warning-yellow);
+        color: #fbbf24;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+      }
+
+      #urgencyHigh:checked + .urgency-pill {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: var(--danger-red);
+        color: #fca5a5;
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* File Drop Area */
+      .file-drop-area {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 16px;
+        border: 2px dashed var(--border-glass);
+        border-radius: 12px;
+        background: var(--card-bg);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+
+      .file-drop-area:hover {
+        border-color: var(--accent-blue);
+        background: var(--card-hover);
+      }
+
+      .file-input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+
+      .file-msg {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .file-msg span {
+        color: var(--accent-blue);
+        text-decoration: underline;
+      }
+
+      #imagePreviewContainer {
+        display: none;
+        margin-top: 8px;
+        position: relative;
+        width: 100%;
+        height: 110px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid var(--border-glass);
+      }
+
+      #imagePreviewContainer img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      /* Location Bar with Light Greenish Accent */
+      .location-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(34, 197, 94, 0.05);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        border-radius: 12px;
+        padding: 8px 12px;
+      }
+
+      .location-btn {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #4ade80;
+        padding: 9px 14px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .location-btn:hover {
+        background: rgba(34, 197, 94, 0.25);
+        border-color: rgba(34, 197, 94, 0.6);
+      }
+
+      .loc-status {
+        font-size: 13px;
+        color: #86efac;
+        font-weight: 500;
+      }
+
+      .submit-btn {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 6px 20px var(--accent-glow);
+        margin-top: 6px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="report-container">
+      <header class="report-header-wrapper">
+        <div class="header-top-row">
+          <button class="back-btn" onclick="history.back()">&larr;</button>
+          <div class="sys-status-badge">
+            <span class="pulse-dot"></span> Secure Node
+          </div>
+        </div>
+        <div class="header-titles">
+          <h1>Incident Sighting Report</h1>
+          <p>Broadcast hazard data instantly to local emergency units</p>
+        </div>
+      </header>
+
+      <form id="sightingForm" class="report-form">
+        <div class="form-group box-title">
+          <label for="incidentTitle">Incident Title</label>
+          <input
+            type="text"
+            id="incidentTitle"
+            placeholder="e.g., Severe Waterlogging or Blocked Road"
+            required
+          />
+        </div>
+
+        <div class="form-group box-category">
+          <label for="hazardCategory">Hazard Type</label>
+          <select id="hazardCategory" required>
+            <option value="" disabled selected>Select hazard category</option>
+            <option value="flood">Flood / Waterlogging</option>
+            <option value="landslide">Landslide Risk</option>
+            <option value="roadblock">Blocked Road / Bridge</option>
+            <option value="fire">Emergency / Fire</option>
+            <option value="medical">Medical Assistance Needed</option>
+          </select>
+        </div>
+
+        <div class="form-group box-urgency">
+          <label>Urgency Level</label>
+          <div class="urgency-options">
+            <input
+              type="radio"
+              id="urgencyLow"
+              name="urgency"
+              value="low"
+              class="urgency-radio"
+            />
+            <label for="urgencyLow" class="urgency-pill">Low</label>
+
+            <input
+              type="radio"
+              id="urgencyMed"
+              name="urgency"
+              value="medium"
+              class="urgency-radio"
+              checked
+            />
+            <label for="urgencyMed" class="urgency-pill">Medium</label>
+
+            <input
+              type="radio"
+              id="urgencyHigh"
+              name="urgency"
+              value="high"
+              class="urgency-radio"
+            />
+            <label for="urgencyHigh" class="urgency-pill">High</label>
+          </div>
+        </div>
+
+        <div class="form-group box-desc">
+          <label for="incidentDesc">Description & Details</label>
+          <textarea
+            id="incidentDesc"
+            rows="3"
+            placeholder="Describe landmarks, urgency, or immediate hazards..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group box-photo">
+          <label>Attach Evidence Photo</label>
+          <div class="file-drop-area">
+            <span style="font-size: 20px">📷</span>
+            <span class="file-msg" id="fileMsg"
+              >Drag & drop photo or <span>browse files</span></span
+            >
+            <input
+              type="file"
+              id="incidentPhoto"
+              class="file-input"
+              accept="image/*"
+            />
+          </div>
+          <div id="imagePreviewContainer">
+            <img id="imagePreview" src="" alt="Evidence Preview" />
+          </div>
+        </div>
+
+        <div class="form-group box-location">
+          <label>Location Coordinates</label>
+          <div class="location-box">
+            <button type="button" id="getLocationBtn" class="location-btn">
+              📍 Pin Location
+            </button>
+            <span id="locationStatus" class="loc-status">Not pinned</span>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Broadcast Sighting Report
+        </button>
+      </form>
+    </div>
+       <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="./js/socket-client.js"></script>
+
+    <script>
+      let currentCoords = {
+        lat: null,
+        lng: null,
+      };
+
+      let selectedFile = null;
+      //
+      const API_URL = "http://localhost:4000/api/incidents";
+
+      // ==========================================
+      // ELEMENTS
+      // ==========================================
+
+      const sightingForm = document.getElementById("sightingForm");
+
+      const fileInput = document.getElementById("incidentPhoto");
+      const fileMsg = document.getElementById("fileMsg");
+
+      const imagePreviewContainer = document.getElementById(
+        "imagePreviewContainer",
+      );
+
+      const imagePreview = document.getElementById("imagePreview");
+
+      const getLocationBtn = document.getElementById("getLocationBtn");
+
+      const locationStatus = document.getElementById("locationStatus");
+
+      // ==========================================
+      // PHOTO PREVIEW
+      // ==========================================
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        selectedFile = file;
+
+        fileMsg.textContent = file.name;
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+          imagePreview.src = event.target.result;
+
+          imagePreviewContainer.style.display = "block";
+        };
+
+        reader.readAsDataURL(file);
+      });
+
+      // ==========================================
+      // GET LOCATION
+      // ==========================================
+
+      getLocationBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+
+          return;
+        }
+
+        locationStatus.textContent = "Locating...";
+        locationStatus.style.color = "#fbbf24";
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            currentCoords.lat = position.coords.latitude;
+
+            currentCoords.lng = position.coords.longitude;
+
+            locationStatus.textContent = `Pinned (${currentCoords.lat.toFixed(5)}, ${currentCoords.lng.toFixed(5)})`;
+
+            locationStatus.style.color = "#4ade80";
+          },
+
+          (error) => {
+            console.error("Geolocation error:", error);
+
+            locationStatus.textContent = "Unable to retrieve location";
+
+            locationStatus.style.color = "#ef4444";
+          },
+
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          },
+        );
+      });
+
+      // ==========================================
+      // SUBMIT SIGHTING
+      // ==========================================
+
+      sightingForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // ------------------------------------------
+        // Check location
+        // ------------------------------------------
+
+        if (currentCoords.lat === null || currentCoords.lng === null) {
+          alert("Please pin your location before broadcasting the sighting.");
+
+          return;
+        }
+
+        // ------------------------------------------
+        // Get form values
+        // ------------------------------------------
+
+        const title = document.getElementById("incidentTitle").value.trim();
+
+        const category = document.getElementById("hazardCategory").value;
+
+        const description = document
+          .getElementById("incidentDesc")
+          .value.trim();
+
+        const selectedUrgency = document.querySelector(
+          'input[name="urgency"]:checked',
+        ).value;
+
+        // ------------------------------------------
+        // Convert frontend values to backend values
+        // ------------------------------------------
+
+        const typeMap = {
+          flood: "FLOOD",
+
+          landslide: "LANDSLIDE",
+
+          roadblock: "ROADBLOCK",
+
+          fire: "FIRE",
+
+          medical: "MEDICAL",
+        };
+
+        const severityMap = {
+          low: "LOW",
+
+          medium: "MEDIUM",
+
+          high: "HIGH",
+        };
+
+        const incidentType = typeMap[category];
+
+        const severity = severityMap[selectedUrgency];
+
+        // ------------------------------------------
+        // Generate Incident ID
+        // ------------------------------------------
+
+        const incidentId = `SIGHTING-${Date.now()}`;
+
+        // ------------------------------------------
+        // Build JSON payload
+        // ------------------------------------------
+
+        const incidentData = {
+          incidentId: incidentId,
+
+          type: incidentType,
+
+          description: `${title}: ${description}`,
+
+          latitude: Number(currentCoords.lat),
+
+          longitude: Number(currentCoords.lng),
+
+          severity: severity,
+
+          peopleAffected: 0,
+
+          reportedBy: null,
+
+          requiredResources: [],
+        };
+
+        console.log("Sending Incident:", incidentData);
+
+        // ------------------------------------------
+        // Disable button
+        // ------------------------------------------
+
+        const submitBtn = sightingForm.querySelector(".submit-btn");
+
+        const originalText = submitBtn.textContent;
+
+        submitBtn.disabled = true;
+
+        submitBtn.textContent = "Broadcasting...";
+
+        // ------------------------------------------
+        // Send to Incident API
+        // ------------------------------------------
+
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify(incidentData),
+          });
+
+          const result = await response.json();
+
+          console.log("Server response:", result);
+
+          // --------------------------------------
+          // Success
+          // --------------------------------------
+
+          if (response.ok && result.success) {
+            alert("Sighting broadcasted successfully!");
+
+            console.log("Created Incident:", result.data);
+
+            // Reset form
+            sightingForm.reset();
+
+            // Reset photo preview
+            selectedFile = null;
+
+            imagePreview.src = "";
+
+            imagePreviewContainer.style.display = "none";
+
+            fileMsg.innerHTML =
+              "Drag & drop photo or <span>browse files</span>";
+
+            // Reset location
+            currentCoords = {
+              lat: null,
+              lng: null,
+            };
+
+            locationStatus.textContent = "Not pinned";
+
+            locationStatus.style.color = "#86efac";
+          } else {
+            console.error("Backend error:", result);
+
+            alert(result.message || "Failed to broadcast sighting.");
+          }
+        } catch (error) {
+          console.error("Network error:", error);
+
+          alert("Unable to connect to DisasterOS backend.");
+        } finally {
+          submitBtn.disabled = false;
+
+          submitBtn.textContent = originalText;
+        }
+      });
+    </script>
+  </body>
+</html>
