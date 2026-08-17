@@ -47,14 +47,19 @@
       </div>
 
       <div class="topbar-right">
-        <div class="status-chip">
-          <span class="pulse"></span>
 
-          Live Monitoring
-        </div>
+    <div class="status-chip">
+        <span class="pulse"></span>
+        Live Monitoring
+    </div>
 
-        <div id="currentTime" class="time-chip">--:-- IST</div>
-      </div>
+    <div id="currentTime" class="time-chip">
+        --:-- IST
+    </div>
+
+    <div id="authUser"></div>
+
+</div>
     </header>
 
     <!-- ===================================================== -->
@@ -302,7 +307,22 @@
 
     <!-- ================= MAIN JS ================= -->
 
-    <script src="./js/user-dashboard.js"></script>
+    <script src="./js/auth-ui.js"></script>
+<script src="./js/user-dashboard.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        const user = await protectDashboard("user");
+
+        if (!user) return;
+
+        console.log("Logged in user:", user);
+
+    });
+
+</script>
 
   
   </body>

@@ -19,6 +19,252 @@ body {
 }
 
 /* ==========================================================
+   USER AVATAR
+========================================================== */
+
+#authUser {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    z-index: 99999;
+}
+
+.user-profile-wrapper {
+    position: relative;
+}
+
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 50%;
+
+    border: 2px solid rgba(34, 196, 238, 0.7);
+
+    background:
+        linear-gradient(
+            135deg,
+            #117db0,
+            #1ecbd0
+        );
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow:
+        0 0 20px rgba(30, 203, 208, 0.25);
+
+    transition: 0.2s ease;
+}
+
+
+.user-avatar:hover {
+    transform: scale(1.06);
+
+    box-shadow:
+        0 0 28px rgba(30, 203, 208, 0.45);
+}
+
+
+/* ==========================================================
+   DROPDOWN
+========================================================== */
+
+.user-dropdown {
+
+    position: absolute;
+
+    top: 54px;
+    right: 0;
+
+    width: 250px;
+
+    padding: 14px;
+
+    background:
+        rgba(7, 13, 23, 0.97);
+
+    border:
+        1px solid rgba(34, 196, 238, 0.2);
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 15px 50px rgba(0, 0, 0, 0.5);
+
+    backdrop-filter: blur(16px);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform:
+        translateY(-8px)
+        scale(0.97);
+
+    transition:
+        0.2s ease;
+}
+
+
+.user-dropdown.show {
+
+    opacity: 1;
+    visibility: visible;
+
+    transform:
+        translateY(0)
+        scale(1);
+}
+
+
+/* ==========================================================
+   DROPDOWN USER
+========================================================== */
+
+.dropdown-user {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+.dropdown-avatar {
+
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #117db0,
+            #1ecbd0
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 700;
+}
+
+
+.dropdown-info {
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+
+.dropdown-info strong {
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.dropdown-info span {
+
+    color: #8994a5;
+
+    font-size: 11px;
+
+    margin-top: 3px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.dropdown-info small {
+
+    color: #26c5df;
+
+    font-size: 10px;
+
+    margin-top: 4px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+.dropdown-divider {
+
+    height: 1px;
+
+    background:
+        rgba(255, 255, 255, 0.08);
+
+    margin: 13px 0;
+}
+
+
+/* ==========================================================
+   LOGOUT
+========================================================== */
+
+.logout-button {
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background:
+        rgba(255, 70, 70, 0.08);
+
+    color: #ff7777;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    transition: 0.2s ease;
+}
+
+
+.logout-button:hover {
+
+    background:
+        rgba(255, 70, 70, 0.16);
+
+    color: #ff5555;
+}
+
+
+/* ==========================================================
    COMMAND CENTER
 ========================================================== */
 
@@ -1489,4 +1735,202 @@ body {
 
 #commandCenter.sos-flash {
   animation: sosFlash 3s ease;
+}
+
+/* ==========================================================
+   COMMAND CENTER LOCATION GATE
+========================================================== */
+
+.command-location-gate {
+    position: fixed;
+    inset: 0;
+
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(0, 190, 255, 0.08),
+            transparent 45%
+        ),
+        #05090d;
+
+    color: white;
+}
+
+.location-gate-card {
+    width: min(620px, calc(100% - 40px));
+
+    padding: 50px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 18px;
+
+    background: rgba(10, 18, 24, 0.94);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,0.65),
+        0 0 50px rgba(0,180,255,0.06);
+
+    text-align: center;
+}
+
+.location-gate-icon {
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(0,180,255,0.08);
+
+    border: 1px solid rgba(0,180,255,0.25);
+
+    font-size: 30px;
+}
+
+.location-gate-badge {
+    font-size: 11px;
+
+    letter-spacing: 2px;
+
+    color: #56c8ff;
+
+    margin-bottom: 14px;
+}
+
+.location-gate-card h1 {
+    margin: 0;
+
+    font-size: clamp(30px, 5vw, 48px);
+
+    line-height: 1.05;
+}
+
+.location-gate-card h1 span {
+    display: block;
+
+    color: #56c8ff;
+}
+
+.location-gate-card p {
+    max-width: 500px;
+
+    margin: 20px auto 30px;
+
+    color: #78909c;
+
+    line-height: 1.7;
+
+    font-size: 14px;
+}
+
+.location-search-box {
+    display: flex;
+
+    gap: 10px;
+}
+
+.location-search-box input {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 15px 16px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    outline: none;
+
+    background: #081118;
+
+    color: white;
+
+    font-family: inherit;
+}
+
+.location-search-box input:focus {
+    border-color: #56c8ff;
+}
+
+.location-search-box button,
+.command-live-location-btn {
+    padding: 15px 20px;
+
+    border-radius: 10px;
+
+    border: 1px solid rgba(86,200,255,0.4);
+
+    background: rgba(86,200,255,0.08);
+
+    color: #56c8ff;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.location-search-box button:hover,
+.command-live-location-btn:hover {
+    background: rgba(86,200,255,0.16);
+
+    border-color: #56c8ff;
+}
+
+.location-divider {
+    margin: 22px 0;
+
+    color: #536873;
+
+    font-size: 11px;
+
+    letter-spacing: 2px;
+}
+
+.command-live-location-btn {
+    width: 100%;
+}
+
+.command-location-status {
+    min-height: 20px;
+
+    margin-top: 18px;
+
+    font-size: 12px;
+
+    color: #78909c;
+}
+
+.command-location-status.error {
+    color: #ff5c5c;
+}
+
+.command-location-status.success {
+    color: #45e69a;
+}
+
+@media (max-width: 600px) {
+
+    .location-gate-card {
+        padding: 30px 22px;
+    }
+
+    .location-search-box {
+        flex-direction: column;
+    }
+
 }

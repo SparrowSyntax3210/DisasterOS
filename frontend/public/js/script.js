@@ -6,6 +6,11 @@ const main = document.getElementById("mainPage");
 const fill = document.querySelector(".progress-fill");
 const percent = document.querySelector(".percent");
 const status = document.getElementById("status");
+const StartBtn = document.querySelector(".nav-btn")
+
+StartBtn.addEventListener("click", ()=> {
+  window.location.href = "./role-selection.html"
+})
 
 const messages = [
     "Initializing DisasterOS...",

@@ -22,24 +22,53 @@
     />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="./css/command-center.css" />
+     <link rel="stylesheet" href="./css/command-center.css">
   </head>
 
   <body>
-    <!-- =========================================================
-     COMMAND CENTER
-========================================================= -->
-
-    <div id="commandCenter">
-      <!-- =====================================================
-         MAP
+    <!-- =====================================================
+         COMMAND CENTER LOCATION GATE
     ====================================================== -->
 
+    <section id="commandLocationGate" class="command-location-gate">
+      <div class="location-gate-card">
+        <div class="location-gate-icon">📍</div>
+
+        <div class="location-gate-badge">DISASTEROS COMMAND CENTER</div>
+
+        <h1>
+          Select Operational
+          <span>Location</span>
+        </h1>
+
+        <p>
+          Choose a city, district or village to load emergency operations,
+          incidents, responders and resources for that area.
+        </p>
+
+        <div class="location-search-box">
+          <input
+            id="commandLocationInput"
+            type="text"
+            autocomplete="off"
+            placeholder="Search City, District or Village"
+          />
+
+          <button id="commandLocationSearchBtn">Load Location</button>
+        </div>
+
+        <div class="location-divider"><span>OR</span></div>
+
+        <button id="commandLiveLocationBtn" class="command-live-location-btn">
+          📍 Use Current Location
+        </button>
+
+        <div id="commandLocationStatus" class="command-location-status"></div>
+      </div>
+    </section>
+
+    <div id="commandCenter" style="display: none">
       <div id="commandMap"></div>
-
-      <!-- =====================================================
-         TOP BAR
-    ====================================================== -->
 
       <header class="command-topbar">
         <div class="brand">
@@ -67,6 +96,8 @@
           >
             ↻
           </button>
+
+          <div id="authUser"></div>
         </div>
       </header>
 
@@ -374,26 +405,31 @@
       <!-- =====================================================
          LOADING
     ====================================================== -->
-<!-- 
+
       <div id="dataLoader" class="data-loader">
         <div class="loader-ring"></div>
 
         <span> CONNECTING TO DISASTEROS </span>
       </div>
-    </div> -->
-
-    <!-- =========================================================
-     LEAFLET
-========================================================= -->
+    </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
-    <!-- =========================================================
-     COMMAND CENTER JS
-========================================================= -->
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-    <script src="./js/socket-client.js"></script>
+<script src="./js/socket-client.js"></script>
+<!-- <script src="./js/authui.js"></script> -->
 
-    <script src="./js/command-center.js"></script>
+<script src="./js/command-config.js"></script>
+<script src="./js/command-api.js"></script>
+<script src="./js/command-utils.js"></script>
+
+<script src="./js/command-center-map.js"></script>
+<script src="./js/command-center-layers.js"></script>
+<script src="./js/command-center-ui.js"></script>
+
+<script src="./js/command-data.js"></script>
+<script src="./js/command-dashboard.js"></script>
+<script src="./js/command-realtime.js"></script>
+<script src="./js/command-init.js"></script>
   </body>
 </html>
