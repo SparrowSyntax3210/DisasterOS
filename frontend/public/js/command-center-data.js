@@ -66,25 +66,33 @@ async function commandFetch(url, options = {}) {
 // SET COMMAND LOCATION
 // ==========================================================
 
-function setCommandLocation(latitude, longitude, name = "") {
-  const lat = Number(latitude);
-  const lng = Number(longitude);
+function setCommandLocation(lat, lng, name = "", source = "search") {
+  lat = Number(lat);
+  lng = Number(lng);
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    throw new Error("Invalid operational location.");
+    throw new Error("Invalid location coordinates.");
   }
 
-  commandLatitude = lat;
-  commandLongitude = lng;
-  commandLocationName = name || "Operational Area";
+  window.commandLocation = {
+    lat,
+    lng,
+    name: name || "Selected Location",
+    source,
+  };
 
-  updateCommandCoordinates();
+  // Synchronize data module location
+  if (window.CommandCenterData?.setCommandLocation) {
+    window.CommandCenterData.setCommandLocation(
+      lat,
+      lng,
+      name || "Selected Location",
+    );
+  }
 
-  console.log("📍 Command Center Location:", {
-    latitude: commandLatitude,
-    longitude: commandLongitude,
-    name: commandLocationName,
-  });
+  console.log("Command Center location:", window.commandLocation);
+
+  return window.commandLocation;
 }
 
 // ==========================================================
@@ -145,27 +153,24 @@ async function loadCommandCenterData() {
     return commandData;
   }
 
-  if (commandLatitude === null || commandLongitude === null) {
+  const location = window.commandLocation;
+
+if (
+    !location ||
+    !Number.isFinite(Number(location.lat)) ||
+    !Number.isFinite(Number(location.lng))
+) {
     throw new Error("Select an operational location first.");
-  }
+}
 
   commandDataLoading = true;
 
   try {
     console.log("🔄 Loading Command Center data...");
 
-    const locationQuery = getLocationQuery();
-
-    // ------------------------------------------------------
-    // IMPORTANT
-    // ------------------------------------------------------
-    // The exact backend routes can differ depending on the
-    // modules currently implemented in your project.
-    //
-    // We therefore load each operational module separately.
-    // A missing optional route will not destroy the entire
-    // Command Center.
-    // ------------------------------------------------------
+    const locationQuery =
+    `lat=${encodeURIComponent(Number(location.lat))}` +
+    `&lng=${encodeURIComponent(Number(location.lng))}`;
 
     const requests = {
       incidents: loadIncidents(locationQuery),

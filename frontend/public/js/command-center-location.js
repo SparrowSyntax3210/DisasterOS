@@ -10,26 +10,7 @@ console.log("Command Center Location JS Loaded");
 // ==========================================================
 
 const COMMAND_LOCATION_API = "http://localhost:4000/api";
-
-// ==========================================================
-// DOM
-// ==========================================================
-
-const commandLocationGate = document.getElementById("commandLocationGate");
-
-const commandLocationInput = document.getElementById("commandLocationInput");
-
-const commandLocationSearchBtn = document.getElementById(
-  "commandLocationSearchBtn",
-);
-
-const commandLiveLocationBtn = document.getElementById(
-  "commandLiveLocationBtn",
-);
-
-const commandLocationStatus = document.getElementById("commandLocationStatus");
-
-const commandCenter = document.getElementById("commandCenter");
+const COMMAND_API = "http://localhost:4000/api";
 
 // ==========================================================
 // GLOBAL LOCATION STATE
@@ -41,6 +22,20 @@ window.commandLocation = {
   name: "",
   source: null,
 };
+
+let commandData = {
+  incidents: [],
+  sos: [],
+  missions: [],
+  teams: [],
+  resources: [],
+  zones: [],
+};
+
+let commandDataLoading = false;
+
+let commandLatitude = null;
+let commandLongitude = null;
 
 // ==========================================================
 // STATUS MESSAGE
@@ -114,64 +109,76 @@ function setCommandLocation(lat, lng, name = "", source = "search") {
   return window.commandLocation;
 }
 
+async function commandFetch(url, options = {}) {
+  const response = await fetch(url, options);
+
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw new Error("Invalid response received from server.");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message || `Server request failed with status ${response.status}`,
+    );
+  }
+
+  return data;
+}
+
 // ==========================================================
 // BACKEND GEOCODING
 // ==========================================================
 
 async function geocodeCommandLocation(place) {
-  const query = String(place || "").trim();
+  const query = place.trim();
 
   if (!query) {
-    throw new Error("Please enter a location.");
+    throw new Error("Enter a location.");
   }
 
-  const url = `${COMMAND_LOCATION_API}/map/geocode?location=${encodeURIComponent(
-    query,
-  )}`;
+  const res = await fetch(
+    `${COMMAND_LOCATION_API}/map/geocode?location=${encodeURIComponent(query)}`,
+  );
 
-  console.log("Geocoding Command Center location:", query);
+  const data = await res.json();
 
-  const response = await fetch(url);
-
-  let data;
-
-  try {
-    data = await response.json();
-  } catch (error) {
-    throw new Error("Invalid response received from location service.");
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Location not found.");
   }
 
-  if (!response.ok) {
-    throw new Error(
-      data?.message || `Location service returned ${response.status}.`,
-    );
-  }
+  const item = data.location;
 
-  if (!data?.success) {
-    throw new Error(data?.message || "Location could not be found.");
-  }
-
-  const location = data.location;
-
-  if (!location) {
-    throw new Error("No location data received.");
-  }
-
-  const lat = Number(location.latitude ?? location.lat);
-
-  const lng = Number(location.longitude ?? location.lng ?? location.lon);
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    console.error("Invalid geocode response:", data);
-
-    throw new Error("Location service returned invalid coordinates.");
+  if (!item || !item.latitude || !item.longitude) {
+    throw new Error("Invalid location data received.");
   }
 
   return {
-    lat,
-    lng,
-    name: location.name || location.display_name || query,
+    lat: Number(item.latitude),
+    lng: Number(item.longitude),
+    name: item.name || query,
   };
+}
+
+async function tryRoutes(routes) {
+  let lastError = null;
+
+  for (const route of routes) {
+    try {
+      const result = await commandFetch(route);
+
+      return result;
+    } catch (error) {
+      lastError = error;
+
+      console.warn("Route failed:", route, error.message);
+    }
+  }
+
+  throw lastError || new Error("No valid API route found.");
 }
 
 // ==========================================================
@@ -223,6 +230,15 @@ async function searchCommandLocation() {
   } finally {
     setLocationButtonsLoading(false);
   }
+}
+
+async function loadSOS(locationQuery) {
+  const possibleRoutes = [
+    `${COMMAND_API}/sos?${locationQuery}`,
+    `${COMMAND_API}/emergency/sos?${locationQuery}`,
+  ];
+
+  return await tryRoutes(possibleRoutes);
 }
 
 // ==========================================================
@@ -323,18 +339,6 @@ async function useCommandCurrentLocation() {
     },
   );
 }
-
-// ==========================================================
-// OPTIONAL REVERSE GEOCODING
-// ==========================================================
-//
-// We use the SAME backend geocoding route.
-// If your backend does not support reverse lookup,
-// the current location will simply remain
-// "Current Location".
-//
-// ==========================================================
-
 async function reverseGeocodeCommandLocation(lat, lng) {
   const url = `${COMMAND_LOCATION_API}/map/geocode?location=${encodeURIComponent(
     `${lat},${lng}`,
@@ -363,72 +367,187 @@ async function reverseGeocodeCommandLocation(lat, lng) {
   };
 }
 
+async function loadIncidents(locationQuery) {
+  const possibleRoutes = [
+    `${COMMAND_API}/incidents?${locationQuery}`,
+    `${COMMAND_API}/incident?${locationQuery}`,
+  ];
+
+  return await tryRoutes(possibleRoutes);
+}
+
+async function loadMissions(locationQuery) {
+  const possibleRoutes = [
+    `${COMMAND_API}/missions?${locationQuery}`,
+    `${COMMAND_API}/mission?${locationQuery}`,
+  ];
+
+  return await tryRoutes(possibleRoutes);
+}
+async function loadTeams(locationQuery) {
+  const possibleRoutes = [
+    `${COMMAND_API}/teams?${locationQuery}`,
+    `${COMMAND_API}/responders?${locationQuery}`,
+    `${COMMAND_API}/volunteers?${locationQuery}`,
+  ];
+
+  return await tryRoutes(possibleRoutes);
+}
+
+async function loadCommandResources(locationQuery) {
+  const possibleRoutes = [
+    `${COMMAND_API}/map/resources?${locationQuery}`,
+    `${COMMAND_API}/resources?${locationQuery}`,
+  ];
+
+  return await tryRoutes(possibleRoutes);
+}
+
+function normalizeArray(data) {
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+
+  if (Array.isArray(data?.items)) {
+    return data.items;
+  }
+
+  if (Array.isArray(data?.results)) {
+    return data.results;
+  }
+
+  if (Array.isArray(data?.incidents)) {
+    return data.incidents;
+  }
+
+  if (Array.isArray(data?.sos)) {
+    return data.sos;
+  }
+
+  if (Array.isArray(data?.missions)) {
+    return data.missions;
+  }
+
+  if (Array.isArray(data?.teams)) {
+    return data.teams;
+  }
+
+  if (Array.isArray(data?.resources)) {
+    return data.resources;
+  }
+
+  return [];
+}
+
 // ==========================================================
 // OPEN COMMAND CENTER
 // ==========================================================
 
+async function loadCommandCenterData() {
+  if (commandDataLoading) {
+    return commandData;
+  }
+
+  const location = window.commandLocation;
+
+  if (
+    !location ||
+    !Number.isFinite(Number(location.lat)) ||
+    !Number.isFinite(Number(location.lng))
+  ) {
+    throw new Error("Select an operational location first.");
+  }
+
+  commandDataLoading = true;
+
+  try {
+    console.log("🔄 Loading Command Center data...");
+
+    const locationQuery =
+      `lat=${encodeURIComponent(Number(location.lat))}` +
+      `&lng=${encodeURIComponent(Number(location.lng))}`;
+
+    const requests = {
+      incidents: loadIncidents(locationQuery),
+      sos: loadSOS(locationQuery),
+      missions: loadMissions(locationQuery),
+      teams: loadTeams(locationQuery),
+      resources: loadCommandResources(locationQuery),
+    };
+
+    const results = await Promise.allSettled(Object.values(requests));
+
+    const keys = Object.keys(requests);
+
+    results.forEach((result, index) => {
+      const key = keys[index];
+
+      if (result.status === "fulfilled") {
+        commandData[key] = normalizeArray(result.value);
+      } else {
+        console.warn(`⚠️ Failed to load ${key}:`, result.reason);
+
+        commandData[key] = [];
+      }
+    });
+
+    console.log("✅ Command Center data loaded:", commandData);
+
+    return commandData;
+  } finally {
+    commandDataLoading = false;
+  }
+}
+
 async function openCommandCenter() {
   const location = window.commandLocation;
+
+  console.log("🚀 openCommandCenter called");
+  console.log("📍 Selected location:", location);
 
   if (!location || location.lat === null || location.lng === null) {
     throw new Error("Select an operational location first.");
   }
 
-  console.log("Opening Command Center for:", location);
-
-  // --------------------------------------------------------
-  // Hide location gate
-  // --------------------------------------------------------
-
+  // Hide gate
   if (commandLocationGate) {
     commandLocationGate.classList.add("hidden");
-
     commandLocationGate.style.display = "none";
   }
 
-  // --------------------------------------------------------
   // Show Command Center
-  // --------------------------------------------------------
-
   if (commandCenter) {
     commandCenter.style.display = "block";
   }
 
-  // --------------------------------------------------------
-  // Notify other Command Center JS files
-  // --------------------------------------------------------
+  console.log("✅ Command Center container opened");
 
+  // Notify other files
   window.dispatchEvent(
     new CustomEvent("commandLocationReady", {
       detail: location,
     }),
   );
 
-  // --------------------------------------------------------
-  // Initialize / refresh map
-  // --------------------------------------------------------
-
-  if (typeof window.initializeCommandMap === "function") {
-    window.initializeCommandMap(location.lat, location.lng);
-  }
-
-  // --------------------------------------------------------
-  // Load operational data
-  // --------------------------------------------------------
-
+  // Load data
   if (typeof window.loadCommandCenterData === "function") {
-    await window.loadCommandCenterData(location);
+    console.log("📡 Loading command center data");
+
+    await window.loadCommandCenterData();
+  } else {
+    console.warn("⚠️ loadCommandCenterData() not found");
   }
 
-  // --------------------------------------------------------
-  // Update coordinate UI
-  // --------------------------------------------------------
-
+  // Update UI
   if (typeof window.updateCommandLocationUI === "function") {
     window.updateCommandLocationUI();
   }
 
-  console.log("Command Center opened successfully.");
+  console.log("✅ Command Center opened successfully");
 }
 
 // ==========================================================
@@ -468,6 +587,7 @@ function showCommandLocationGate() {
 
 if (commandLocationSearchBtn) {
   commandLocationSearchBtn.addEventListener("click", searchCommandLocation);
+  console.log("Location Btn clicked");
 } else {
   console.error("❌ Load Location button not found.");
 }
@@ -492,6 +612,7 @@ if (commandLocationInput) {
 
 if (commandLiveLocationBtn) {
   commandLiveLocationBtn.addEventListener("click", useCommandCurrentLocation);
+  console.log("Btn clicked ");
 } else {
   console.error("❌ Current Location button not found.");
 }

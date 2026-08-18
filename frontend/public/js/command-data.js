@@ -25,6 +25,15 @@ CommandCenter.data = CommandCenter.data || {
   loading: false,
 };
 
+let commandData = {
+  incidents: [],
+  sos: [],
+  missions: [],
+  teams: [],
+  resources: [],
+  zones: [],
+};
+
 // ==========================================================
 // HELPERS
 // ==========================================================

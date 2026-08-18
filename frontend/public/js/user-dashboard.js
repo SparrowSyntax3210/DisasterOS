@@ -238,7 +238,6 @@ if (liveBtn) {
 // ==========================================================
 
 async function geocode(place) {
-
   const query = place.trim();
 
   if (!query) {
@@ -246,29 +245,20 @@ async function geocode(place) {
   }
 
   const res = await fetch(
-    `${API}/map/geocode?location=${encodeURIComponent(query)}`
+    `${API}/map/geocode?location=${encodeURIComponent(query)}`,
   );
 
   const data = await res.json();
 
   if (!res.ok || !data.success) {
-    throw new Error(
-      data.message || "Location not found."
-    );
+    throw new Error(data.message || "Location not found.");
   }
-
 
   const item = data.location;
 
-
-  if (
-    !item ||
-    !item.latitude ||
-    !item.longitude
-  ) {
+  if (!item || !item.latitude || !item.longitude) {
     throw new Error("Invalid location data received.");
   }
-
 
   return {
     lat: Number(item.latitude),
@@ -450,13 +440,10 @@ function initializeMap() {
   // DARK TACTICAL BASEMAP
   // =====================================================
 
-L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap contributors"
-    }
-).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
 
   // =====================================================
   // CURRENT LOCATION
@@ -614,31 +601,29 @@ function renderResources() {
 // MAP MARKERS
 // ==========================================================
 
-function createResourceIcon(type){
+function createResourceIcon(type) {
+  const colors = {
+    hospital: "#ff3b30",
+    shelter: "#4ea8ff",
+    police: "#00d26a",
+    fire: "#ff9800",
+    pharmacy: "#ff4f9a",
+    school: "#ffd54f",
+  };
 
-const colors={
-hospital:"#ff3b30",
-shelter:"#4ea8ff",
-police:"#00d26a",
-fire:"#ff9800",
-pharmacy:"#ff4f9a",
-school:"#ffd54f"
-};
+  const emojis = {
+    hospital: "🏥",
+    shelter: "🏠",
+    police: "🚓",
+    fire: "🚒",
+    pharmacy: "💊",
+    school: "🏫",
+  };
 
-const emojis={
-hospital:"🏥",
-shelter:"🏠",
-police:"🚓",
-fire:"🚒",
-pharmacy:"💊",
-school:"🏫"
-};
+  return L.divIcon({
+    className: "",
 
-return L.divIcon({
-
-className:"",
-
-html:`
+    html: `
 
 <div style="
 width:18px;
@@ -659,11 +644,9 @@ ${emojis[type]}
 
 `,
 
-iconSize:[18,18],
-iconAnchor:[9,9]
-
-});
-
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
 }
 
 function renderMarkers() {
@@ -815,18 +798,18 @@ function generateIrregularPolygon(lat, lng, radius, seed = 1) {
 
   const lngRadius = radius / (111320 * Math.cos((lat * Math.PI) / 180));
 
-  const shape=[
-[0.00,1.00],
-[0.42,0.82],
-[0.90,0.55],
-[1.05,0.05],
-[0.70,-0.65],
-[0.25,-1.05],
-[-0.55,-0.92],
-[-0.95,-0.35],
-[-0.85,0.42],
-[-0.30,0.95]
-];
+  const shape = [
+    [0.0, 1.0],
+    [0.42, 0.82],
+    [0.9, 0.55],
+    [1.05, 0.05],
+    [0.7, -0.65],
+    [0.25, -1.05],
+    [-0.55, -0.92],
+    [-0.95, -0.35],
+    [-0.85, 0.42],
+    [-0.3, 0.95],
+  ];
 
   return shape.map(([x, y], index) => {
     /*
@@ -894,9 +877,7 @@ function renderZones() {
 
       color: colors.stroke,
 
-      weight:
-risk==="EXTREME"?4:
-risk==="HIGH"?3:2,
+      weight: risk === "EXTREME" ? 4 : risk === "HIGH" ? 3 : 2,
 
       opacity: 0.9,
 
@@ -908,7 +889,7 @@ risk==="HIGH"?3:2,
           : risk === "HIGH"
             ? 0.48
             : risk === "MEDIUM"
-              ? 0.30
+              ? 0.3
               : 0.18,
 
       className: `risk-zone risk-${risk.toLowerCase()}`,
