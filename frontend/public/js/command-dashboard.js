@@ -1,312 +1,262 @@
 "use strict";
 
-// ==========================================================
-// DISASTEROS COMMAND CENTER
-// COMMAND DASHBOARD MODULE
-// ==========================================================
+console.log("📊 Command Dashboard Loaded");
 
-console.log("✅ command-dashboard.js loaded");
+const CommandDashboard = (() => {
 
-// ==========================================================
-// SAFE HELPERS
-// ==========================================================
+  const API =
+    window.COMMAND_API_BASE ||
+    "http://localhost:4000/api";
 
-function dashboardArray(value) {
-  return Array.isArray(value) ? value : [];
-}
+  function requireLocation() {
+    const location =
+      CommandCenterData.getState().location;
 
-function dashboardStatus(value) {
-  return String(value || "UNKNOWN")
-    .trim()
-    .toUpperCase();
-}
+    const lat = Number(location.lat);
+    const lng = Number(location.lng);
 
-function dashboardEntityID(item) {
-  return (
-    item?._id ||
-    item?.id ||
-    item?.incidentId ||
-    item?.sosId ||
-    item?.missionId ||
-    item?.teamId ||
-    item?.resourceId ||
-    item?.deviceId ||
-    null
-  );
-}
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      throw new Error(
+        "Operational location has not been selected."
+      );
+    }
 
-// ==========================================================
-// GET DATA
-// ==========================================================
-
-function getDashboardData() {
-  const data = CommandCenter.data || {};
-
-  return {
-    incidents: dashboardArray(data.incidents),
-
-    sos: dashboardArray(data.sos),
-
-    missions: dashboardArray(data.missions),
-
-    teams: dashboardArray(data.teams),
-
-    resources: dashboardArray(data.resources),
-
-    fieldDevices: dashboardArray(data.fieldDevices),
-  };
-}
-
-// ==========================================================
-// ACTIVE COUNTS
-// ==========================================================
-
-function isActiveStatus(status) {
-  return [
-    "ACTIVE",
-    "OPEN",
-    "PENDING",
-    "ASSIGNED",
-    "IN_PROGRESS",
-    "ONGOING",
-    "RESPONDING",
-    "DISPATCHED",
-    "REPORTED",
-  ].includes(dashboardStatus(status));
-}
-
-function countActive(items) {
-  return items.filter((item) => isActiveStatus(item?.status)).length;
-}
-
-// ==========================================================
-// UPDATE TEXT
-// ==========================================================
-
-function dashboardText(id, value) {
-  const element = document.getElementById(id);
-
-  if (!element) {
-    return;
+    return {
+      lat,
+      lng,
+    };
   }
 
-  element.textContent = value ?? 0;
-}
+  async function loadIncidents() {
+    console.log(
+      "📡 Loading incidents..."
+    );
 
-// ==========================================================
-// STATISTICS
-// ==========================================================
+    const response =
+      await commandApi.getIncidents();
 
-function updateCommandDashboardStats() {
-  const data = getDashboardData();
+    console.log(
+      "📥 Incidents API:",
+      response
+    );
 
-  const incidents = data.incidents.length;
+    const data =
+      Array.isArray(response?.data)
+        ? response.data
+        : commandArray(
+            response,
+            ["incidents"]
+          );
 
-  const sos = data.sos.length;
+    CommandCenterData.setIncidents(
+      data
+    );
 
-  const missions = data.missions.length;
-
-  const teams = data.teams.length;
-
-  const resources = data.resources.length;
-
-  const activeIncidents = countActive(data.incidents);
-
-  const activeSOS = countActive(data.sos);
-
-  const activeMissions = countActive(data.missions);
-
-  // HTML supplied by you
-  dashboardText("incidentCount", incidents);
-
-  dashboardText("sosCount", sos);
-
-  dashboardText("missionCount", missions);
-
-  dashboardText("teamCount", teams);
-
-  dashboardText("resourceTeams", teams);
-
-  dashboardText("resourceSupplies", resources);
-
-  // --------------------------------------------------------
-  // Risk
-  // --------------------------------------------------------
-
-  let risk = "LOW";
-
-  if (activeIncidents > 10 || activeSOS > 10) {
-    risk = "CRITICAL";
-  } else if (activeIncidents > 5 || activeSOS > 5) {
-    risk = "HIGH";
-  } else if (activeIncidents > 0 || activeSOS > 0) {
-    risk = "MEDIUM";
+    return data;
   }
 
-  const riskScore = Math.min(
-    100,
-    activeIncidents * 5 + activeSOS * 8 + activeMissions * 2,
-  );
+  async function loadMissions() {
+    console.log(
+      "📡 Loading missions..."
+    );
 
-  dashboardText("riskLevel", risk);
+    const response =
+      await commandApi.getMissions();
 
-  dashboardText("riskScore", riskScore);
+    console.log(
+      "📥 Missions API:",
+      response
+    );
 
-  // --------------------------------------------------------
-  // Alert count
-  // --------------------------------------------------------
+    const data =
+      Array.isArray(response?.data)
+        ? response.data
+        : commandArray(
+            response,
+            ["missions"]
+          );
 
-  const alertCount = activeIncidents + activeSOS;
+    CommandCenterData.setMissions(
+      data
+    );
 
-  dashboardText("alertCount", alertCount);
-
-  renderAlerts(data.incidents, data.sos);
-
-  updateSituationSummary(risk, incidents, sos, missions, teams);
-}
-
-// ==========================================================
-// SITUATION SUMMARY
-// ==========================================================
-
-function updateSituationSummary(risk, incidents, sos, missions, teams) {
-  const element = document.getElementById("situationSummary");
-
-  if (!element) {
-    return;
+    return data;
   }
 
-  element.textContent =
-    `${incidents} incidents, ` +
-    `${sos} SOS requests, ` +
-    `${missions} missions and ` +
-    `${teams} responder teams ` +
-    `currently monitored in this operational area.`;
-}
+  async function loadResources() {
+    console.log(
+      "📡 Loading resources..."
+    );
 
-// ==========================================================
-// ALERTS
-// ==========================================================
+    const response =
+      await commandApi.getResources();
 
-function renderAlerts(incidents, sos) {
-  const container = document.getElementById("alertsList");
+    console.log(
+      "📥 Resources API:",
+      response
+    );
 
-  if (!container) {
-    return;
+    const data =
+      Array.isArray(response?.data)
+        ? response.data
+        : commandArray(
+            response,
+            ["resources"]
+          );
+
+    CommandCenterData.setResources(
+      data
+    );
+
+    return data;
   }
 
-  const alerts = [];
+  async function loadSOS() {
+    console.log(
+      "📡 Loading SOS..."
+    );
 
-  incidents
-    .filter((item) => isActiveStatus(item?.status))
-    .forEach((incident) => {
-      alerts.push({
-        type: "INCIDENT",
-        title: incident?.type || incident?.title || "Incident",
-        severity: incident?.severity || "UNKNOWN",
-      });
-    });
+    const response =
+      await commandApi.getSOS();
 
-  sos
-    .filter((item) => isActiveStatus(item?.status))
-    .forEach((request) => {
-      alerts.push({
-        type: "SOS",
-        title: request?.type || "Emergency SOS",
-        severity: request?.severity || "UNKNOWN",
-      });
-    });
+    console.log(
+      "📥 SOS API:",
+      response
+    );
 
-  if (!alerts.length) {
-    container.innerHTML = `<div class="empty-state">
-        No active alerts
-      </div>`;
+    const data =
+      Array.isArray(response?.data)
+        ? response.data
+        : commandArray(
+            response,
+            ["sos", "requests"]
+          );
 
-    return;
+    CommandCenterData.setSOS(
+      data
+    );
+
+    return data;
   }
 
-  container.innerHTML = alerts
-    .slice(0, 10)
-    .map(
-      (alert) => `
-          <div class="command-alert">
-            <strong>
-              ${escapeMapHTML(alert.type)}
-            </strong>
+  async function loadMapResources() {
+    const { lat, lng } =
+      requireLocation();
 
-            <span>
-              ${escapeMapHTML(alert.title)}
-            </span>
+    const endpoint =
+      `/map/resources?lat=${encodeURIComponent(
+        lat
+      )}&lng=${encodeURIComponent(
+        lng
+      )}`;
 
-            <small>
-              ${escapeMapHTML(alert.severity)}
-            </small>
-          </div>
-        `,
-    )
-    .join("");
-}
+    console.log(
+      "📡 GET",
+      `${API}${endpoint}`
+    );
 
-// ==========================================================
-// HTML ESCAPE
-// ==========================================================
+    const response =
+      await commandApiRequest(
+        endpoint,
+        {
+          method: "GET",
+        }
+      );
 
-function escapeDashboardHTML(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+    console.log(
+      "📥 Map Resources API:",
+      response
+    );
 
-// Keep compatibility with existing map module
-if (typeof window.escapeMapHTML !== "function") {
-  window.escapeMapHTML = escapeDashboardHTML;
-}
+    const resources =
+      response?.resources || {};
 
-// ==========================================================
-// REFRESH DASHBOARD
-// ==========================================================
+    CommandCenterData.setMapResources(
+      resources
+    );
 
-async function updateCommandCenterDashboard() {
-  updateCommandDashboardStats();
+    return resources;
+  }
 
-  if (typeof window.renderCommandCenterMapData === "function") {
+  async function loadAll() {
+    // NEVER load dashboard data without location.
+    const location =
+      requireLocation();
+
+    console.log(
+      "🚀 Loading Command Center data for:",
+      location
+    );
+
+    CommandCenterData.setLoading(
+      true
+    );
+
     try {
-      window.renderCommandCenterMapData();
-    } catch (error) {
-      console.error("[DASHBOARD] Map render failed:", error);
+      const results =
+        await Promise.allSettled([
+          loadIncidents(),
+          loadMissions(),
+          loadResources(),
+          loadSOS(),
+          loadMapResources(),
+        ]);
+
+      const names = [
+        "incidents",
+        "missions",
+        "resources",
+        "sos",
+        "map resources",
+      ];
+
+      results.forEach(
+        (result, index) => {
+          if (
+            result.status === "rejected"
+          ) {
+            console.error(
+              `❌ ${names[index]} failed:`,
+              result.reason
+            );
+          }
+        }
+      );
+
+      CommandCenterData.calculateStats();
+
+      console.log(
+        "✅ Command Center data loaded",
+        CommandCenterData.getState()
+      );
+
+      return CommandCenterData.getState();
+
+    } finally {
+      CommandCenterData.setLoading(
+        false
+      );
     }
   }
-}
 
-// ==========================================================
-// LOCATION CHANGE
-// ==========================================================
+  return {
+    API,
+    loadIncidents,
+    loadMissions,
+    loadResources,
+    loadSOS,
+    loadMapResources,
+    loadAll,
+  };
 
-document.addEventListener("commandcenter:location-selected", async () => {
-  console.log("[DASHBOARD] Location selected.");
+})();
 
-  await updateCommandCenterDashboard();
-});
+window.CommandDashboard =
+  CommandDashboard;
 
-// ==========================================================
-// DATA UPDATE
-// ==========================================================
-
-document.addEventListener("commandcenter:data-updated", () => {
-  updateCommandCenterDashboard();
-});
-
-// ==========================================================
-// PUBLIC API
-// ==========================================================
-
-window.updateCommandCenterDashboard = updateCommandCenterDashboard;
-
-window.updateCommandDashboardStats = updateCommandDashboardStats;
-
-window.getDashboardData = getDashboardData;
-
-console.log("✅ Command dashboard module ready.");
+console.log(
+  "✅ Command Dashboard Ready"
+);

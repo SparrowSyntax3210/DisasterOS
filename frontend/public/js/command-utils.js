@@ -1,137 +1,12 @@
 "use strict";
 
-/* ==========================================================
-   DISASTEROS COMMAND CENTER
-   UTILITY FUNCTIONS
-   ========================================================== */
-
-console.log("Command Utils Loaded");
-
-/* ==========================================================
-   SAFE VALUE
-   ========================================================== */
-
-function commandValue(value, fallback = "--") {
-  if (value === undefined || value === null || value === "") {
-    return fallback;
-  }
-
-  return value;
-}
-
-/* ==========================================================
-   NUMBER
-   ========================================================== */
-
-function commandNumber(value, fallback = 0) {
-  const number = Number(value);
-
-  return Number.isFinite(number) ? number : fallback;
-}
-
-/* ==========================================================
-   COORDINATES
-   ========================================================== */
-
-function getCommandLatitude(item) {
-  if (!item) {
-    return null;
-  }
-
-  const value =
-    item.latitude ??
-    item.lat ??
-    item.location?.latitude ??
-    item.location?.lat ??
-    item.coordinates?.latitude ??
-    item.coordinates?.lat;
-
-  const latitude = Number(value);
-
-  return Number.isFinite(latitude) ? latitude : null;
-}
-
-function getCommandLongitude(item) {
-  if (!item) {
-    return null;
-  }
-
-  const value =
-    item.longitude ??
-    item.lng ??
-    item.lon ??
-    item.location?.longitude ??
-    item.location?.lng ??
-    item.location?.lon ??
-    item.coordinates?.longitude ??
-    item.coordinates?.lng ??
-    item.coordinates?.lon;
-
-  const longitude = Number(value);
-
-  return Number.isFinite(longitude) ? longitude : null;
-}
-
-function hasCommandCoordinates(item) {
-  return (
-    getCommandLatitude(item) !== null && getCommandLongitude(item) !== null
-  );
-}
-
-/* ==========================================================
-   ID
-   ========================================================== */
-
-function getCommandId(item) {
-  if (!item) {
-    return null;
-  }
-
-  return (
-    item._id ??
-    item.id ??
-    item.ID ??
-    item.incidentId ??
-    item.missionId ??
-    item.teamId ??
-    item.userId ??
-    null
-  );
-}
-
-/* ==========================================================
-   ARRAY NORMALIZATION
-   ========================================================== */
-
-function ensureCommandArray(value) {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (value && Array.isArray(value.data)) {
-    return value.data;
-  }
-
-  if (value && Array.isArray(value.results)) {
-    return value.results;
-  }
-
-  if (value && Array.isArray(value.items)) {
-    return value.items;
-  }
-
-  if (value && Array.isArray(value.records)) {
-    return value.records;
-  }
-
-  return [];
-}
+console.log("🛠️ Command Utils Loaded");
 
 /* ==========================================================
    HTML ESCAPE
-   ========================================================== */
+========================================================== */
 
-function escapeCommandHtml(value) {
+function escapeCommandHTML(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -141,213 +16,158 @@ function escapeCommandHtml(value) {
 }
 
 /* ==========================================================
-   DATE
-   ========================================================== */
+   NUMBER
+========================================================== */
 
-function formatCommandDate(value) {
-  if (!value) {
-    return "--";
-  }
+function commandNumber(value, fallback = null) {
+  const number = Number(value);
 
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "--";
-  }
-
-  return date.toLocaleDateString("en-IN");
+  return Number.isFinite(number) ? number : fallback;
 }
 
 /* ==========================================================
-   TIME
-   ========================================================== */
+   ARRAY NORMALIZER
+========================================================== */
 
-function formatCommandTime(value) {
-  if (!value) {
-    return "--";
+function commandArray(response, keys = []) {
+  if (Array.isArray(response)) {
+    return response;
   }
 
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "--";
+  for (const key of keys) {
+    if (Array.isArray(response?.[key])) {
+      return response[key];
+    }
   }
 
-  return date.toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response?.items)) {
+    return response.items;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
 }
 
 /* ==========================================================
-   DATE + TIME
-   ========================================================== */
+   ENTITY ID
+========================================================== */
 
-function formatCommandDateTime(value) {
-  if (!value) {
-    return "--";
-  }
+function commandEntityId(item) {
+  if (!item) return null;
 
-  const date = new Date(value);
+  const id =
+    item._id ??
+    item.id ??
+    item.incidentId ??
+    item.sosId ??
+    item.missionId ??
+    item.teamId ??
+    item.resourceId ??
+    item.userId ??
+    item.deviceId;
 
-  if (Number.isNaN(date.getTime())) {
-    return "--";
-  }
-
-  return date.toLocaleString("en-IN");
+  return id != null ? String(id) : null;
 }
 
 /* ==========================================================
-   TIME AGO
-   ========================================================== */
+   COORDINATES
+========================================================== */
 
-function commandTimeAgo(value) {
-  if (!value) {
-    return "--";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "--";
-  }
-
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-
-  if (seconds < 60) {
-    return `${seconds}s ago`;
-  }
-
-  const minutes = Math.floor(seconds / 60);
-
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-
-  const days = Math.floor(hours / 24);
-
-  return `${days}d ago`;
-}
-
-/* ==========================================================
-   STATUS NORMALIZATION
-   ========================================================== */
-
-function normalizeCommandStatus(value) {
-  return String(value ?? "")
-    .trim()
-    .toUpperCase()
-    .replace(/[\s-]+/g, "_");
-}
-
-/* ==========================================================
-   SEVERITY
-   ========================================================== */
-
-function normalizeCommandSeverity(value) {
-  const severity = String(value ?? "")
-    .trim()
-    .toUpperCase();
-
-  if (["CRITICAL", "EXTREME"].includes(severity)) {
-    return "CRITICAL";
-  }
-
-  if (severity === "HIGH") {
-    return "HIGH";
-  }
-
-  if (severity === "MEDIUM" || severity === "MODERATE") {
-    return "MEDIUM";
-  }
-
-  return "LOW";
-}
-
-/* ==========================================================
-   COLLECTION UPSERT
-   ========================================================== */
-
-function upsertCommandItem(collection, item) {
-  if (!Array.isArray(collection)) {
-    return collection;
-  }
-
-  const id = getCommandId(item);
-
-  if (!id) {
-    collection.push(item);
-    return collection;
-  }
-
-  const index = collection.findIndex(
-    (existing) => String(getCommandId(existing)) === String(id),
-  );
-
-  if (index === -1) {
-    collection.push(item);
-  } else {
-    collection[index] = {
-      ...collection[index],
-      ...item,
+function commandCoordinates(item) {
+  if (!item) {
+    return {
+      lat: null,
+      lng: null,
     };
   }
 
-  return collection;
+  const properties = item.properties || {};
+  const geometry = item.geometry?.coordinates;
+
+  const lat = commandNumber(
+    item.latitude ??
+      item.lat ??
+      item.location?.latitude ??
+      item.location?.lat ??
+      properties.latitude ??
+      properties.lat ??
+      geometry?.[1],
+  );
+
+  const lng = commandNumber(
+    item.longitude ??
+      item.lng ??
+      item.lon ??
+      item.location?.longitude ??
+      item.location?.lng ??
+      item.location?.lon ??
+      properties.longitude ??
+      properties.lng ??
+      geometry?.[0],
+  );
+
+  return {
+    lat,
+    lng,
+  };
 }
 
 /* ==========================================================
-   REMOVE BY ID
-   ========================================================== */
+   STATUS
+========================================================== */
 
-function removeCommandItem(collection, id) {
-  if (!Array.isArray(collection)) {
-    return collection;
-  }
+function commandIsActive(item) {
+  const status = String(item?.status || "")
+    .trim()
+    .toLowerCase();
 
-  return collection.filter((item) => String(getCommandId(item)) !== String(id));
+  return ![
+    "resolved",
+    "closed",
+    "completed",
+    "cancelled",
+    "canceled",
+    "rejected",
+  ].includes(status);
 }
 
 /* ==========================================================
-   EXPORTS
-   ========================================================== */
+   TYPE
+========================================================== */
 
-window.commandValue = commandValue;
+function commandItemType(item, fallback = "") {
+  return String(
+    item?.type ||
+      item?.category ||
+      item?.resourceType ||
+      item?.incidentType ||
+      fallback,
+  )
+    .trim()
+    .toLowerCase();
+}
 
+/* ==========================================================
+   PUBLIC
+========================================================== */
+
+window.escapeCommandHTML = escapeCommandHTML;
 window.commandNumber = commandNumber;
+window.commandArray = commandArray;
+window.commandEntityId = commandEntityId;
+window.commandCoordinates = commandCoordinates;
+window.commandIsActive = commandIsActive;
+window.commandItemType = commandItemType;
 
-window.getCommandLatitude = getCommandLatitude;
-
-window.getCommandLongitude = getCommandLongitude;
-
-window.hasCommandCoordinates = hasCommandCoordinates;
-
-window.getCommandId = getCommandId;
-
-window.ensureCommandArray = ensureCommandArray;
-
-window.escapeCommandHtml = escapeCommandHtml;
-
-window.formatCommandDate = formatCommandDate;
-
-window.formatCommandTime = formatCommandTime;
-
-window.formatCommandDateTime = formatCommandDateTime;
-
-window.commandTimeAgo = commandTimeAgo;
-
-window.normalizeCommandStatus = normalizeCommandStatus;
-
-window.normalizeCommandSeverity = normalizeCommandSeverity;
-
-window.upsertCommandItem = upsertCommandItem;
-
-window.removeCommandItem = removeCommandItem;
-
-console.log("✅ Command Center utilities initialized");
+console.log("✅ Command Utils Ready");

@@ -3,31 +3,33 @@
    Avatar + Profile + Logout + Session Check
 ========================================================== */
 
-const AUTH_API = "http://localhost:4000/api/auth";
+const AUTH_API = "http://localhost:4000/auth";
 
 /* ==========================================================
    GET CURRENT SESSION
 ========================================================== */
 
 async function getCurrentUser() {
-  try {
-    const response = await fetch(`${AUTH_API}/status`, {
-      method: "GET",
-      credentials: "include",
-    });
+    try {
+        const response = await fetch(`${AUTH_API}/status`, {
+            method: "GET",
+            credentials: "include",
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok || !data.loggedIn) {
-      return null;
+        console.log("AUTH STATUS:", data);
+
+        if (!response.ok || !data.loggedIn) {
+            return null;
+        }
+
+        return data.user;
+
+    } catch (error) {
+        console.error("AUTH STATUS ERROR:", error);
+        return null;
     }
-
-    return data.user;
-  } catch (error) {
-    console.error("AUTH STATUS ERROR:", error);
-
-    return null;
-  }
 }
 
 /* ==========================================================
@@ -147,31 +149,28 @@ function createUserAvatar(user) {
 ========================================================== */
 
 async function logoutUser() {
-  try {
-    const response = await fetch(`${AUTH_API}/logout`, {
-      method: "GET",
+    try {
+        const response = await fetch(`${AUTH_API}/logout`, {
+            method: "GET",
+            credentials: "include",
+        });
 
-      credentials: "include",
-    });
+        const data = await response.json();
 
-    const data = await response.json();
+        if (!response.ok) {
+            alert(data.message || "Logout failed.");
+            return;
+        }
 
-    if (!response.ok) {
-      alert(data.message || "Logout failed.");
+        localStorage.removeItem("disasterOSRole");
 
-      return;
+        window.location.href = "role-selection.html";
+
+    } catch (error) {
+        console.error("LOGOUT ERROR:", error);
+
+        alert("Unable to logout. Please try again.");
     }
-
-    // Remove selected role
-    localStorage.removeItem("disasterOSRole");
-
-    // Go back to role selection
-    window.location.href = "role-selection.html";
-  } catch (error) {
-    console.error("LOGOUT ERROR:", error);
-
-    alert("Unable to logout. Please try again.");
-  }
 }
 
 /* ==========================================================
@@ -179,55 +178,38 @@ async function logoutUser() {
 ========================================================== */
 
 async function protectDashboard(expectedRole) {
-  const user = await getCurrentUser();
+    const user = await getCurrentUser();
 
-  if (!user) {
-    localStorage.removeItem("disasterOSRole");
-
-    window.location.href = "role-selection.html";
-
-    return null;
-  }
-
-  const selectedRole = localStorage.getItem("disasterOSRole");
-
-  /*
-   * Check frontend selected role.
-   */
-
-  if (selectedRole && selectedRole !== expectedRole) {
-    if (selectedRole === "user") {
-      window.location.href = "user-dashboard.html";
-    } else if (selectedRole === "command-center") {
-      window.location.href = "command-center.html";
+    if (!user) {
+        localStorage.removeItem("disasterOSRole");
+        window.location.href = "role-selection.html";
+        return null;
     }
 
-    return null;
-  }
+    const selectedRole =
+        localStorage.getItem("disasterOSRole")?.toLowerCase();
 
-  createUserAvatar(user);
+    const expected = expectedRole.toLowerCase();
 
-  return user;
-}
+    console.log("AUTH USER:", user);
+    console.log("DATABASE ROLE:", user.role);
+    console.log("SELECTED ROLE:", selectedRole);
+    console.log("EXPECTED ROLE:", expected);
 
-/* ==========================================================
-   ROLE FORMATTER
-========================================================== */
+    // Selected portal doesn't match this page
+    if (selectedRole && selectedRole !== expected) {
+        if (selectedRole === "user") {
+            window.location.href = "user-dashboard.html";
+        } else if (selectedRole === "command-center") {
+            window.location.href = "command-center.html";
+        }
 
-function formatRole(role) {
-  if (!role) return "User";
+        return null;
+    }
 
-  if (role === "command-center") {
-    return "Command Center";
-  }
+    createUserAvatar(user);
 
-  if (role === "command_center") {
-    return "Command Center";
-  }
-
-  return role
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+    return user;
 }
 
 /* ==========================================================

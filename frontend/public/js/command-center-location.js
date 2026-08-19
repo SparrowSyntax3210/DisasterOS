@@ -1,653 +1,507 @@
-// ==========================================================
-// DISASTEROS COMMAND CENTER
-// LOCATION GATE / LOCATION SELECTION
-// ==========================================================
+"use strict";
 
-console.log("Command Center Location JS Loaded");
+console.log("📍 Command Center Location Loaded");
 
-// ==========================================================
-// API
-// ==========================================================
+const CommandCenterLocation = (() => {
+  let currentLocation = null;
+  let initialized = false;
 
-const COMMAND_LOCATION_API = "http://localhost:4000/api";
-const COMMAND_API = "http://localhost:4000/api";
+  const DEFAULT_ZOOM = 12.8;
 
-// ==========================================================
-// GLOBAL LOCATION STATE
-// ==========================================================
+  function getElements() {
+    return {
+      gate: document.getElementById("commandLocationGate"),
+      main: document.getElementById("commandCenter"),
 
-window.commandLocation = {
-  lat: null,
-  lng: null,
-  name: "",
-  source: null,
-};
-
-let commandData = {
-  incidents: [],
-  sos: [],
-  missions: [],
-  teams: [],
-  resources: [],
-  zones: [],
-};
-
-let commandDataLoading = false;
-
-let commandLatitude = null;
-let commandLongitude = null;
-
-// ==========================================================
-// STATUS MESSAGE
-// ==========================================================
-
-function setCommandLocationStatus(message, type = "normal") {
-  if (!commandLocationStatus) {
-    return;
+      input: document.getElementById("commandLocationInput"),
+      searchBtn: document.getElementById("commandLocationSearchBtn"),
+      liveBtn: document.getElementById("commandLiveLocationBtn"),
+      status: document.getElementById("commandLocationStatus"),
+    };
   }
 
-  commandLocationStatus.textContent = message || "";
+  function setStatus(message, type = "") {
+    const { status } = getElements();
 
-  commandLocationStatus.className = "command-location-status";
+    if (!status) return;
 
-  if (type === "error") {
-    commandLocationStatus.classList.add("error");
+    status.textContent = message || "";
+    status.className =
+      `command-location-status ${type}`.trim();
   }
 
-  if (type === "success") {
-    commandLocationStatus.classList.add("success");
-  }
+  function validateCoordinates(latitude, longitude) {
+    const lat = Number(latitude);
+    const lng = Number(longitude);
 
-  if (type === "loading") {
-    commandLocationStatus.classList.add("loading");
-  }
-}
-
-// ==========================================================
-// DISABLE / ENABLE LOCATION BUTTONS
-// ==========================================================
-
-function setLocationButtonsLoading(loading) {
-  if (commandLocationSearchBtn) {
-    commandLocationSearchBtn.disabled = loading;
-
-    commandLocationSearchBtn.textContent = loading
-      ? "Loading..."
-      : "Load Location";
-  }
-
-  if (commandLiveLocationBtn) {
-    commandLiveLocationBtn.disabled = loading;
-
-    commandLiveLocationBtn.textContent = loading
-      ? "Detecting..."
-      : "📍 Use Current Location";
-  }
-}
-
-// ==========================================================
-// SAVE LOCATION
-// ==========================================================
-
-function setCommandLocation(lat, lng, name = "", source = "search") {
-  lat = Number(lat);
-  lng = Number(lng);
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    throw new Error("Invalid location coordinates.");
-  }
-
-  window.commandLocation = {
-    lat,
-    lng,
-    name: name || "Selected Location",
-    source,
-  };
-
-  console.log("Command Center location:", window.commandLocation);
-
-  return window.commandLocation;
-}
-
-async function commandFetch(url, options = {}) {
-  const response = await fetch(url, options);
-
-  let data = null;
-
-  try {
-    data = await response.json();
-  } catch (error) {
-    throw new Error("Invalid response received from server.");
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.message || `Server request failed with status ${response.status}`,
-    );
-  }
-
-  return data;
-}
-
-// ==========================================================
-// BACKEND GEOCODING
-// ==========================================================
-
-async function geocodeCommandLocation(place) {
-  const query = place.trim();
-
-  if (!query) {
-    throw new Error("Enter a location.");
-  }
-
-  const res = await fetch(
-    `${COMMAND_LOCATION_API}/map/geocode?location=${encodeURIComponent(query)}`,
-  );
-
-  const data = await res.json();
-
-  if (!res.ok || !data.success) {
-    throw new Error(data.message || "Location not found.");
-  }
-
-  const item = data.location;
-
-  if (!item || !item.latitude || !item.longitude) {
-    throw new Error("Invalid location data received.");
-  }
-
-  return {
-    lat: Number(item.latitude),
-    lng: Number(item.longitude),
-    name: item.name || query,
-  };
-}
-
-async function tryRoutes(routes) {
-  let lastError = null;
-
-  for (const route of routes) {
-    try {
-      const result = await commandFetch(route);
-
-      return result;
-    } catch (error) {
-      lastError = error;
-
-      console.warn("Route failed:", route, error.message);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      return null;
     }
+
+    if (lat < -90 || lat > 90) {
+      return null;
+    }
+
+    if (lng < -180 || lng > 180) {
+      return null;
+    }
+
+    return { lat, lng };
   }
 
-  throw lastError || new Error("No valid API route found.");
-}
-
-// ==========================================================
-// SEARCH LOCATION
-// ==========================================================
-
-async function searchCommandLocation() {
-  if (!commandLocationInput) {
-    console.error("commandLocationInput not found.");
-
-    return;
-  }
-
-  const place = commandLocationInput.value.trim();
-
-  if (!place) {
-    setCommandLocationStatus("Enter a city, district or village.", "error");
-
-    commandLocationInput.focus();
-
-    return;
-  }
-
-  setLocationButtonsLoading(true);
-
-  setCommandLocationStatus("Finding operational location...", "loading");
-
-  try {
-    const result = await geocodeCommandLocation(place);
-
-    setCommandLocation(result.lat, result.lng, result.name, "search");
-
-    commandLocationInput.value = result.name;
-
-    setCommandLocationStatus(`Location loaded: ${result.name}`, "success");
-
-    // ------------------------------------------------------
-    // OPEN COMMAND CENTER
-    // ------------------------------------------------------
-
-    await openCommandCenter();
-  } catch (error) {
-    console.error("Command location error:", error);
-
-    setCommandLocationStatus(
-      error.message || "Unable to find this location.",
-      "error",
-    );
-  } finally {
-    setLocationButtonsLoading(false);
-  }
-}
-
-async function loadSOS(locationQuery) {
-  const possibleRoutes = [
-    `${COMMAND_API}/sos?${locationQuery}`,
-    `${COMMAND_API}/emergency/sos?${locationQuery}`,
-  ];
-
-  return await tryRoutes(possibleRoutes);
-}
-
-// ==========================================================
-// CURRENT LOCATION
-// ==========================================================
-
-async function useCommandCurrentLocation() {
-  if (!navigator.geolocation) {
-    setCommandLocationStatus(
-      "Geolocation is not supported by this browser.",
-      "error",
-    );
-
-    return;
-  }
-
-  setLocationButtonsLoading(true);
-
-  setCommandLocationStatus("Detecting your current location...", "loading");
-
-  navigator.geolocation.getCurrentPosition(
-    async (position) => {
-      try {
-        const lat = position.coords.latitude;
-
-        const lng = position.coords.longitude;
-
-        // --------------------------------------------------
-        // Reverse geocoding is optional.
-        // We already have valid coordinates.
-        // --------------------------------------------------
-
-        let name = "Current Location";
-
-        try {
-          const reverse = await reverseGeocodeCommandLocation(lat, lng);
-
-          if (reverse?.name) {
-            name = reverse.name;
-          }
-        } catch (error) {
-          console.warn("Reverse geocoding failed:", error);
-        }
-
-        setCommandLocation(lat, lng, name, "live");
-
-        if (commandLocationInput) {
-          commandLocationInput.value = name;
-        }
-
-        setCommandLocationStatus(
-          `Current location detected: ${name}`,
-          "success",
-        );
-
-        await openCommandCenter();
-      } catch (error) {
-        console.error("Current location processing failed:", error);
-
-        setCommandLocationStatus(
-          error.message || "Unable to use current location.",
-          "error",
-        );
-      } finally {
-        setLocationButtonsLoading(false);
-      }
-    },
-
-    (error) => {
-      console.error("Geolocation error:", error);
-
-      let message = "Unable to detect your current location.";
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          message =
-            "Location permission was denied. Please allow location access.";
-          break;
-
-        case error.POSITION_UNAVAILABLE:
-          message = "Your current location is unavailable.";
-          break;
-
-        case error.TIMEOUT:
-          message = "Location detection timed out. Please try again.";
-          break;
-      }
-
-      setCommandLocationStatus(message, "error");
-
-      setLocationButtonsLoading(false);
-    },
-
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
-    },
-  );
-}
-async function reverseGeocodeCommandLocation(lat, lng) {
-  const url = `${COMMAND_LOCATION_API}/map/geocode?location=${encodeURIComponent(
-    `${lat},${lng}`,
-  )}`;
-
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Reverse geocoding failed.");
-  }
-
-  const data = await response.json();
-
-  if (!data?.success || !data?.location) {
-    throw new Error("Reverse geocoding returned no location.");
-  }
-
-  const location = data.location;
-
-  return {
-    name: location.name || location.display_name || "Current Location",
-
-    lat: Number(location.latitude ?? location.lat ?? lat),
-
-    lng: Number(location.longitude ?? location.lng ?? location.lon ?? lng),
-  };
-}
-
-async function loadIncidents(locationQuery) {
-  const possibleRoutes = [
-    `${COMMAND_API}/incidents?${locationQuery}`,
-    `${COMMAND_API}/incident?${locationQuery}`,
-  ];
-
-  return await tryRoutes(possibleRoutes);
-}
-
-async function loadMissions(locationQuery) {
-  const possibleRoutes = [
-    `${COMMAND_API}/missions?${locationQuery}`,
-    `${COMMAND_API}/mission?${locationQuery}`,
-  ];
-
-  return await tryRoutes(possibleRoutes);
-}
-async function loadTeams(locationQuery) {
-  const possibleRoutes = [
-    `${COMMAND_API}/teams?${locationQuery}`,
-    `${COMMAND_API}/responders?${locationQuery}`,
-    `${COMMAND_API}/volunteers?${locationQuery}`,
-  ];
-
-  return await tryRoutes(possibleRoutes);
-}
-
-async function loadCommandResources(locationQuery) {
-  const possibleRoutes = [
-    `${COMMAND_API}/map/resources?${locationQuery}`,
-    `${COMMAND_API}/resources?${locationQuery}`,
-  ];
-
-  return await tryRoutes(possibleRoutes);
-}
-
-function normalizeArray(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.data)) {
-    return data.data;
-  }
-
-  if (Array.isArray(data?.items)) {
-    return data.items;
-  }
-
-  if (Array.isArray(data?.results)) {
-    return data.results;
-  }
-
-  if (Array.isArray(data?.incidents)) {
-    return data.incidents;
-  }
-
-  if (Array.isArray(data?.sos)) {
-    return data.sos;
-  }
-
-  if (Array.isArray(data?.missions)) {
-    return data.missions;
-  }
-
-  if (Array.isArray(data?.teams)) {
-    return data.teams;
-  }
-
-  if (Array.isArray(data?.resources)) {
-    return data.resources;
-  }
-
-  return [];
-}
-
-// ==========================================================
-// OPEN COMMAND CENTER
-// ==========================================================
-
-async function loadCommandCenterData() {
-  if (commandDataLoading) {
-    return commandData;
-  }
-
-  const location = window.commandLocation;
-
-  if (
-    !location ||
-    !Number.isFinite(Number(location.lat)) ||
-    !Number.isFinite(Number(location.lng))
+  async function activateLocation(
+    latitude,
+    longitude,
+    name = null,
+    source = "unknown"
   ) {
-    throw new Error("Select an operational location first.");
-  }
+    const coordinates =
+      validateCoordinates(latitude, longitude);
 
-  commandDataLoading = true;
+    if (!coordinates) {
+      throw new Error(
+        "Invalid location coordinates."
+      );
+    }
 
-  try {
-    console.log("🔄 Loading Command Center data...");
+    const { lat, lng } = coordinates;
 
-    const locationQuery =
-      `lat=${encodeURIComponent(Number(location.lat))}` +
-      `&lng=${encodeURIComponent(Number(location.lng))}`;
-
-    const requests = {
-      incidents: loadIncidents(locationQuery),
-      sos: loadSOS(locationQuery),
-      missions: loadMissions(locationQuery),
-      teams: loadTeams(locationQuery),
-      resources: loadCommandResources(locationQuery),
+    currentLocation = {
+      lat,
+      lng,
+      name: name || null,
+      source,
     };
 
-    const results = await Promise.allSettled(Object.values(requests));
+    console.log(
+      "📍 Operational location selected:",
+      currentLocation
+    );
 
-    const keys = Object.keys(requests);
+    // Update central store.
+    CommandCenterData.setLocation(
+      currentLocation
+    );
 
-    results.forEach((result, index) => {
-      const key = keys[index];
+    // Expose location globally for compatibility.
+    window.commandLocation =
+      currentLocation;
 
-      if (result.status === "fulfilled") {
-        commandData[key] = normalizeArray(result.value);
-      } else {
-        console.warn(`⚠️ Failed to load ${key}:`, result.reason);
+    // Update coordinates UI.
+    const mapLat =
+      document.getElementById("mapLat");
 
-        commandData[key] = [];
+    const mapLng =
+      document.getElementById("mapLng");
+
+    if (mapLat) {
+      mapLat.textContent =
+        lat.toFixed(6);
+    }
+
+    if (mapLng) {
+      mapLng.textContent =
+        lng.toFixed(6);
+    }
+
+    // Initialize / move map.
+    if (window.CommandCenterMap) {
+      window.CommandCenterMap.initialize(
+        lat,
+        lng
+      );
+    }
+
+    // Hide gate.
+    const { gate, main } =
+      getElements();
+
+    if (gate) {
+      gate.style.display = "none";
+    }
+
+    if (main) {
+      main.style.display = "block";
+    }
+
+    setStatus("");
+
+    // Give browser a frame to render the map.
+    requestAnimationFrame(() => {
+      if (
+        window.CommandCenterMap &&
+        typeof window.CommandCenterMap.invalidateSize ===
+          "function"
+      ) {
+        window.CommandCenterMap.invalidateSize();
       }
     });
 
-    console.log("✅ Command Center data loaded:", commandData);
-
-    return commandData;
-  } finally {
-    commandDataLoading = false;
-  }
-}
-
-async function openCommandCenter() {
-  const location = window.commandLocation;
-
-  console.log("🚀 openCommandCenter called");
-  console.log("📍 Selected location:", location);
-
-  if (!location || location.lat === null || location.lng === null) {
-    throw new Error("Select an operational location first.");
-  }
-
-  // Hide gate
-  if (commandLocationGate) {
-    commandLocationGate.classList.add("hidden");
-    commandLocationGate.style.display = "none";
-  }
-
-  // Show Command Center
-  if (commandCenter) {
-    commandCenter.style.display = "block";
-  }
-
-  console.log("✅ Command Center container opened");
-
-  // Notify other files
-  window.dispatchEvent(
-    new CustomEvent("commandLocationReady", {
-      detail: location,
-    }),
-  );
-
-  // Load data
-  if (typeof window.loadCommandCenterData === "function") {
-    console.log("📡 Loading command center data");
-
-    await window.loadCommandCenterData();
-  } else {
-    console.warn("⚠️ loadCommandCenterData() not found");
-  }
-
-  // Update UI
-  if (typeof window.updateCommandLocationUI === "function") {
-    window.updateCommandLocationUI();
-  }
-
-  console.log("✅ Command Center opened successfully");
-}
-
-// ==========================================================
-// RETURN TO LOCATION SELECTION
-// ==========================================================
-
-function showCommandLocationGate() {
-  if (commandCenter) {
-    commandCenter.style.display = "none";
-  }
-
-  if (commandLocationGate) {
-    commandLocationGate.classList.remove("hidden");
-
-    commandLocationGate.style.display = "";
-  }
-
-  setCommandLocationStatus("");
-
-  if (commandLocationInput) {
-    commandLocationInput.value = "";
-  }
-
-  window.commandLocation = {
-    lat: null,
-    lng: null,
-    name: "",
-    source: null,
-  };
-
-  window.dispatchEvent(new CustomEvent("commandLocationReset"));
-}
-
-// ==========================================================
-// SEARCH BUTTON
-// ==========================================================
-
-if (commandLocationSearchBtn) {
-  commandLocationSearchBtn.addEventListener("click", searchCommandLocation);
-  console.log("Location Btn clicked");
-} else {
-  console.error("❌ Load Location button not found.");
-}
-
-// ==========================================================
-// ENTER KEY SEARCH
-// ==========================================================
-
-if (commandLocationInput) {
-  commandLocationInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-
-      searchCommandLocation();
+    // Load ALL operational data only AFTER
+    // a location has been selected.
+    if (window.CommandDashboard) {
+      await window.CommandDashboard.loadAll();
     }
-  });
-}
 
-// ==========================================================
-// LIVE LOCATION BUTTON
-// ==========================================================
-
-if (commandLiveLocationBtn) {
-  commandLiveLocationBtn.addEventListener("click", useCommandCurrentLocation);
-  console.log("Btn clicked ");
-} else {
-  console.error("❌ Current Location button not found.");
-}
-
-// ==========================================================
-// EXPORTS
-// ==========================================================
-
-window.searchCommandLocation = searchCommandLocation;
-
-window.useCommandCurrentLocation = useCommandCurrentLocation;
-
-window.setCommandLocation = setCommandLocation;
-
-window.openCommandCenter = openCommandCenter;
-
-window.showCommandLocationGate = showCommandLocationGate;
-
-window.geocodeCommandLocation = geocodeCommandLocation;
-
-// ==========================================================
-// INITIAL STATE
-// ==========================================================
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Keep Command Center hidden
-  // until a location is selected.
-
-  if (commandCenter) {
-    commandCenter.style.display = "none";
+    return currentLocation;
   }
 
-  if (commandLocationGate) {
-    commandLocationGate.style.display = "";
+  async function searchLocation() {
+    const { input, searchBtn } =
+      getElements();
+
+    const place =
+      input?.value?.trim();
+
+    if (!place) {
+      setStatus(
+        "Please enter a city, district or village.",
+        "error"
+      );
+
+      input?.focus();
+
+      return;
+    }
+
+    if (searchBtn) {
+      searchBtn.disabled = true;
+      searchBtn.textContent = "Searching...";
+    }
+
+    setStatus(
+      `Searching for "${place}"...`,
+      "loading"
+    );
+
+    try {
+      if (
+        !window.commandApi ||
+        typeof window.commandApi.geocode !==
+          "function"
+      ) {
+        throw new Error(
+          "Geocoding API is unavailable."
+        );
+      }
+
+      console.log(
+        "🔎 Geocoding location:",
+        place
+      );
+
+      const response =
+        await window.commandApi.geocode(
+          place
+        );
+
+      console.log(
+        "📍 Geocoding response:",
+        response
+      );
+
+      const location =
+        extractGeocodedLocation(response);
+
+      if (!location) {
+        throw new Error(
+          `Location "${place}" could not be found.`
+        );
+      }
+
+      await activateLocation(
+        location.lat,
+        location.lng,
+        location.name || place,
+        "search"
+      );
+
+    } catch (error) {
+      console.error(
+        "❌ Location search failed:",
+        error
+      );
+
+      setStatus(
+        error.message ||
+          "Unable to find this location.",
+        "error"
+      );
+
+    } finally {
+      if (searchBtn) {
+        searchBtn.disabled = false;
+        searchBtn.textContent =
+          "Load Location";
+      }
+    }
   }
 
-  console.log("📍 Command Center location gate ready.");
-});
+  function extractGeocodedLocation(response) {
+    if (!response) return null;
+
+    // Common backend response:
+    // { success: true, data: [...] }
+
+    const candidates = [];
+
+    if (Array.isArray(response)) {
+      candidates.push(...response);
+    }
+
+    if (Array.isArray(response.data)) {
+      candidates.push(...response.data);
+    }
+
+    if (Array.isArray(response.results)) {
+      candidates.push(...response.results);
+    }
+
+    if (response.data && !Array.isArray(response.data)) {
+      candidates.push(response.data);
+    }
+
+    if (response.result) {
+      candidates.push(response.result);
+    }
+
+    if (response.location) {
+      candidates.push(response.location);
+    }
+
+    for (const item of candidates) {
+      if (!item) continue;
+
+      const lat = Number(
+        item.lat ??
+        item.latitude ??
+        item.properties?.lat
+      );
+
+      const lng = Number(
+        item.lng ??
+        item.lon ??
+        item.longitude ??
+        item.properties?.lon
+      );
+
+      if (
+        Number.isFinite(lat) &&
+        Number.isFinite(lng)
+      ) {
+        return {
+          lat,
+          lng,
+          name:
+            item.name ||
+            item.display_name ||
+            item.formatted ||
+            item.properties?.formatted ||
+            null,
+        };
+      }
+    }
+
+    // Direct object fallback.
+    const lat = Number(
+      response.lat ??
+      response.latitude
+    );
+
+    const lng = Number(
+      response.lng ??
+      response.lon ??
+      response.longitude
+    );
+
+    if (
+      Number.isFinite(lat) &&
+      Number.isFinite(lng)
+    ) {
+      return {
+        lat,
+        lng,
+        name:
+          response.name ||
+          response.display_name ||
+          null,
+      };
+    }
+
+    return null;
+  }
+
+  function useCurrentLocation() {
+    const { liveBtn } =
+      getElements();
+
+    if (
+      !navigator.geolocation
+    ) {
+      setStatus(
+        "Geolocation is not supported by this browser.",
+        "error"
+      );
+
+      return;
+    }
+
+    if (liveBtn) {
+      liveBtn.disabled = true;
+      liveBtn.textContent =
+        "📍 Detecting Location...";
+    }
+
+    setStatus(
+      "Getting your current location...",
+      "loading"
+    );
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          await activateLocation(
+            position.coords.latitude,
+            position.coords.longitude,
+            null,
+            "live"
+          );
+
+        } catch (error) {
+          console.error(
+            "❌ Current location activation failed:",
+            error
+          );
+
+          setStatus(
+            error.message,
+            "error"
+          );
+        } finally {
+          if (liveBtn) {
+            liveBtn.disabled = false;
+            liveBtn.textContent =
+              "📍 Use Current Location";
+          }
+        }
+      },
+
+      (error) => {
+        console.error(
+          "❌ Geolocation error:",
+          error
+        );
+
+        let message =
+          "Unable to get your current location.";
+
+        if (error.code === 1) {
+          message =
+            "Location permission was denied. Please allow location access.";
+        } else if (error.code === 2) {
+          message =
+            "Your current location could not be determined.";
+        } else if (error.code === 3) {
+          message =
+            "Location request timed out. Please try again.";
+        }
+
+        setStatus(
+          message,
+          "error"
+        );
+
+        if (liveBtn) {
+          liveBtn.disabled = false;
+          liveBtn.textContent =
+            "📍 Use Current Location";
+        }
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  }
+
+  function initialize() {
+    if (initialized) return;
+
+    initialized = true;
+
+    const {
+      gate,
+      main,
+      input,
+      searchBtn,
+      liveBtn,
+    } = getElements();
+
+    // IMPORTANT:
+    // Command Center starts LOCKED.
+    if (gate) {
+      gate.style.display = "flex";
+    }
+
+    if (main) {
+      main.style.display = "none";
+    }
+
+    // Search button.
+    searchBtn?.addEventListener(
+      "click",
+      searchLocation
+    );
+
+    // Enter key.
+    input?.addEventListener(
+      "keydown",
+      (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          searchLocation();
+        }
+      }
+    );
+
+    // Current location.
+    liveBtn?.addEventListener(
+      "click",
+      useCurrentLocation
+    );
+
+    console.log(
+      "✅ Location gate ready — waiting for user selection"
+    );
+  }
+
+  function getLocation() {
+    return currentLocation;
+  }
+
+  function hasLocation() {
+    return Boolean(
+      currentLocation &&
+      Number.isFinite(currentLocation.lat) &&
+      Number.isFinite(currentLocation.lng)
+    );
+  }
+
+  return {
+    initialize,
+    activateLocation,
+    searchLocation,
+    useCurrentLocation,
+    getLocation,
+    hasLocation,
+  };
+})();
+
+window.CommandCenterLocation =
+  CommandCenterLocation;
+
+console.log(
+  "✅ Command Center Location Ready"
+);

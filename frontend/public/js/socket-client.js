@@ -1,64 +1,93 @@
-const SocketService = (() => {
-    let socket = null;
+"use strict";
 
-    const SOCKET_URL = "http://localhost:4000";
+console.log("🔌 Socket Client Loaded");
 
-    function connect() {
-        if (socket && socket.connected) {
-            return socket;
-        }
+let commandSocket = null;
 
-        socket = io(SOCKET_URL);
+/* ==========================================================
+   CONNECT
+========================================================== */
 
-        socket.on("connect", () => {
-            console.log("🟢 Socket connected:", socket.id);
-        });
+function initializeCommandSocket() {
+  if (
+    typeof io !== "function"
+  ) {
+    console.error(
+      "❌ Socket.IO library not loaded",
+    );
 
-        socket.on("disconnect", (reason) => {
-            console.log("🔴 Socket disconnected:", reason);
-        });
+    return null;
+  }
 
-        socket.on("connect_error", (error) => {
-            console.error("❌ Socket connection error:", error);
-        });
+  if (
+    commandSocket &&
+    commandSocket.connected
+  ) {
+    return commandSocket;
+  }
 
-        return socket;
-    }
+  const socketUrl =
+    window.COMMAND_SOCKET_URL ||
+    "http://localhost:4000";
 
-    function on(event, callback) {
-        if (!socket) {
-            connect();
-        }
+  commandSocket = io(
+    socketUrl,
+    {
+      transports: [
+        "websocket",
+        "polling",
+      ],
 
-        socket.on(event, callback);
-    }
+      withCredentials: true,
+    },
+  );
 
-    function off(event, callback) {
-        if (!socket) return;
+  commandSocket.on(
+    "connect",
+    () => {
+      console.log(
+        "🟢 Command Socket Connected:",
+        commandSocket.id,
+      );
+    },
+  );
 
-        socket.off(event, callback);
-    }
+  commandSocket.on(
+    "disconnect",
+    (reason) => {
+      console.warn(
+        "🔴 Command Socket Disconnected:",
+        reason,
+      );
+    },
+  );
 
-    function emit(event, data) {
-        if (!socket) {
-            connect();
-        }
+  commandSocket.on(
+    "connect_error",
+    (error) => {
+      console.error(
+        "❌ Socket connection error:",
+        error.message,
+      );
+    },
+  );
 
-        socket.emit(event, data);
-    }
+  window.commandSocket =
+    commandSocket;
 
-    function disconnect() {
-        if (socket) {
-            socket.disconnect();
-            socket = null;
-        }
-    }
+  return commandSocket;
+}
 
-    return {
-        connect,
-        on,
-        off,
-        emit,
-        disconnect
-    };
-})();
+/* ==========================================================
+   EXPORT
+========================================================== */
+
+window.initializeCommandSocket =
+  initializeCommandSocket;
+
+window.commandSocket =
+  commandSocket;
+
+console.log(
+  "✅ Socket Client Ready",
+);

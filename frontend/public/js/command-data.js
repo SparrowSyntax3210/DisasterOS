@@ -1,314 +1,389 @@
+/* ==========================================================
+   DISASTEROS COMMAND CENTER
+   DATA STORE + FETCH + UPDATE VALUES
+   ========================================================== */
+
 "use strict";
 
-// ==========================================================
-// DISASTEROS COMMAND CENTER
-// COMMAND DATA MODULE
-// ==========================================================
+console.log("📦 Command Data Loaded");
 
-console.log("✅ command-data.js loaded");
-
-// ==========================================================
-// STATE
-// ==========================================================
-
-window.CommandCenter = window.CommandCenter || {};
-
-CommandCenter.data = CommandCenter.data || {
+const CommandData = window.CommandData || {
   incidents: [],
   sos: [],
   missions: [],
   teams: [],
   resources: [],
-  fieldDevices: [],
-
-  lastLoaded: null,
+  field: [],
+  users: [],
+  predictions: [],
+  lastRefresh: null,
   loading: false,
 };
 
-let commandData = {
-  incidents: [],
-  sos: [],
-  missions: [],
-  teams: [],
-  resources: [],
-  zones: [],
-};
+window.CommandData = CommandData;
 
-// ==========================================================
-// HELPERS
-// ==========================================================
+/* Keep compatibility with the old monolithic CommandCenter object. */
+window.CommandCenter = window.CommandCenter || {};
+const CC = window.CommandCenter;
 
-function commandDataArray(response) {
-  if (Array.isArray(response)) {
-    return response;
+function ensureCommandArrays() {
+  const keys = [
+    "incidents", "sos", "missions", "teams", "resources",
+    "field", "fieldData", "fieldDevices", "fieldAgents",
+    "users", "predictions"
+  ];
+
+  keys.forEach((key) => {
+    if (!Array.isArray(CommandData[key])) CommandData[key] = [];
+  });
+
+  if (!Array.isArray(CC.incidents)) CC.incidents = CommandData.incidents;
+  if (!Array.isArray(CC.sos)) CC.sos = CommandData.sos;
+  if (!Array.isArray(CC.missions)) CC.missions = CommandData.missions;
+  if (!Array.isArray(CC.teams)) CC.teams = CommandData.teams;
+  if (!Array.isArray(CC.resources)) CC.resources = CommandData.resources;
+  if (!Array.isArray(CC.fieldData)) CC.fieldData = CommandData.field;
+}
+
+function extractArray(response, keys = []) {
+  if (Array.isArray(response)) return response;
+
+  for (const key of keys) {
+    if (Array.isArray(response?.[key])) return response[key];
   }
 
-  if (Array.isArray(response?.data)) {
-    return response.data;
-  }
-
-  if (Array.isArray(response?.data?.data)) {
-    return response.data.data;
-  }
-
-  if (Array.isArray(response?.results)) {
-    return response.results;
-  }
-
-  if (Array.isArray(response?.items)) {
-    return response.items;
-  }
-
-  if (Array.isArray(response?.incidents)) {
-    return response.incidents;
-  }
-
-  if (Array.isArray(response?.sos)) {
-    return response.sos;
-  }
-
-  if (Array.isArray(response?.missions)) {
-    return response.missions;
-  }
-
-  if (Array.isArray(response?.teams)) {
-    return response.teams;
-  }
-
-  if (Array.isArray(response?.resources)) {
-    return response.resources;
-  }
-
-  if (Array.isArray(response?.devices)) {
-    return response.devices;
-  }
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.results)) return response.results;
+  if (Array.isArray(response?.items)) return response.items;
 
   return [];
 }
 
-// ==========================================================
-// LOCATION QUERY
-// ==========================================================
+function entityId(item) {
+  if (!item) return null;
+  return String(
+    item._id ??
+    item.id ??
+    item.incidentId ??
+    item.sosId ??
+    item.missionId ??
+    item.teamId ??
+    item.resourceId ??
+    item.deviceId ??
+    ""
+  ) || null;
+}
 
-function getCommandDataLocationQuery() {
-  if (typeof window.getCommandCenterLocationQuery === "function") {
-    return window.getCommandCenterLocationQuery();
+function upsert(array, item) {
+  if (!item) return array;
+  const id = entityId(item);
+
+  if (!id) {
+    array.push(item);
+    return array;
   }
 
-  const location = CommandCenter.operationalLocation || CommandCenter.location;
+  const index = array.findIndex((x) => entityId(x) === id);
+  if (index === -1) array.push(item);
+  else array[index] = { ...array[index], ...item };
 
-  if (!location) {
-    return {};
-  }
+  return array;
+}
 
-  const latitude = location.latitude ?? location.lat;
+function remove(array, id) {
+  const target = String(id ?? "");
+  return array.filter((x) => entityId(x) !== target);
+}
 
-  const longitude = location.longitude ?? location.lng;
+function syncCompatibilityState() {
+  CC.incidents = CommandData.incidents;
+  CC.sos = CommandData.sos;
+  CC.missions = CommandData.missions;
+  CC.teams = CommandData.teams;
+  CC.resources = CommandData.resources;
+  CC.fieldData = CommandData.field;
+  CC.fieldDevices = CommandData.fieldDevices || [];
+  CC.fieldAgents = CommandData.fieldAgents || [];
+
+  CC.dashboard = CC.dashboard || {};
+  CC.dashboard.incidents = CommandData.incidents;
+  CC.dashboard.sos = CommandData.sos;
+  CC.dashboard.missions = CommandData.missions;
+  CC.dashboard.teams = CommandData.teams;
+  CC.dashboard.resources = CommandData.resources;
+  CC.dashboard.fieldDevices = CommandData.fieldDevices || [];
+  CC.dashboard.lastRefresh = CommandData.lastRefresh;
+}
+
+function calculateCommandValues() {
+  const incidents = CommandData.incidents;
+  const sos = CommandData.sos;
+  const missions = CommandData.missions;
+  const teams = CommandData.teams;
+  const resources = CommandData.resources;
+
+  const active = (item) => {
+    const status = String(item?.status || "").toLowerCase();
+    return !["resolved", "closed", "completed", "cancelled", "rejected"].includes(status);
+  };
+
+  const activeIncidents = incidents.filter(active);
+  const activeSOS = sos.filter(active);
+
+  const critical = [...incidents, ...sos].filter((x) =>
+    ["critical", "extreme"].includes(
+      String(x?.severity || x?.priority || "").toLowerCase()
+    )
+  );
+
+  const riskScore = Math.min(
+    100,
+    Math.round(
+      activeIncidents.length * 10 +
+      activeSOS.length * 15 +
+      critical.length * 10 +
+      missions.filter(active).length * 4
+    )
+  );
+
+  let riskLevel = "LOW";
+  if (riskScore >= 75) riskLevel = "CRITICAL";
+  else if (riskScore >= 50) riskLevel = "HIGH";
+  else if (riskScore >= 25) riskLevel = "MEDIUM";
+
+  const resourceCount = (type) =>
+    resources.filter((r) => {
+      const text = String(
+        r?.resourceType || r?.type || r?.category || r?.name || ""
+      ).toLowerCase();
+      return text.includes(type);
+    }).length;
 
   return {
-    latitude,
-    longitude,
-    location: location.name || location.displayName || "",
+    incidents: incidents.length,
+    sos: sos.length,
+    missions: missions.length,
+    teams: teams.length,
+    activeIncidents: activeIncidents.length,
+    activeSOS: activeSOS.length,
+    critical: critical.length,
+    riskScore,
+    riskLevel,
+    ambulance: resourceCount("ambulance"),
+    boats: resourceCount("boat"),
+    supplies: resources.filter((r) => {
+      const text = String(r?.type || r?.category || r?.name || "").toLowerCase();
+      return /supply|food|water/.test(text);
+    }).length,
   };
 }
 
-// ==========================================================
-// GENERIC LOADER
-// ==========================================================
-
-async function loadCommandDataEndpoint(endpoint, key) {
-  try {
-    const query = getCommandDataLocationQuery();
-
-    console.log(`[COMMAND DATA] Loading ${key}`, query);
-
-    const response = await apiGet(endpoint, query);
-
-    const data = commandDataArray(response);
-
-    CommandCenter.data[key] = data;
-
-    // Keep main state synchronized
-    CommandCenter[key] = data;
-
-    console.log(`[COMMAND DATA] ${key}: ${data.length}`);
-
-    return data;
-  } catch (error) {
-    console.error(`[COMMAND DATA] Failed to load ${key}:`, error);
-
-    CommandCenter.data[key] = [];
-    CommandCenter[key] = [];
-
-    return [];
-  }
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value ?? 0;
 }
 
-// ==========================================================
-// INCIDENTS
-// ==========================================================
+function updateValues() {
+  const v = calculateCommandValues();
 
-async function loadOperationalIncidents() {
-  return loadCommandDataEndpoint("/api/incidents", "incidents");
+  setText("incidentCount", v.incidents);
+  setText("sosCount", v.sos);
+  setText("missionCount", v.missions);
+  setText("teamCount", v.teams);
+
+  setText("resourceTeams", v.teams);
+  setText("resourceAmbulance", v.ambulance);
+  setText("resourceBoats", v.boats);
+  setText("resourceSupplies", v.supplies);
+
+  setText("riskLevel", v.riskLevel);
+  setText("riskScore", v.riskScore);
+  setText(
+    "situationSummary",
+    `${v.activeIncidents} active incidents, ${v.activeSOS} active SOS requests and ${v.missions} missions are currently being monitored.`
+  );
+
+  setText("alertCount", v.critical);
+
+  renderAlerts();
+
+  document.dispatchEvent(new CustomEvent("commandcenter:values-updated", {
+    detail: v
+  }));
+
+  return v;
 }
 
-// ==========================================================
-// SOS
-// ==========================================================
+function renderAlerts() {
+  const list = document.getElementById("alertsList");
+  if (!list) return;
 
-async function loadOperationalSOS() {
-  return loadCommandDataEndpoint("/api/sos", "sos");
-}
+  const items = [...CommandData.sos, ...CommandData.incidents]
+    .filter((x) => {
+      const severity = String(x?.severity || x?.priority || "").toLowerCase();
+      return ["critical", "extreme", "high"].includes(severity);
+    })
+    .slice(0, 8);
 
-// ==========================================================
-// MISSIONS
-// ==========================================================
-
-async function loadOperationalMissions() {
-  return loadCommandDataEndpoint("/api/missions", "missions");
-}
-
-// ==========================================================
-// TEAMS
-// ==========================================================
-
-async function loadOperationalTeams() {
-  return loadCommandDataEndpoint("/api/teams", "teams");
-}
-
-// ==========================================================
-// RESOURCES
-// ==========================================================
-
-async function loadOperationalResources() {
-  return loadCommandDataEndpoint("/api/resources", "resources");
-}
-
-// ==========================================================
-// FIELD DEVICES
-// ==========================================================
-
-async function loadOperationalFieldDevices() {
-  return loadCommandDataEndpoint("/api/field", "fieldDevices");
-}
-
-// ==========================================================
-// LOAD EVERYTHING
-// ==========================================================
-
-async function loadOperationalData() {
-  if (CommandCenter.data.loading) {
-    return CommandCenter.data;
+  if (!items.length) {
+    list.innerHTML = `<div class="empty-state">No active alerts</div>`;
+    return;
   }
 
-  const location = getCommandDataLocationQuery();
+  list.innerHTML = items.map((item) => {
+    const title =
+      item?.title ||
+      item?.type ||
+      item?.subject ||
+      "Emergency";
 
-  if (location.latitude === undefined || location.longitude === undefined) {
-    console.warn("[COMMAND DATA] No operational location selected.");
+    const status = item?.status || "ACTIVE";
 
-    return CommandCenter.data;
+    return `
+      <div class="alert-item">
+        <strong>${escapeHTML(title)}</strong>
+        <span>${escapeHTML(status)}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+async function fetchCommandCenterData() {
+  ensureCommandArrays();
+
+  if (!window.commandApi) {
+    throw new Error("commandApi is not available");
   }
 
-  CommandCenter.data.loading = true;
+  CommandData.loading = true;
 
-  try {
-    const results = await Promise.allSettled([
-      loadOperationalIncidents(),
-      loadOperationalSOS(),
-      loadOperationalMissions(),
-      loadOperationalTeams(),
-      loadOperationalResources(),
-      loadOperationalFieldDevices(),
-    ]);
+  const loaders = [
+    ["incidents", window.commandApi.getIncidents, ["incidents", "data"]],
+    ["sos", window.commandApi.getSOS, ["sos", "requests", "data"]],
+    ["missions", window.commandApi.getMissions, ["missions", "data"]],
+    ["teams", window.commandApi.getTeams, ["teams", "data"]],
+    ["resources", window.commandApi.getResources, ["resources", "data"]],
+    ["field", window.commandApi.getField, ["field", "devices", "fieldDevices", "data"]],
+    ["users", window.commandApi.getUsers, ["users", "data"]],
+    ["predictions", window.commandApi.getPredictions, ["predictions", "data"]],
+  ];
 
-    results.forEach((result, index) => {
-      if (result.status === "rejected") {
-        console.warn(`[COMMAND DATA] Loader ${index} failed`, result.reason);
+  const results = await Promise.allSettled(
+    loaders.map(([, fn]) => fn())
+  );
+
+  results.forEach((result, index) => {
+    const [key, , responseKeys] = loaders[index];
+
+    if (result.status === "fulfilled") {
+      CommandData[key] = extractArray(result.value, responseKeys);
+
+      if (key === "field") {
+        const response = result.value;
+        CommandData.fieldDevices =
+          response?.devices ||
+          response?.fieldDevices ||
+          CommandData.field ||
+          [];
+
+        CommandData.fieldAgents =
+          response?.agents ||
+          response?.fieldAgents ||
+          [];
       }
-    });
+    } else {
+      console.warn(`[DATA] ${key} failed:`, result.reason);
+      CommandData[key] = [];
+    }
+  });
 
-    CommandCenter.data.lastLoaded = new Date();
+  CommandData.lastRefresh = new Date().toISOString();
+  CommandData.loading = false;
 
-    console.log("[COMMAND DATA] Operational data loaded.");
+  syncCompatibilityState();
+  updateValues();
 
-    return CommandCenter.data;
-  } finally {
-    CommandCenter.data.loading = false;
+  document.dispatchEvent(new CustomEvent("commandcenter:data-loaded", {
+    detail: CommandData
+  }));
+
+  if (typeof window.refreshCommandMap === "function") {
+    window.refreshCommandMap(CommandData);
+  }
+
+  return CommandData;
+}
+
+async function refreshCommandCenterData() {
+  return fetchCommandCenterData();
+}
+
+function updateCollection(type, payload) {
+  const keyMap = {
+    incident: "incidents",
+    sos: "sos",
+    mission: "missions",
+    team: "teams",
+    resource: "resources",
+    field: "field",
+  };
+
+  const key = keyMap[type] || type;
+  if (!Array.isArray(CommandData[key])) CommandData[key] = [];
+
+  if (Array.isArray(payload)) {
+    CommandData[key] = payload;
+  } else if (payload) {
+    upsert(CommandData[key], payload);
+  }
+
+  syncCompatibilityState();
+  updateValues();
+
+  if (typeof window.refreshCommandMap === "function") {
+    window.refreshCommandMap(CommandData);
   }
 }
 
-// ==========================================================
-// REFRESH
-// ==========================================================
+function deleteCollectionItem(type, id) {
+  const keyMap = {
+    incident: "incidents",
+    sos: "sos",
+    mission: "missions",
+    team: "teams",
+    resource: "resources",
+  };
 
-async function refreshOperationalData() {
-  return loadOperationalData();
+  const key = keyMap[type] || type;
+  if (!Array.isArray(CommandData[key])) return;
+
+  CommandData[key] = remove(CommandData[key], id);
+
+  syncCompatibilityState();
+  updateValues();
+
+  if (typeof window.refreshCommandMap === "function") {
+    window.refreshCommandMap(CommandData);
+  }
 }
 
-// ==========================================================
-// GETTERS
-// ==========================================================
+window.fetchCommandCenterData = fetchCommandCenterData;
+window.refreshCommandCenterData = refreshCommandCenterData;
+window.updateCommandCenterValues = updateValues;
+window.calculateCommandValues = calculateCommandValues;
+window.updateCollection = updateCollection;
+window.deleteCollectionItem = deleteCollectionItem;
+window.CommandData = CommandData;
 
-function getOperationalData() {
-  return CommandCenter.data;
-}
-
-function getOperationalIncidents() {
-  return CommandCenter.data.incidents || [];
-}
-
-function getOperationalSOS() {
-  return CommandCenter.data.sos || [];
-}
-
-function getOperationalMissions() {
-  return CommandCenter.data.missions || [];
-}
-
-function getOperationalTeams() {
-  return CommandCenter.data.teams || [];
-}
-
-function getOperationalResources() {
-  return CommandCenter.data.resources || [];
-}
-
-function getOperationalFieldDevices() {
-  return CommandCenter.data.fieldDevices || [];
-}
-
-// ==========================================================
-// GLOBAL EXPORTS
-// ==========================================================
-
-window.loadOperationalData = loadOperationalData;
-
-window.refreshOperationalData = refreshOperationalData;
-
-window.loadOperationalIncidents = loadOperationalIncidents;
-
-window.loadOperationalSOS = loadOperationalSOS;
-
-window.loadOperationalMissions = loadOperationalMissions;
-
-window.loadOperationalTeams = loadOperationalTeams;
-
-window.loadOperationalResources = loadOperationalResources;
-
-window.loadOperationalFieldDevices = loadOperationalFieldDevices;
-
-window.getOperationalData = getOperationalData;
-
-window.getOperationalIncidents = getOperationalIncidents;
-
-window.getOperationalSOS = getOperationalSOS;
-
-window.getOperationalMissions = getOperationalMissions;
-
-window.getOperationalTeams = getOperationalTeams;
-
-window.getOperationalResources = getOperationalResources;
-
-window.getOperationalFieldDevices = getOperationalFieldDevices;
-
-console.log("✅ Command data module ready.");
+ensureCommandArrays();
+syncCompatibilityState();

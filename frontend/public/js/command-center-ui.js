@@ -1,521 +1,384 @@
-// ==========================================================
-// DISASTEROS COMMAND CENTER
-// UI / DASHBOARD RENDERING
-// ==========================================================
+console.log("🎛️ Command Center UI Loaded");
 
-console.log("Command Center UI JS Loaded");
+const CommandCenterUI = (() => {
 
-// ==========================================================
-// DOM REFERENCES
-// ==========================================================
+  function find(...selectors) {
 
-const commandUI = {
-  incidentCount: document.getElementById("incidentCount"),
-  sosCount: document.getElementById("sosCount"),
-  missionCount: document.getElementById("missionCount"),
-  teamCount: document.getElementById("teamCount"),
+    for (const selector of selectors) {
 
-  riskLevel: document.getElementById("riskLevel"),
-  riskScore: document.getElementById("riskScore"),
-  situationSummary: document.getElementById("situationSummary"),
+      const element =
+        document.querySelector(selector);
 
-  alertCount: document.getElementById("alertCount"),
-  alertsList: document.getElementById("alertsList"),
+      if (element) return element;
+    }
 
-  resourceTeams: document.getElementById("resourceTeams"),
-  resourceAmbulance: document.getElementById("resourceAmbulance"),
-  resourceBoats: document.getElementById("resourceBoats"),
-  resourceSupplies: document.getElementById("resourceSupplies"),
-
-  selectedPanel: document.getElementById("selectedPanel"),
-  selectedTitle: document.getElementById("selectedTitle"),
-  selectedStatus: document.getElementById("selectedStatus"),
-  selectedSeverity: document.getElementById("selectedSeverity"),
-  selectedDescription: document.getElementById("selectedDescription"),
-  selectedLocation: document.getElementById("selectedLocation"),
-  selectedType: document.querySelector(".selected-type"),
-
-  closeSelected: document.getElementById("closeSelected"),
-
-  mapLat: document.getElementById("mapLat"),
-  mapLng: document.getElementById("mapLng"),
-};
-
-// ==========================================================
-// SAFE VALUE
-// ==========================================================
-
-function uiValue(value, fallback = "--") {
-  if (value === undefined || value === null || value === "") {
-    return fallback;
+    return null;
   }
 
-  return value;
-}
+  function setText(value, ...selectors) {
 
-// ==========================================================
-// UPDATE LOCATION DISPLAY
-// ==========================================================
+    const element =
+      find(...selectors);
 
-function updateCommandLocationUI() {
-  const location = window.commandLocation;
+    if (!element) return;
 
-  if (!location) {
-    return;
+    element.textContent =
+      value ?? 0;
   }
 
-  if (commandUI.mapLat) {
-    commandUI.mapLat.textContent = Number(location.lat).toFixed(5);
-  }
+  function renderCounters(state) {
 
-  if (commandUI.mapLng) {
-    commandUI.mapLng.textContent = Number(location.lng).toFixed(5);
-  }
-}
+    const stats =
+      state.stats || {};
 
-// ==========================================================
-// UPDATE SITUATION COUNTERS
-// ==========================================================
+    // ------------------------------------------------------
+    // INCIDENTS
+    // ------------------------------------------------------
 
-function renderSituationOverview(data) {
-  if (!data) {
-    return;
-  }
+    setText(
+      stats.incidents,
+      "#incidentCount",
+      "#totalIncidents",
+      "[data-stat='incidents']",
+      "[data-counter='incidents']"
+    );
 
-  const incidents = data.incidents || data.incident || [];
+    setText(
+      stats.activeIncidents,
+      "#activeIncidentCount",
+      "#activeIncidents",
+      "[data-stat='active-incidents']",
+      "[data-counter='active-incidents']"
+    );
 
-  const sos = data.sos || data.sosRequests || [];
+    setText(
+      stats.criticalIncidents,
+      "#criticalIncidentCount",
+      "#criticalIncidents",
+      "[data-stat='critical-incidents']",
+      "[data-counter='critical-incidents']"
+    );
 
-  const missions = data.missions || [];
+    // ------------------------------------------------------
+    // MISSIONS
+    // ------------------------------------------------------
 
-  const teams = data.teams || data.responders || [];
+    setText(
+      stats.missions,
+      "#missionCount",
+      "#totalMissions",
+      "[data-stat='missions']",
+      "[data-counter='missions']"
+    );
 
-  if (commandUI.incidentCount) {
-    commandUI.incidentCount.textContent = Array.isArray(incidents)
-      ? incidents.length
-      : Number(incidents) || 0;
-  }
+    setText(
+      stats.activeMissions,
+      "#activeMissionCount",
+      "#activeMissions",
+      "[data-stat='active-missions']",
+      "[data-counter='active-missions']"
+    );
 
-  if (commandUI.sosCount) {
-    commandUI.sosCount.textContent = Array.isArray(sos)
-      ? sos.length
-      : Number(sos) || 0;
-  }
+    // ------------------------------------------------------
+    // RESOURCES
+    // ------------------------------------------------------
 
-  if (commandUI.missionCount) {
-    commandUI.missionCount.textContent = Array.isArray(missions)
-      ? missions.length
-      : Number(missions) || 0;
-  }
+    setText(
+      stats.resources,
+      "#resourceCount",
+      "#totalResources",
+      "[data-stat='resources']",
+      "[data-counter='resources']"
+    );
 
-  if (commandUI.teamCount) {
-    commandUI.teamCount.textContent = Array.isArray(teams)
-      ? teams.length
-      : Number(teams) || 0;
-  }
-}
+    // ------------------------------------------------------
+    // SOS
+    // ------------------------------------------------------
 
-// ==========================================================
-// RISK STATUS
-// ==========================================================
+    setText(
+      stats.sos,
+      "#sosCount",
+      "#totalSOS",
+      "[data-stat='sos']",
+      "[data-counter='sos']"
+    );
 
-function renderRiskStatus(data) {
-  if (!data) {
-    return;
-  }
+    setText(
+      stats.pendingSOS,
+      "#pendingSOS",
+      "[data-stat='pending-sos']",
+      "[data-counter='pending-sos']"
+    );
 
-  const prediction = data.prediction || data.risk || {};
-
-  const risk =
-    prediction.risk || data.riskLevel || data.risk || "AWAITING DATA";
-
-  const score =
-    prediction.probability ??
-    prediction.score ??
-    data.riskScore ??
-    data.probability ??
-    null;
-
-  if (commandUI.riskLevel) {
-    commandUI.riskLevel.textContent = String(risk).toUpperCase();
-  }
-
-  if (commandUI.riskScore) {
-    commandUI.riskScore.textContent = score === null ? "--" : `${score}%`;
-  }
-
-  if (commandUI.situationSummary) {
-    commandUI.situationSummary.textContent = buildSituationSummary(
-      data,
-      risk,
-      score,
+    setText(
+      stats.criticalSOS,
+      "#criticalSOS",
+      "[data-stat='critical-sos']",
+      "[data-counter='critical-sos']"
     );
   }
-}
 
-// ==========================================================
-// GENERATE SITUATION SUMMARY
-// ==========================================================
+  function renderIncidentList(state) {
 
-function buildSituationSummary(data, risk, score) {
-  const incidents = Array.isArray(data.incidents) ? data.incidents.length : 0;
+    const container =
+      find(
+        "#incidentList",
+        "#incidentsList",
+        "[data-list='incidents']"
+      );
 
-  const sos = Array.isArray(data.sos)
-    ? data.sos.length
-    : Array.isArray(data.sosRequests)
-      ? data.sosRequests.length
-      : 0;
+    if (!container) return;
 
-  const missions = Array.isArray(data.missions) ? data.missions.length : 0;
+    const incidents =
+      state.incidents || [];
 
-  const teams = Array.isArray(data.teams)
-    ? data.teams.length
-    : Array.isArray(data.responders)
-      ? data.responders.length
-      : 0;
+    if (!incidents.length) {
 
-  let summary =
-    `Operational monitoring active. ` +
-    `${incidents} incidents, ` +
-    `${sos} SOS requests and ` +
-    `${missions} missions detected. ` +
-    `${teams} responder units available.`;
-
-  if (
-    String(risk).toUpperCase() === "CRITICAL" ||
-    String(risk).toUpperCase() === "EXTREME"
-  ) {
-    summary =
-      `Critical operational conditions detected. ` +
-      `Immediate attention is required across ` +
-      `active incidents and emergency operations.`;
-  } else if (String(risk).toUpperCase() === "HIGH") {
-    summary =
-      `High operational risk detected. ` +
-      `Emergency teams should remain prepared ` +
-      `for escalation.`;
-  }
-
-  return summary;
-}
-
-// ==========================================================
-// ALERTS
-// ==========================================================
-
-function renderAlerts(data) {
-  if (!commandUI.alertsList) {
-    return;
-  }
-
-  const alerts = [];
-
-  // --------------------------------------------------------
-  // INCIDENT ALERTS
-  // --------------------------------------------------------
-
-  const incidents = Array.isArray(data?.incidents) ? data.incidents : [];
-
-  incidents.forEach((incident) => {
-    const severity = String(
-      incident.severity || incident.priority || "HIGH",
-    ).toUpperCase();
-
-    alerts.push({
-      type: "INCIDENT",
-      title: incident.title || incident.name || "Emergency Incident",
-      description:
-        incident.description ||
-        "Active incident reported in the operational area.",
-      severity,
-      item: incident,
-    });
-  });
-
-  // --------------------------------------------------------
-  // SOS ALERTS
-  // --------------------------------------------------------
-
-  const sos = Array.isArray(data?.sos)
-    ? data.sos
-    : Array.isArray(data?.sosRequests)
-      ? data.sosRequests
-      : [];
-
-  sos.forEach((item) => {
-    alerts.push({
-      type: "SOS",
-      title: "Emergency SOS Request",
-      description:
-        item.description ||
-        item.message ||
-        "Emergency assistance has been requested.",
-      severity: String(
-        item.severity || item.priority || "CRITICAL",
-      ).toUpperCase(),
-      item,
-    });
-  });
-
-  // --------------------------------------------------------
-  // SORT BY SEVERITY
-  // --------------------------------------------------------
-
-  const priority = {
-    CRITICAL: 4,
-    EXTREME: 4,
-    HIGH: 3,
-    MEDIUM: 2,
-    LOW: 1,
-  };
-
-  alerts.sort((a, b) => {
-    return (priority[b.severity] || 0) - (priority[a.severity] || 0);
-  });
-
-  if (commandUI.alertCount) {
-    commandUI.alertCount.textContent = alerts.length;
-  }
-
-  // --------------------------------------------------------
-  // EMPTY STATE
-  // --------------------------------------------------------
-
-  if (!alerts.length) {
-    commandUI.alertsList.innerHTML = `
-      <div class="empty-state">
-        No active alerts
-      </div>
-    `;
-
-    return;
-  }
-
-  // --------------------------------------------------------
-  // RENDER
-  // --------------------------------------------------------
-
-  commandUI.alertsList.innerHTML = "";
-
-  alerts.slice(0, 10).forEach((alert) => {
-    const element = document.createElement("div");
-
-    element.className = "command-alert-item";
-
-    const severityClass = alert.severity.toLowerCase().replace(/[^a-z]/g, "");
-
-    element.innerHTML = `
-        <div class="alert-indicator ${severityClass}">
-        </div>
-
-        <div class="alert-content">
-
-          <div class="alert-top">
-
-            <span class="alert-type">
-              ${escapeCommandUI(alert.type)}
-            </span>
-
-            <span class="alert-severity">
-              ${escapeCommandUI(alert.severity)}
-            </span>
-
-          </div>
-
-          <strong>
-            ${escapeCommandUI(alert.title)}
-          </strong>
-
-          <p>
-            ${escapeCommandUI(alert.description)}
-          </p>
-
+      container.innerHTML = `
+        <div class="empty-state">
+          No incidents reported
         </div>
       `;
 
-    element.addEventListener("click", () => {
-      if (typeof window.selectCommandOperation === "function") {
-        window.selectCommandOperation(alert.item, alert.type);
-      }
-    });
+      return;
+    }
 
-    commandUI.alertsList.appendChild(element);
-  });
-}
+    container.innerHTML =
+      incidents
+        .slice(0, 10)
+        .map((incident) => {
 
-// ==========================================================
-// RESOURCE COUNTS
-// ==========================================================
+          const severity =
+            String(
+              incident.severity || "UNKNOWN"
+            ).toUpperCase();
 
-function renderResourcesUI(data) {
-  if (!data) {
-    return;
+          return `
+            <div class="incident-item"
+                 data-id="${incident._id || ""}">
+
+              <div class="incident-main">
+
+                <strong>
+                  ${escapeHTML(
+                    incident.type || "Incident"
+                  )}
+                </strong>
+
+                <span>
+                  ${escapeHTML(
+                    incident.incidentId ||
+                    incident._id ||
+                    ""
+                  )}
+                </span>
+
+              </div>
+
+              <div class="incident-meta">
+
+                <span>
+                  ${escapeHTML(
+                    incident.status || "REPORTED"
+                  )}
+                </span>
+
+                <b class="severity-${severity.toLowerCase()}">
+                  ${severity}
+                </b>
+
+              </div>
+
+            </div>
+          `;
+
+        })
+        .join("");
   }
 
-  const resources = data.resources || {};
+  function renderMissionList(state) {
 
-  const teams = data.teams || data.responders || resources.teams || [];
+    const container =
+      find(
+        "#missionList",
+        "#missionsList",
+        "[data-list='missions']"
+      );
 
-  const ambulances =
-    data.ambulances || resources.ambulances || resources.ambulance || [];
+    if (!container) return;
 
-  const boats = data.boats || resources.boats || [];
+    const missions =
+      state.missions || [];
 
-  const supplies = data.supplies || resources.supplies || [];
+    if (!missions.length) {
 
-  if (commandUI.resourceTeams) {
-    commandUI.resourceTeams.textContent = Array.isArray(teams)
-      ? teams.length
-      : Number(teams) || 0;
+      container.innerHTML = `
+        <div class="empty-state">
+          No missions created
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML =
+      missions
+        .slice(0, 10)
+        .map((mission) => {
+
+          return `
+            <div class="mission-item"
+                 data-id="${mission._id || ""}">
+
+              <strong>
+                ${escapeHTML(
+                  mission.title ||
+                  "Untitled Mission"
+                )}
+              </strong>
+
+              <span>
+                ${escapeHTML(
+                  mission.priority || "NORMAL"
+                )}
+              </span>
+
+              <small>
+                ${escapeHTML(
+                  mission.status || "CREATED"
+                )}
+              </small>
+
+            </div>
+          `;
+
+        })
+        .join("");
   }
 
-  if (commandUI.resourceAmbulance) {
-    commandUI.resourceAmbulance.textContent = Array.isArray(ambulances)
-      ? ambulances.length
-      : Number(ambulances) || 0;
+  function renderSOSList(state) {
+
+    const container =
+      find(
+        "#sosList",
+        "#sosRequests",
+        "[data-list='sos']"
+      );
+
+    if (!container) return;
+
+    const requests =
+      state.sos || [];
+
+    if (!requests.length) {
+
+      container.innerHTML = `
+        <div class="empty-state">
+          No SOS requests
+        </div>
+      `;
+
+      return;
+    }
+
+    container.innerHTML =
+      requests
+        .slice(0, 10)
+        .map((sos) => {
+
+          return `
+            <div class="sos-item"
+                 data-id="${sos._id || ""}">
+
+              <strong>
+                ${escapeHTML(
+                  sos.sosId || "SOS"
+                )}
+              </strong>
+
+              <span>
+                ${escapeHTML(
+                  sos.type || "EMERGENCY"
+                )}
+              </span>
+
+              <b>
+                ${escapeHTML(
+                  sos.priority || "MEDIUM"
+                )}
+              </b>
+
+            </div>
+          `;
+
+        })
+        .join("");
   }
 
-  if (commandUI.resourceBoats) {
-    commandUI.resourceBoats.textContent = Array.isArray(boats)
-      ? boats.length
-      : Number(boats) || 0;
+  function render(state, type) {
+
+    renderCounters(state);
+
+    renderIncidentList(state);
+
+    renderMissionList(state);
+
+    renderSOSList(state);
+
+    updateLastUpdated(state);
   }
 
-  if (commandUI.resourceSupplies) {
-    commandUI.resourceSupplies.textContent = Array.isArray(supplies)
-      ? supplies.length
-      : Number(supplies) || 0;
-  }
-}
+  function updateLastUpdated(state) {
 
-// ==========================================================
-// SELECTED OPERATION
-// ==========================================================
+    const element =
+      find(
+        "#lastUpdated",
+        "[data-last-updated]"
+      );
 
-function selectCommandOperation(operation, type = "INCIDENT") {
-  if (!commandUI.selectedPanel) {
-    return;
-  }
+    if (!element) return;
 
-  if (!operation) {
-    return;
-  }
+    if (!state.lastUpdated) return;
 
-  const normalizedType = String(type).toUpperCase();
+    const date =
+      new Date(state.lastUpdated);
 
-  if (commandUI.selectedType) {
-    commandUI.selectedType.textContent = normalizedType;
+    element.textContent =
+      `Updated ${date.toLocaleTimeString()}`;
   }
 
-  if (commandUI.selectedTitle) {
-    commandUI.selectedTitle.textContent = uiValue(
-      operation.title ||
-        operation.name ||
-        operation.subject ||
-        `${normalizedType} Operation`,
-    );
+  function escapeHTML(value) {
+
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
   }
 
-  if (commandUI.selectedStatus) {
-    commandUI.selectedStatus.textContent = uiValue(operation.status, "ACTIVE");
-  }
+  CommandCenterData.subscribe(render);
 
-  if (commandUI.selectedSeverity) {
-    commandUI.selectedSeverity.textContent = uiValue(
-      operation.severity || operation.priority,
-      "HIGH",
-    );
-  }
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-  if (commandUI.selectedDescription) {
-    commandUI.selectedDescription.textContent = uiValue(
-      operation.description || operation.message,
-      "No additional information available.",
-    );
-  }
+      render(
+        CommandCenterData.getState(),
+        "initial"
+      );
 
-  if (commandUI.selectedLocation) {
-    commandUI.selectedLocation.textContent = uiValue(
-      operation.location?.name ||
-        operation.locationName ||
-        operation.address ||
-        operation.area,
-      "Operational Area",
-    );
-  }
+    }
+  );
 
-  commandUI.selectedPanel.classList.remove("hidden");
-}
+  return {
+    render,
+    renderCounters,
+  };
 
-// ==========================================================
-// CLOSE SELECTED OPERATION
-// ==========================================================
+})();
 
-function closeSelectedOperation() {
-  if (!commandUI.selectedPanel) {
-    return;
-  }
+window.CommandCenterUI =
+  CommandCenterUI;
 
-  commandUI.selectedPanel.classList.add("hidden");
-}
-
-if (commandUI.closeSelected) {
-  commandUI.closeSelected.addEventListener("click", closeSelectedOperation);
-}
-
-// ==========================================================
-// RENDER COMPLETE UI
-// ==========================================================
-
-function renderCommandUI(data) {
-  if (!data) {
-    console.warn("No command center data received.");
-
-    return;
-  }
-
-  renderSituationOverview(data);
-
-  renderRiskStatus(data);
-
-  renderAlerts(data);
-
-  renderResourcesUI(data);
-
-  updateCommandLocationUI();
-
-  console.log("Command Center UI rendered.");
-}
-
-// ==========================================================
-// ESCAPE HTML
-// ==========================================================
-
-function escapeCommandUI(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// ==========================================================
-// EXPORT
-// ==========================================================
-
-window.renderCommandUI = renderCommandUI;
-
-window.renderSituationOverview = renderSituationOverview;
-
-window.renderRiskStatus = renderRiskStatus;
-
-window.renderAlerts = renderAlerts;
-
-window.renderResourcesUI = renderResourcesUI;
-
-window.selectCommandOperation = selectCommandOperation;
-
-window.closeSelectedOperation = closeSelectedOperation;
-
-window.updateCommandLocationUI = updateCommandLocationUI;
+console.log("✅ Command Center UI Ready");

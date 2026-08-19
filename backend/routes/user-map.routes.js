@@ -1,65 +1,99 @@
 console.log(__filename);
+
 const express = require("express");
 const router = express.Router();
-const { getPlaces, geocodeLocation } = require("../services/geoapify.service");
+
+const {
+  getPlaces,
+  geocodeLocation,
+} = require("../services/geoapify.service");
 
 const DEFAULT_RADIUS = 5000;
+
+// ==========================================================
+// MAP RESOURCES
+// GET /api/map/resources?lat=28.63&lng=77.44
+// ==========================================================
 
 router.get("/resources", async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
-    const hospitals = await getPlaces(
-      lat,
-      lng,
-      DEFAULT_RADIUS,
-      "healthcare.hospital",
-    );
+    if (lat === undefined || lng === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude and longitude are required.",
+      });
+    }
 
-    const policeStations = await getPlaces(
-      lat,
-      lng,
-      DEFAULT_RADIUS,
-      "service.police",
-    );
+    const [
+      hospitals,
+      policeStations,
+      fireStations,
+      pharmacies,
+      schools,
+      shelters,
+    ] = await Promise.all([
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "healthcare.hospital"
+      ),
 
-    const fireStations = await getPlaces(
-      lat,
-      lng,
-      DEFAULT_RADIUS,
-      "service.fire_station",
-    );
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "service.police"
+      ),
 
-    const pharmacies = await getPlaces(
-      lat,
-      lng,
-      DEFAULT_RADIUS,
-      "healthcare.pharmacy",
-    );
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "service.fire_station"
+      ),
 
-    const schools = await getPlaces(
-      lat,
-      lng,
-      DEFAULT_RADIUS,
-      "education.school",
-    );
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "healthcare.pharmacy"
+      ),
+
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "education.school"
+      ),
+
+      getPlaces(
+        lat,
+        lng,
+        DEFAULT_RADIUS,
+        "accommodation.shelter"
+      ),
+    ]);
 
     return res.json({
       success: true,
 
       resources: {
-        hospitals,
-        policeStations,
-        fireStations,
-        pharmacies,
-        schools,
-        shelters: schools,
+        hospitals: hospitals || [],
+        policeStations: policeStations || [],
+        fireStations: fireStations || [],
+        pharmacies: pharmacies || [],
+        schools: schools || [],
+        shelters: shelters || [],
       },
     });
-  } catch (err) {
-    console.log(err);
 
-    res.status(500).json({
+  } catch (err) {
+    console.error("Map Resources Error:", err);
+
+    return res.status(500).json({
       success: false,
       message: err.message,
     });
@@ -70,11 +104,17 @@ router.get("/police", async (req, res) => {
   try {
     const { lat, lng } = req.query;
 
-    const police = await getPlaces(lat, lng, DEFAULT_RADIUS, "service.police");
+    const police = await getPlaces(
+      lat,
+      lng,
+      DEFAULT_RADIUS,
+      "service.police"
+    );
 
     res.status(200).json(police);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -90,12 +130,13 @@ router.get("/fire-stations", async (req, res) => {
       lat,
       lng,
       DEFAULT_RADIUS,
-      "service.fire_station",
+      "service.fire_station"
     );
 
     res.status(200).json(fireStations);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -111,12 +152,13 @@ router.get("/pharmacies", async (req, res) => {
       lat,
       lng,
       DEFAULT_RADIUS,
-      "healthcare.pharmacy",
+      "healthcare.pharmacy"
     );
 
     res.status(200).json(pharmacies);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -132,12 +174,13 @@ router.get("/shelters", async (req, res) => {
       lat,
       lng,
       DEFAULT_RADIUS,
-      "accommodation.shelter",
+      "accommodation.shelter"
     );
 
     res.status(200).json(shelters);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -153,12 +196,13 @@ router.get("/schools", async (req, res) => {
       lat,
       lng,
       DEFAULT_RADIUS,
-      "education.school",
+      "education.school"
     );
 
     res.status(200).json(schools);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -174,12 +218,13 @@ router.get("/community-centres", async (req, res) => {
       lat,
       lng,
       DEFAULT_RADIUS,
-      "service.community_centre",
+      "service.community_centre"
     );
 
     res.status(200).json(centres);
   } catch (err) {
     console.error(err);
+
     res.status(500).json({
       success: false,
       message: err.message,
@@ -189,19 +234,25 @@ router.get("/community-centres", async (req, res) => {
 
 router.get("/routes", async (req, res) => {
   res.json({
+    success: true,
     message: "Coming Soon",
+    data: [],
   });
 });
 
 router.get("/danger-zones", async (req, res) => {
   res.json({
+    success: true,
     message: "Coming Soon",
+    data: [],
   });
 });
 
 router.get("/safe-zones", async (req, res) => {
   res.json({
+    success: true,
     message: "Coming Soon",
+    data: [],
   });
 });
 
@@ -225,7 +276,7 @@ router.get("/geocode", async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       location: result,
     });
@@ -233,7 +284,7 @@ router.get("/geocode", async (req, res) => {
   } catch (err) {
     console.error("Geocode Error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: err.message,
     });

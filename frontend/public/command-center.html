@@ -21,14 +21,14 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
 
-    <!-- CSS -->
-     <link rel="stylesheet" href="./css/command-center.css">
+    <!-- Command Center CSS -->
+    <link rel="stylesheet" href="./css/command-center.css" />
   </head>
 
   <body>
-    <!-- =====================================================
+    <!-- =========================================================
          COMMAND CENTER LOCATION GATE
-    ====================================================== -->
+    ========================================================== -->
 
     <section id="commandLocationGate" class="command-location-gate">
       <div class="location-gate-card">
@@ -57,7 +57,9 @@
           <button id="commandLocationSearchBtn">Load Location</button>
         </div>
 
-        <div class="location-divider"><span>OR</span></div>
+        <div class="location-divider">
+          <span>OR</span>
+        </div>
 
         <button id="commandLiveLocationBtn" class="command-live-location-btn">
           📍 Use Current Location
@@ -67,8 +69,20 @@
       </div>
     </section>
 
-    <div id="commandCenter" style="display: none">
+    <!-- =========================================================
+         COMMAND CENTER
+    ========================================================== -->
+
+    <main id="commandCenter" style="display: none">
+      <!-- =======================================================
+           MAP
+      ======================================================== -->
+
       <div id="commandMap"></div>
+
+      <!-- =======================================================
+           TOP BAR
+      ======================================================== -->
 
       <header class="command-topbar">
         <div class="brand">
@@ -77,13 +91,14 @@
           <div class="brand-text">
             <h1>Disaster<span>OS</span></h1>
 
-            <p>COMMAND & CONTROL</p>
+            <p>COMMAND &amp; CONTROL</p>
           </div>
         </div>
 
         <div class="operation-status">
           <div class="live-indicator">
             <span></span>
+
             LIVE OPERATIONS
           </div>
 
@@ -93,6 +108,7 @@
             id="refreshBtn"
             class="icon-button"
             title="Refresh operational data"
+            type="button"
           >
             ↻
           </button>
@@ -101,55 +117,67 @@
         </div>
       </header>
 
-      <!-- =====================================================
-         LEFT TOP SITUATION OVERLAY
-    ====================================================== -->
+      <!-- =======================================================
+           SITUATION OVERVIEW
+      ======================================================== -->
 
       <section class="overlay situation-overlay">
         <div class="overlay-label">SITUATION OVERVIEW</div>
 
         <div class="status-grid">
+          <!-- INCIDENTS -->
+
           <div class="status-item critical">
-            <span class="status-icon">!</span>
+            <span class="status-icon"> ! </span>
 
             <div>
-              <strong id="incidentCount">0</strong>
-              <small>INCIDENTS</small>
+              <strong id="incidentCount"> 0 </strong>
+
+              <small> INCIDENTS </small>
             </div>
           </div>
+
+          <!-- SOS -->
 
           <div class="status-item danger">
-            <span class="status-icon">SOS</span>
+            <span class="status-icon"> SOS </span>
 
             <div>
-              <strong id="sosCount">0</strong>
-              <small>SOS</small>
+              <strong id="sosCount"> 0 </strong>
+
+              <small> SOS </small>
             </div>
           </div>
 
+          <!-- MISSIONS -->
+
           <div class="status-item">
-            <span class="status-icon">◆</span>
+            <span class="status-icon"> ◆ </span>
 
             <div>
-              <strong id="missionCount">0</strong>
-              <small>MISSIONS</small>
+              <strong id="missionCount"> 0 </strong>
+
+              <small> MISSIONS </small>
             </div>
           </div>
 
+          <!-- RESPONDERS -->
+
           <div class="status-item">
-            <span class="status-icon">●</span>
+            <span class="status-icon"> ● </span>
 
             <div>
-              <strong id="teamCount">0</strong>
-              <small>RESPONDERS</small>
+              <strong id="teamCount"> 0 </strong>
+
+              <small> RESPONDERS </small>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- =====================================================
-         RIGHT TOP AI OVERLAY
-    ====================================================== -->
+      <!-- =======================================================
+           AI / INTELLIGENCE
+      ======================================================== -->
 
       <section class="overlay intelligence-overlay">
         <div class="overlay-header">
@@ -171,7 +199,7 @@
             </div>
 
             <div class="risk-score">
-              <span id="riskScore">--</span>
+              <span id="riskScore"> -- </span>
             </div>
           </div>
 
@@ -184,9 +212,9 @@
         </div>
       </section>
 
-      <!-- =====================================================
-         LEFT BOTTOM ALERTS
-    ====================================================== -->
+      <!-- =======================================================
+           PRIORITY ALERTS
+      ======================================================== -->
 
       <section class="overlay alerts-overlay">
         <div class="overlay-header">
@@ -204,9 +232,9 @@
         </div>
       </section>
 
-      <!-- =====================================================
-         RIGHT MIDDLE RESOURCES
-    ====================================================== -->
+      <!-- =======================================================
+           RESOURCES OVERLAY
+      ======================================================== -->
 
       <section class="overlay resources-overlay">
         <div class="overlay-header">
@@ -218,6 +246,8 @@
         </div>
 
         <div class="resource-grid">
+          <!-- TEAMS -->
+
           <div class="resource-stat">
             <span class="resource-symbol"> ◉ </span>
 
@@ -227,6 +257,8 @@
               <small> TEAMS </small>
             </div>
           </div>
+
+          <!-- AMBULANCE -->
 
           <div class="resource-stat">
             <span class="resource-symbol"> + </span>
@@ -238,6 +270,8 @@
             </div>
           </div>
 
+          <!-- BOATS -->
+
           <div class="resource-stat">
             <span class="resource-symbol"> ◈ </span>
 
@@ -247,6 +281,8 @@
               <small> BOATS </small>
             </div>
           </div>
+
+          <!-- SUPPLIES -->
 
           <div class="resource-stat">
             <span class="resource-symbol"> □ </span>
@@ -260,33 +296,27 @@
         </div>
       </section>
 
-      <label class="layer-option">
-        <input type="checkbox" data-layer="zones" checked />
-
-        <span class="legend zone"></span>
-
-        Risk Zones
-      </label>
-
-      <!-- =====================================================
-         SELECTED OPERATION PANEL
-    ====================================================== -->
+      <!-- =======================================================
+           SELECTED OPERATION
+      ======================================================== -->
 
       <section id="selectedPanel" class="overlay selected-panel hidden">
-        <button id="closeSelected" class="close-button">×</button>
+        <button id="closeSelected" class="close-button" type="button">×</button>
 
-        <div class="selected-type">INCIDENT</div>
+        <div id="selectedType" class="selected-type">INCIDENT</div>
 
         <h2 id="selectedTitle">--</h2>
 
         <div class="selected-meta">
           <div>
-            <span>STATUS</span>
+            <span> STATUS </span>
+
             <strong id="selectedStatus"> -- </strong>
           </div>
 
           <div>
-            <span>SEVERITY</span>
+            <span> SEVERITY </span>
+
             <strong id="selectedSeverity"> -- </strong>
           </div>
         </div>
@@ -294,26 +324,42 @@
         <p id="selectedDescription">--</p>
 
         <div class="selected-location">
-          <span>LOCATION</span>
+          <span> LOCATION </span>
 
           <strong id="selectedLocation"> -- </strong>
         </div>
 
         <div class="selected-actions">
-          <button>ASSIGN</button>
+          <button id="assignOperationBtn" type="button">ASSIGN</button>
 
-          <button id="createMissionBtn" class="create-mission-btn">
+          <button
+            id="createMissionBtn"
+            class="create-mission-btn"
+            type="button"
+          >
             + Create Mission
           </button>
         </div>
       </section>
 
-      <!-- =====================================================
-         MAP LAYER CONTROL
-    ====================================================== -->
+      <!-- =======================================================
+           MAP LAYER CONTROL
+      ======================================================== -->
 
       <section class="map-layer-control">
         <div class="layer-title">MAP LAYERS</div>
+
+        <!-- RISK -->
+
+        <label class="layer-option">
+          <input type="checkbox" data-layer="zones" checked />
+
+          <span class="legend zone"></span>
+
+          Risk Zones
+        </label>
+
+        <!-- INCIDENTS -->
 
         <label class="layer-option">
           <input type="checkbox" data-layer="incidents" checked />
@@ -323,6 +369,8 @@
           Incidents
         </label>
 
+        <!-- SOS -->
+
         <label class="layer-option">
           <input type="checkbox" data-layer="sos" checked />
 
@@ -330,6 +378,8 @@
 
           SOS
         </label>
+
+        <!-- MISSIONS -->
 
         <label class="layer-option">
           <input type="checkbox" data-layer="missions" checked />
@@ -339,6 +389,8 @@
           Missions
         </label>
 
+        <!-- RESPONDERS -->
+
         <label class="layer-option">
           <input type="checkbox" data-layer="teams" checked />
 
@@ -346,6 +398,8 @@
 
           Responders
         </label>
+
+        <!-- RESOURCES -->
 
         <label class="layer-option">
           <input type="checkbox" data-layer="resources" checked />
@@ -356,9 +410,9 @@
         </label>
       </section>
 
-      <!-- =====================================================
-         BOTTOM OPERATION BAR
-    ====================================================== -->
+      <!-- =======================================================
+           BOTTOM OPERATION BAR
+      ======================================================== -->
 
       <footer class="operation-bar">
         <div class="map-status">
@@ -401,36 +455,72 @@
           <strong id="mapLng"> -- </strong>
         </div>
       </footer>
+    </main>
 
-      <!-- =====================================================
-         LOADING
-    ====================================================== -->
-<!-- 
-      <div id="dataLoader" class="data-loader">
-        <div class="loader-ring"></div>
-
-        <span> CONNECTING TO DISASTEROS </span>
-      </div>
-    </div> -->
+    <!-- ==========================================================
+     LIBRARIES
+========================================================== -->
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
-<script src="./js/socket-client.js"></script>
-<!-- <script src="./js/authui.js"></script> -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
-<script src="./js/command-config.js"></script>
-<script src="./js/command-api.js"></script>
-<script src="./js/command-utils.js"></script>
+    <!-- ==========================================================
+     COMMAND CENTER CORE
+========================================================== -->
 
-<script src="./js/command-center-map.js"></script>
-<script src="./js/command-center-layers.js"></script>
-<script src="./js/command-center-ui.js"></script>
-<script src="./js/command-center-location.js"></script>
+    <script src="./js/command-config.js"></script>
+    <script src="./js/command-utils.js"></script>
+    <script src="./js/command-api.js"></script>
 
-<script src="./js/command-data.js"></script>
-<script src="./js/command-dashboard.js"></script>
-<script src="./js/command-realtime.js"></script>
-<script src="./js/command-init.js"></script>
+    <!-- ==========================================================
+     SOCKET
+========================================================== -->
+
+    <script src="./js/socket-client.js"></script>
+
+    <!-- ==========================================================
+     LOCATION
+========================================================== -->
+
+    <script src="./js/command-center-location.js"></script>
+
+    <!-- ==========================================================
+     CENTRAL DATA
+========================================================== -->
+
+    <script src="./js/command-center-data.js"></script>
+
+    <!-- ==========================================================
+     MAP
+========================================================== -->
+
+    <script src="./js/command-center-map.js"></script>
+    <script src="./js/command-center-layers.js"></script>
+
+    <!-- ==========================================================
+     UI / DASHBOARD
+========================================================== -->
+
+    <script src="./js/command-center-ui.js"></script>
+    <script src="./js/command-dashboard.js"></script>
+
+    <!-- ==========================================================
+     REALTIME
+========================================================== -->
+
+    <script src="./js/command-center-realtime.js"></script>
+
+    <!-- ==========================================================
+     MISSION CREATION
+========================================================== -->
+
+    <script src="./js/create-mission.js"></script>
+
+    <!-- ==========================================================
+     APPLICATION START
+========================================================== -->
+
+    <script src="./js/command-init.js"></script>
   </body>
 </html>
