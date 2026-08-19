@@ -27,69 +27,59 @@ router.get("/resources", async (req, res) => {
     }
 
     const [
-      hospitals,
-      policeStations,
-      fireStations,
-      pharmacies,
-      schools,
-      shelters,
-    ] = await Promise.all([
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "healthcare.hospital"
-      ),
+  hospitals,
+  policeStations,
+  fireStations,
+  pharmacies,
+  schools,
+] = await Promise.all([
+  getPlaces(
+    lat,
+    lng,
+    DEFAULT_RADIUS,
+    "healthcare.hospital"
+  ),
 
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "service.police"
-      ),
+  getPlaces(
+    lat,
+    lng,
+    DEFAULT_RADIUS,
+    "service.police"
+  ),
 
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "service.fire_station"
-      ),
+  getPlaces(
+    lat,
+    lng,
+    DEFAULT_RADIUS,
+    "service.fire_station"
+  ),
 
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "healthcare.pharmacy"
-      ),
+  getPlaces(
+    lat,
+    lng,
+    DEFAULT_RADIUS,
+    "healthcare.pharmacy"
+  ),
 
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "education.school"
-      ),
+  getPlaces(
+    lat,
+    lng,
+    DEFAULT_RADIUS,
+    "education.school"
+  ),
+]);
 
-      getPlaces(
-        lat,
-        lng,
-        DEFAULT_RADIUS,
-        "accommodation.shelter"
-      ),
-    ]);
-
-    return res.json({
-      success: true,
-
-      resources: {
-        hospitals: hospitals || [],
-        policeStations: policeStations || [],
-        fireStations: fireStations || [],
-        pharmacies: pharmacies || [],
-        schools: schools || [],
-        shelters: shelters || [],
-      },
-    });
-
+return res.json({
+  success: true,
+  resources: {
+    hospitals: hospitals || [],
+    policeStations: policeStations || [],
+    fireStations: fireStations || [],
+    pharmacies: pharmacies || [],
+    schools: schools || [],
+    shelters: [],
+  },
+});
   } catch (err) {
     console.error("Map Resources Error:", err);
 

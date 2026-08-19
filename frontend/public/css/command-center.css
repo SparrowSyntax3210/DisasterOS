@@ -23,44 +23,44 @@ body {
    ========================================================= */
 
 #authUser {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 12px;
-    z-index: 1000;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  z-index: 1000;
 }
 
 /* Avatar button */
 #authUser .avatar,
 #authUser .user-avatar,
 #authUser button:first-child {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.25);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    background: linear-gradient(135deg, #2563eb, #06b6d4);
-    color: white;
+  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  color: white;
 
-    font-size: 16px;
-    font-weight: 700;
+  font-size: 16px;
+  font-weight: 700;
 
-    cursor: pointer;
-    transition: all 0.25s ease;
+  cursor: pointer;
+  transition: all 0.25s ease;
 
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 #authUser .avatar:hover,
 #authUser .user-avatar:hover,
 #authUser button:first-child:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 7px 22px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 7px 22px rgba(37, 99, 235, 0.4);
 }
 
 /* =========================================================
@@ -70,27 +70,27 @@ body {
 #authUser .user-menu,
 #authUser .profile-menu,
 #authUser .dropdown-menu {
-    position: absolute;
+  position: absolute;
 
-    top: calc(100% + 12px);
-    right: 0;
+  top: calc(100% + 12px);
+  right: 0;
 
-    min-width: 190px;
+  min-width: 190px;
 
-    padding: 10px;
+  padding: 10px;
 
-    background: rgba(15, 23, 42, 0.97);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 
-    border-radius: 14px;
+  border-radius: 14px;
 
-    box-shadow:
-        0 15px 40px rgba(0, 0, 0, 0.45),
-        0 0 20px rgba(37, 99, 235, 0.08);
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(37, 99, 235, 0.08);
 
-    backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 
-    z-index: 9999;
+  z-index: 9999;
 }
 
 /* Dropdown items */
@@ -101,29 +101,31 @@ body {
 #authUser .profile-menu button,
 #authUser .dropdown-menu a,
 #authUser .dropdown-menu button {
-    width: 100%;
+  width: 100%;
 
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
-    padding: 10px 12px;
+  padding: 10px 12px;
 
-    border: none;
-    border-radius: 9px;
+  border: none;
+  border-radius: 9px;
 
-    background: transparent;
+  background: transparent;
 
-    color: #e5e7eb;
+  color: #e5e7eb;
 
-    font-family: "Inter", sans-serif;
-    font-size: 14px;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
 
-    text-decoration: none;
+  text-decoration: none;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 #authUser .user-menu a:hover,
@@ -132,21 +134,21 @@ body {
 #authUser .profile-menu button:hover,
 #authUser .dropdown-menu a:hover,
 #authUser .dropdown-menu button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
 }
 
 /* Logout specifically */
 
 #authUser .logout-btn,
 #authUser #logoutBtn {
-    color: #f87171;
+  color: #f87171;
 }
 
 #authUser .logout-btn:hover,
 #authUser #logoutBtn:hover {
-    background: rgba(239, 68, 68, 0.12);
-    color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
 }
 
 /* =========================================================
@@ -154,14 +156,14 @@ body {
    ========================================================= */
 
 #authUser .user-name {
-    color: #f8fafc;
-    font-weight: 600;
-    font-size: 14px;
+  color: #f8fafc;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 #authUser .user-email {
-    color: #94a3b8;
-    font-size: 11px;
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 /* =========================================================
@@ -169,23 +171,22 @@ body {
    ========================================================= */
 
 .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 /* Make sure nothing clips the dropdown */
 
 .topbar {
-    position: relative;
-    z-index: 10000;
+  position: relative;
+  z-index: 10000;
 }
 
 .topbar-right {
-    position: relative;
-    z-index: 10001;
+  position: relative;
+  z-index: 10001;
 }
-
 
 /* ==========================================================
    COMMAND CENTER
@@ -314,7 +315,9 @@ body {
 #dataLoader {
   opacity: 1;
   visibility: visible;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    visibility 0.4s ease;
 }
 
 #dataLoader.hidden {
@@ -1598,6 +1601,330 @@ body {
 }
 
 /* ==========================================================
+   DISASTEROS CUSTOM MAP MARKERS
+   ========================================================== */
+
+.disaster-marker {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.disaster-marker-inner {
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+
+  background: #111820;
+
+  border: 2px solid #fff;
+
+  box-shadow:
+    0 0 0 3px rgba(0, 0, 0, 0.25),
+    0 5px 16px rgba(0, 0, 0, 0.45);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.disaster-marker-inner span {
+  display: block;
+  line-height: 1;
+}
+
+/* INCIDENT */
+
+.disaster-marker-incident .disaster-marker-inner {
+  border-color: #ff9f43;
+  color: #ff9f43;
+}
+
+/* SOS */
+
+.disaster-marker-sos .disaster-marker-inner {
+  border-color: #ff3b5c;
+  color: #ff3b5c;
+
+  box-shadow:
+    0 0 0 3px rgba(255, 59, 92, 0.18),
+    0 0 18px rgba(255, 59, 92, 0.45);
+}
+
+/* MISSION */
+
+.disaster-marker-mission .disaster-marker-inner {
+  border-color: #a78bfa;
+  color: #a78bfa;
+}
+
+/* HOSPITAL */
+
+.disaster-marker-hospital .disaster-marker-inner {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+/* POLICE */
+
+.disaster-marker-police .disaster-marker-inner {
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+/* FIRE */
+
+.disaster-marker-fire .disaster-marker-inner {
+  border-color: #fb923c;
+  color: #fb923c;
+}
+
+/* PHARMACY */
+
+.disaster-marker-pharmacy .disaster-marker-inner {
+  border-color: #34d399;
+  color: #34d399;
+}
+
+/* SCHOOL */
+
+.disaster-marker-school .disaster-marker-inner {
+  border-color: #facc15;
+  color: #facc15;
+}
+
+/* SHELTER */
+
+.disaster-marker-shelter .disaster-marker-inner {
+  border-color: #22d3ee;
+  color: #22d3ee;
+}
+
+/* TEAM */
+
+.disaster-marker-team .disaster-marker-inner {
+  border-color: #c084fc;
+  color: #c084fc;
+}
+
+/* ==========================================================
+   MAP POPUPS
+   ========================================================== */
+
+.command-popup {
+  min-width: 190px;
+
+  font-family: Inter, sans-serif;
+}
+
+.command-popup .popup-kicker {
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 0.12em;
+
+  opacity: 0.55;
+
+  margin-bottom: 5px;
+}
+
+.command-popup h3 {
+  margin: 0 0 12px;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.popup-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 6px 0;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+  font-size: 11px;
+}
+
+.popup-row span {
+  opacity: 0.55;
+}
+
+.popup-row strong {
+  text-align: right;
+}
+
+.popup-address {
+  margin-top: 10px;
+
+  padding-top: 8px;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+
+  font-size: 10px;
+
+  opacity: 0.65;
+}
+
+/* ==========================================================
+   LAYER CONTROL
+   ========================================================== */
+
+.map-layer-control {
+  position: absolute;
+
+  z-index: 1000;
+
+  right: 22px;
+  bottom: 80px;
+
+  min-width: 180px;
+
+  padding: 14px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  border-radius: 12px;
+
+  background: rgba(10, 15, 20, 0.92);
+
+  backdrop-filter: blur(14px);
+
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+
+  color: #fff;
+}
+
+.layer-title {
+  margin-bottom: 10px;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+
+  opacity: 0.55;
+}
+
+.layer-option {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 7px 5px;
+
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  font-size: 11px;
+
+  transition:
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.layer-option:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.layer-option input {
+  cursor: pointer;
+
+  accent-color: #22d3ee;
+}
+
+.layer-option.layer-disabled {
+  opacity: 0.4;
+}
+
+.layer-option .legend {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  display: inline-block;
+}
+
+.legend.incident {
+  background: #ff9f43;
+}
+
+.legend.sos {
+  background: #ff3b5c;
+}
+
+.legend.mission {
+  background: #a78bfa;
+}
+
+.legend.team {
+  background: #c084fc;
+}
+
+.legend.resource {
+  background: #34d399;
+}
+
+.legend.zone {
+  background: #facc15;
+}
+
+/* ==========================================================
+   MISSION ROUTE
+   ========================================================== */
+
+.mission-route {
+  stroke-dashoffset: 0;
+
+  animation: missionRouteFlow 1.5s linear infinite;
+}
+
+@keyframes missionRouteFlow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+/* ==========================================================
+   COMMAND LOCATION
+   ========================================================== */
+
+.command-location-marker {
+  stroke-width: 3;
+
+  animation: commandLocationPulse 2s infinite;
+}
+
+@keyframes commandLocationPulse {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================
    MAP POPUPS
    ========================================================== */
 
@@ -1665,195 +1992,189 @@ body {
 ========================================================== */
 
 .command-location-gate {
-    position: fixed;
-    inset: 0;
+  position: fixed;
+  inset: 0;
 
-    z-index: 99999;
+  z-index: 99999;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    background:
-        radial-gradient(
-            circle at center,
-            rgba(0, 190, 255, 0.08),
-            transparent 45%
-        ),
-        #05090d;
+  background:
+    radial-gradient(circle at center, rgba(0, 190, 255, 0.08), transparent 45%),
+    #05090d;
 
-    color: white;
+  color: white;
 }
 
 .location-gate-card {
-    width: min(620px, calc(100% - 40px));
+  width: min(620px, calc(100% - 40px));
 
-    padding: 50px;
+  padding: 50px;
 
-    border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
-    border-radius: 18px;
+  border-radius: 18px;
 
-    background: rgba(10, 18, 24, 0.94);
+  background: rgba(10, 18, 24, 0.94);
 
-    box-shadow:
-        0 30px 100px rgba(0,0,0,0.65),
-        0 0 50px rgba(0,180,255,0.06);
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.65),
+    0 0 50px rgba(0, 180, 255, 0.06);
 
-    text-align: center;
+  text-align: center;
 }
 
 .location-gate-icon {
-    width: 70px;
-    height: 70px;
+  width: 70px;
+  height: 70px;
 
-    margin: 0 auto 22px;
+  margin: 0 auto 22px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    border-radius: 50%;
+  border-radius: 50%;
 
-    background: rgba(0,180,255,0.08);
+  background: rgba(0, 180, 255, 0.08);
 
-    border: 1px solid rgba(0,180,255,0.25);
+  border: 1px solid rgba(0, 180, 255, 0.25);
 
-    font-size: 30px;
+  font-size: 30px;
 }
 
 .location-gate-badge {
-    font-size: 11px;
+  font-size: 11px;
 
-    letter-spacing: 2px;
+  letter-spacing: 2px;
 
-    color: #56c8ff;
+  color: #56c8ff;
 
-    margin-bottom: 14px;
+  margin-bottom: 14px;
 }
 
 .location-gate-card h1 {
-    margin: 0;
+  margin: 0;
 
-    font-size: clamp(30px, 5vw, 48px);
+  font-size: clamp(30px, 5vw, 48px);
 
-    line-height: 1.05;
+  line-height: 1.05;
 }
 
 .location-gate-card h1 span {
-    display: block;
+  display: block;
 
-    color: #56c8ff;
+  color: #56c8ff;
 }
 
 .location-gate-card p {
-    max-width: 500px;
+  max-width: 500px;
 
-    margin: 20px auto 30px;
+  margin: 20px auto 30px;
 
-    color: #78909c;
+  color: #78909c;
 
-    line-height: 1.7;
+  line-height: 1.7;
 
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .location-search-box {
-    display: flex;
+  display: flex;
 
-    gap: 10px;
+  gap: 10px;
 }
 
 .location-search-box input {
-    flex: 1;
+  flex: 1;
 
-    min-width: 0;
+  min-width: 0;
 
-    padding: 15px 16px;
+  padding: 15px 16px;
 
-    border-radius: 10px;
+  border-radius: 10px;
 
-    border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
-    outline: none;
+  outline: none;
 
-    background: #081118;
+  background: #081118;
 
-    color: white;
+  color: white;
 
-    font-family: inherit;
+  font-family: inherit;
 }
 
 .location-search-box input:focus {
-    border-color: #56c8ff;
+  border-color: #56c8ff;
 }
 
 .location-search-box button,
 .command-live-location-btn {
-    padding: 15px 20px;
+  padding: 15px 20px;
 
-    border-radius: 10px;
+  border-radius: 10px;
 
-    border: 1px solid rgba(86,200,255,0.4);
+  border: 1px solid rgba(86, 200, 255, 0.4);
 
-    background: rgba(86,200,255,0.08);
+  background: rgba(86, 200, 255, 0.08);
 
-    color: #56c8ff;
+  color: #56c8ff;
 
-    font-weight: 600;
+  font-weight: 600;
 
-    cursor: pointer;
+  cursor: pointer;
 
-    transition: 0.2s;
+  transition: 0.2s;
 }
 
 .location-search-box button:hover,
 .command-live-location-btn:hover {
-    background: rgba(86,200,255,0.16);
+  background: rgba(86, 200, 255, 0.16);
 
-    border-color: #56c8ff;
+  border-color: #56c8ff;
 }
 
 .location-divider {
-    margin: 22px 0;
+  margin: 22px 0;
 
-    color: #536873;
+  color: #536873;
 
-    font-size: 11px;
+  font-size: 11px;
 
-    letter-spacing: 2px;
+  letter-spacing: 2px;
 }
 
 .command-live-location-btn {
-    width: 100%;
+  width: 100%;
 }
 
 .command-location-status {
-    min-height: 20px;
+  min-height: 20px;
 
-    margin-top: 18px;
+  margin-top: 18px;
 
-    font-size: 12px;
+  font-size: 12px;
 
-    color: #78909c;
+  color: #78909c;
 }
 
 .command-location-status.error {
-    color: #ff5c5c;
+  color: #ff5c5c;
 }
 
 .command-location-status.success {
-    color: #45e69a;
+  color: #45e69a;
 }
 
 @media (max-width: 600px) {
+  .location-gate-card {
+    padding: 30px 22px;
+  }
 
-    .location-gate-card {
-        padding: 30px 22px;
-    }
-
-    .location-search-box {
-        flex-direction: column;
-    }
-
+  .location-search-box {
+    flex-direction: column;
+  }
 }

@@ -1,21 +1,32 @@
+"use strict";
+
 console.log("🎛️ Command Center UI Loaded");
 
 const CommandCenterUI = (() => {
 
   function find(...selectors) {
 
-    for (const selector of selectors) {
+    for (
+      const selector of selectors
+    ) {
 
       const element =
-        document.querySelector(selector);
+        document.querySelector(
+          selector
+        );
 
-      if (element) return element;
+      if (element) {
+        return element;
+      }
     }
 
     return null;
   }
 
-  function setText(value, ...selectors) {
+  function setText(
+    value,
+    ...selectors
+  ) {
 
     const element =
       find(...selectors);
@@ -26,14 +37,14 @@ const CommandCenterUI = (() => {
       value ?? 0;
   }
 
+  // ==========================================================
+  // COUNTERS
+  // ==========================================================
+
   function renderCounters(state) {
 
     const stats =
       state.stats || {};
-
-    // ------------------------------------------------------
-    // INCIDENTS
-    // ------------------------------------------------------
 
     setText(
       stats.incidents,
@@ -59,10 +70,6 @@ const CommandCenterUI = (() => {
       "[data-counter='critical-incidents']"
     );
 
-    // ------------------------------------------------------
-    // MISSIONS
-    // ------------------------------------------------------
-
     setText(
       stats.missions,
       "#missionCount",
@@ -79,10 +86,6 @@ const CommandCenterUI = (() => {
       "[data-counter='active-missions']"
     );
 
-    // ------------------------------------------------------
-    // RESOURCES
-    // ------------------------------------------------------
-
     setText(
       stats.resources,
       "#resourceCount",
@@ -90,10 +93,6 @@ const CommandCenterUI = (() => {
       "[data-stat='resources']",
       "[data-counter='resources']"
     );
-
-    // ------------------------------------------------------
-    // SOS
-    // ------------------------------------------------------
 
     setText(
       stats.sos,
@@ -116,7 +115,17 @@ const CommandCenterUI = (() => {
       "[data-stat='critical-sos']",
       "[data-counter='critical-sos']"
     );
+
+    // Responders
+    setText(
+      state.resources?.length || 0,
+      "#teamCount"
+    );
   }
+
+  // ==========================================================
+  // INCIDENT LIST
+  // ==========================================================
 
   function renderIncidentList(state) {
 
@@ -134,11 +143,10 @@ const CommandCenterUI = (() => {
 
     if (!incidents.length) {
 
-      container.innerHTML = `
-        <div class="empty-state">
+      container.innerHTML =
+        `<div class="empty-state">
           No incidents reported
-        </div>
-      `;
+        </div>`;
 
       return;
     }
@@ -146,22 +154,28 @@ const CommandCenterUI = (() => {
     container.innerHTML =
       incidents
         .slice(0, 10)
-        .map((incident) => {
+        .map(incident => {
 
           const severity =
             String(
-              incident.severity || "UNKNOWN"
+              incident.severity ||
+              "UNKNOWN"
             ).toUpperCase();
 
           return `
-            <div class="incident-item"
-                 data-id="${incident._id || ""}">
+            <div
+              class="incident-item"
+              data-id="${escapeHTML(
+                incident._id || ""
+              )}"
+            >
 
               <div class="incident-main">
 
                 <strong>
                   ${escapeHTML(
-                    incident.type || "Incident"
+                    incident.type ||
+                    "Incident"
                   )}
                 </strong>
 
@@ -179,22 +193,28 @@ const CommandCenterUI = (() => {
 
                 <span>
                   ${escapeHTML(
-                    incident.status || "REPORTED"
+                    incident.status ||
+                    "REPORTED"
                   )}
                 </span>
 
                 <b class="severity-${severity.toLowerCase()}">
-                  ${severity}
+                  ${escapeHTML(
+                    severity
+                  )}
                 </b>
 
               </div>
 
             </div>
           `;
-
         })
         .join("");
   }
+
+  // ==========================================================
+  // MISSION LIST
+  // ==========================================================
 
   function renderMissionList(state) {
 
@@ -212,11 +232,10 @@ const CommandCenterUI = (() => {
 
     if (!missions.length) {
 
-      container.innerHTML = `
-        <div class="empty-state">
+      container.innerHTML =
+        `<div class="empty-state">
           No missions created
-        </div>
-      `;
+        </div>`;
 
       return;
     }
@@ -224,11 +243,15 @@ const CommandCenterUI = (() => {
     container.innerHTML =
       missions
         .slice(0, 10)
-        .map((mission) => {
+        .map(mission => {
 
           return `
-            <div class="mission-item"
-                 data-id="${mission._id || ""}">
+            <div
+              class="mission-item"
+              data-id="${escapeHTML(
+                mission._id || ""
+              )}"
+            >
 
               <strong>
                 ${escapeHTML(
@@ -239,22 +262,27 @@ const CommandCenterUI = (() => {
 
               <span>
                 ${escapeHTML(
-                  mission.priority || "NORMAL"
+                  mission.priority ||
+                  "NORMAL"
                 )}
               </span>
 
               <small>
                 ${escapeHTML(
-                  mission.status || "CREATED"
+                  mission.status ||
+                  "CREATED"
                 )}
               </small>
 
             </div>
           `;
-
         })
         .join("");
   }
+
+  // ==========================================================
+  // SOS LIST
+  // ==========================================================
 
   function renderSOSList(state) {
 
@@ -272,11 +300,10 @@ const CommandCenterUI = (() => {
 
     if (!requests.length) {
 
-      container.innerHTML = `
-        <div class="empty-state">
+      container.innerHTML =
+        `<div class="empty-state">
           No SOS requests
-        </div>
-      `;
+        </div>`;
 
       return;
     }
@@ -284,38 +311,51 @@ const CommandCenterUI = (() => {
     container.innerHTML =
       requests
         .slice(0, 10)
-        .map((sos) => {
+        .map(sos => {
 
           return `
-            <div class="sos-item"
-                 data-id="${sos._id || ""}">
+            <div
+              class="sos-item"
+              data-id="${escapeHTML(
+                sos._id || ""
+              )}"
+            >
 
               <strong>
                 ${escapeHTML(
-                  sos.sosId || "SOS"
+                  sos.sosId ||
+                  "SOS"
                 )}
               </strong>
 
               <span>
                 ${escapeHTML(
-                  sos.type || "EMERGENCY"
+                  sos.type ||
+                  "EMERGENCY"
                 )}
               </span>
 
               <b>
                 ${escapeHTML(
-                  sos.priority || "MEDIUM"
+                  sos.priority ||
+                  "MEDIUM"
                 )}
               </b>
 
             </div>
           `;
-
         })
         .join("");
   }
 
-  function render(state, type) {
+  // ==========================================================
+  // MAIN RENDER
+  // ==========================================================
+
+  function render(
+    state,
+    type
+  ) {
 
     renderCounters(state);
 
@@ -328,6 +368,10 @@ const CommandCenterUI = (() => {
     updateLastUpdated(state);
   }
 
+  // ==========================================================
+  // LAST UPDATED
+  // ==========================================================
+
   function updateLastUpdated(state) {
 
     const element =
@@ -336,12 +380,17 @@ const CommandCenterUI = (() => {
         "[data-last-updated]"
       );
 
-    if (!element) return;
-
-    if (!state.lastUpdated) return;
+    if (
+      !element ||
+      !state.lastUpdated
+    ) {
+      return;
+    }
 
     const date =
-      new Date(state.lastUpdated);
+      new Date(
+        state.lastUpdated
+      );
 
     element.textContent =
       `Updated ${date.toLocaleTimeString()}`;
@@ -357,7 +406,9 @@ const CommandCenterUI = (() => {
       .replaceAll("'", "&#039;");
   }
 
-  CommandCenterData.subscribe(render);
+  CommandCenterData.subscribe(
+    render
+  );
 
   document.addEventListener(
     "DOMContentLoaded",
@@ -367,13 +418,12 @@ const CommandCenterUI = (() => {
         CommandCenterData.getState(),
         "initial"
       );
-
     }
   );
 
   return {
     render,
-    renderCounters,
+    renderCounters
   };
 
 })();
@@ -381,4 +431,6 @@ const CommandCenterUI = (() => {
 window.CommandCenterUI =
   CommandCenterUI;
 
-console.log("✅ Command Center UI Ready");
+console.log(
+  "✅ Command Center UI Ready"
+);

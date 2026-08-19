@@ -3,64 +3,86 @@
 console.log("🗺️ Command Center Map JS Loaded");
 
 const CommandCenterMap = (() => {
-
   let map = null;
+  let currentLocationMarker = null;
 
-  const markers = {
-    incidents: new Map(),
-    sos: new Map(),
-    missions: new Map(),
-    resources: new Map()
+  const layers = {
+    zones: L.layerGroup(),
+    incidents: L.layerGroup(),
+    sos: L.layerGroup(),
+    missions: L.layerGroup(),
+    teams: L.layerGroup(),
+    resources: L.layerGroup(),
   };
 
-  // ========================================================
-  // INITIALIZE MAP
-  // ========================================================
+  const visibility = {
+    zones: true,
+    incidents: true,
+    sos: true,
+    missions: true,
+    teams: true,
+    resources: true,
+  };
+
+  // ==========================================================
+  // ICONS
+  // ==========================================================
+
+  const icons = {
+    incident: createIcon("!", "incident"),
+    sos: createIcon("SOS", "sos"),
+    mission: createIcon("◆", "mission"),
+
+    hospital: createIcon("+", "hospital"),
+    police: createIcon("P", "police"),
+    fire: createIcon("F", "fire"),
+    pharmacy: createIcon("Rx", "pharmacy"),
+    school: createIcon("S", "school"),
+    shelter: createIcon("⌂", "shelter"),
+    team: createIcon("●", "team"),
+  };
+
+  function createIcon(text, type) {
+    return L.divIcon({
+      className: `disaster-marker disaster-marker-${type}`,
+      html: `
+        <div class="disaster-marker-inner">
+          <span>${text}</span>
+        </div>
+      `,
+      iconSize: [38, 38],
+      iconAnchor: [19, 19],
+      popupAnchor: [0, -20],
+    });
+  }
+
+  // ==========================================================
+  // INITIALIZE
+  // ==========================================================
 
   function initialize(lat, lng) {
-
     lat = Number(lat);
     lng = Number(lng);
 
-    if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lng)
-    ) {
-      console.error(
-        "❌ Invalid map coordinates:",
-        lat,
-        lng
-      );
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      console.error("❌ Invalid map coordinates:", lat, lng);
 
       return null;
     }
 
-    // ------------------------------------------------------
-    // Map already exists
-    // ------------------------------------------------------
-
     if (map) {
-
-      map.setView(
-        [lat, lng],
-        12.8
-      );
+      map.setView([lat, lng], 12.8);
 
       setTimeout(() => {
         map.invalidateSize();
       }, 100);
 
-      renderCurrentLocation(
-        lat,
-        lng
-      );
+      renderCurrentLocation(lat, lng);
+
+      renderAll(CommandCenterData.getState());
 
       return map;
     }
-
-    // ------------------------------------------------------
-    // Find container
-    // ------------------------------------------------------
 
     const container =
       document.querySelector("#commandMap") ||
@@ -68,541 +90,510 @@ const CommandCenterMap = (() => {
       document.querySelector(".command-map");
 
     if (!container) {
-
-      console.error(
-        "❌ Command map container not found."
-      );
+      console.error("❌ Command map container not found.");
 
       return null;
     }
 
-    // ------------------------------------------------------
-    // Create map
-    // ------------------------------------------------------
-
     map = L.map(container, {
-      zoomControl: true
-    }).setView(
-      [lat, lng],
-      12.8
-    );
+      zoomControl: true,
+      preferCanvas: true,
+    }).setView([lat, lng], 12.8);
 
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        maxZoom: 19,
-        attribution:
-          "&copy; OpenStreetMap contributors"
-      }
-    ).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
 
-    console.log(
-      "✅ Command map initialized:",
-      lat,
-      lng
-    );
+    // Add layer groups.
+    Object.values(layers).forEach((layer) => {
+      layer.addTo(map);
+    });
+
+    renderCurrentLocation(lat, lng);
 
     setTimeout(() => {
       map.invalidateSize();
     }, 100);
 
-    renderCurrentLocation(
-      lat,
-      lng
-    );
+    renderAll(CommandCenterData.getState());
 
-    renderAll(
-      CommandCenterData.getState()
-    );
+    console.log("✅ Command map initialized:", lat, lng);
 
     return map;
   }
 
-  // ========================================================
+  // ==========================================================
   // CURRENT LOCATION
-  // ========================================================
+  // ==========================================================
 
-  let currentLocationMarker = null;
-
-  function renderCurrentLocation(
-    lat,
-    lng
-  ) {
-
+  function renderCurrentLocation(lat, lng) {
     if (!map) return;
 
     if (currentLocationMarker) {
-      try {
-        map.removeLayer(
-          currentLocationMarker
-        );
-      } catch {}
+      map.removeLayer(currentLocationMarker);
     }
 
-    currentLocationMarker =
-      L.circleMarker(
-        [lat, lng],
-        {
-          radius: 8,
-          weight: 3,
-          fillOpacity: 1
-        }
-      )
+    currentLocationMarker = L.circleMarker([lat, lng], {
+      radius: 8,
+      weight: 3,
+      fillOpacity: 1,
+      className: "command-location-marker",
+    })
       .addTo(map)
-      .bindPopup(
-        "Command Center Location"
-      );
+      .bindPopup("<strong>Command Center</strong><br>Operational Location");
   }
 
-  // ========================================================
-  // CLEAR MARKERS
-  // ========================================================
+  // ==========================================================
+  // CLEAR
+  // ==========================================================
 
-  function clearGroup(group) {
+  function clearLayer(layer) {
+    if (!layer) return;
 
-    if (!map) return;
-
-    group.forEach((marker) => {
-
-      try {
-        map.removeLayer(marker);
-      } catch {}
-
-    });
-
-    group.clear();
+    layer.clearLayers();
   }
 
-  // ========================================================
+  // ==========================================================
   // COORDINATES
-  // ========================================================
+  // ==========================================================
 
   function getCoordinates(item) {
+    if (typeof window.commandCoordinates === "function") {
+      const result = window.commandCoordinates(item);
 
-    // Use shared utility if available
-    if (
-      typeof window.commandCoordinates ===
-      "function"
-    ) {
-      return window.commandCoordinates(item);
+      if (result) {
+        return {
+          lat: Number(result.lat),
+          lng: Number(result.lng),
+        };
+      }
     }
 
-    // Fallback
-    const geometry =
-      item?.geometry?.coordinates;
+    const geometry = item?.geometry?.coordinates;
 
     const lat = Number(
       item?.latitude ??
-      item?.lat ??
-      item?.location?.latitude ??
-      item?.location?.lat ??
-      item?.properties?.latitude ??
-      item?.properties?.lat ??
-      geometry?.[1]
+        item?.lat ??
+        item?.location?.latitude ??
+        item?.location?.lat ??
+        item?.properties?.latitude ??
+        item?.properties?.lat ??
+        geometry?.[1],
     );
 
     const lng = Number(
       item?.longitude ??
-      item?.lng ??
-      item?.lon ??
-      item?.location?.longitude ??
-      item?.location?.lng ??
-      item?.location?.lon ??
-      item?.properties?.longitude ??
-      item?.properties?.lng ??
-      geometry?.[0]
+        item?.lng ??
+        item?.lon ??
+        item?.location?.longitude ??
+        item?.location?.lng ??
+        item?.location?.lon ??
+        item?.properties?.longitude ??
+        item?.properties?.lng ??
+        geometry?.[0],
     );
 
     return {
       lat,
-      lng
+      lng,
     };
   }
 
-  // ========================================================
+  // ==========================================================
   // INCIDENTS
-  // ========================================================
+  // ==========================================================
 
-  function renderIncidents(
-    incidents = []
-  ) {
-
+  function renderIncidents(incidents = []) {
     if (!map) return;
 
-    clearGroup(
-      markers.incidents
-    );
+    clearLayer(layers.incidents);
 
-    incidents.forEach(
-      (incident) => {
+    incidents.forEach((incident) => {
+      const { lat, lng } = getCoordinates(incident);
 
-        const {
-          lat,
-          lng
-        } = getCoordinates(
-          incident
-        );
-
-        if (
-          !Number.isFinite(lat) ||
-          !Number.isFinite(lng)
-        ) {
-          console.warn(
-            "⚠️ Invalid incident coordinates:",
-            incident
-          );
-
-          return;
-        }
-
-        const marker =
-          L.circleMarker(
-            [lat, lng],
-            {
-              radius: 9,
-              weight: 2,
-              fillOpacity: 0.8
-            }
-          )
-          .addTo(map);
-
-        marker.bindPopup(`
-          <strong>
-            ${escapeHTML(
-              incident.type ||
-              "Incident"
-            )}
-          </strong>
-          <br>
-          Severity:
-          ${escapeHTML(
-            incident.severity ||
-            "UNKNOWN"
-          )}
-          <br>
-          Status:
-          ${escapeHTML(
-            incident.status ||
-            "REPORTED"
-          )}
-        `);
-
-        const id =
-          incident._id ||
-          incident.incidentId ||
-          crypto.randomUUID();
-
-        markers.incidents.set(
-          String(id),
-          marker
-        );
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
       }
-    );
+
+      const severity = String(incident.severity || "UNKNOWN").toUpperCase();
+
+      const marker = L.marker([lat, lng], {
+        icon: icons.incident,
+        zIndexOffset: 300,
+      });
+
+      marker.bindPopup(`
+        <div class="command-popup incident-popup">
+
+          <div class="popup-kicker">
+            INCIDENT
+          </div>
+
+          <h3>
+            ${escapeHTML(incident.type || "Emergency Incident")}
+          </h3>
+
+          <div class="popup-row">
+            <span>ID</span>
+            <strong>
+              ${escapeHTML(incident.incidentId || incident._id || "—")}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>Severity</span>
+            <strong class="popup-severity">
+              ${escapeHTML(severity)}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>Status</span>
+            <strong>
+              ${escapeHTML(incident.status || "REPORTED")}
+            </strong>
+          </div>
+
+        </div>
+      `);
+
+      if (visibility.incidents) {
+        marker.addTo(layers.incidents);
+      }
+    });
   }
 
-  // ========================================================
+  // ==========================================================
   // SOS
-  // ========================================================
+  // ==========================================================
 
-  function renderSOS(
-    requests = []
-  ) {
-
+  function renderSOS(requests = []) {
     if (!map) return;
 
-    clearGroup(
-      markers.sos
-    );
+    clearLayer(layers.sos);
 
-    requests.forEach(
-      (sos) => {
+    requests.forEach((sos) => {
+      const { lat, lng } = getCoordinates(sos);
 
-        const {
-          lat,
-          lng
-        } = getCoordinates(sos);
-
-        if (
-          !Number.isFinite(lat) ||
-          !Number.isFinite(lng)
-        ) {
-          console.warn(
-            "⚠️ Invalid SOS coordinates:",
-            sos
-          );
-
-          return;
-        }
-
-        const marker =
-          L.marker([
-            lat,
-            lng
-          ])
-          .addTo(map);
-
-        marker.bindPopup(`
-          <strong>
-            🚨 ${escapeHTML(
-              sos.sosId ||
-              "SOS"
-            )}
-          </strong>
-          <br>
-          Type:
-          ${escapeHTML(
-            sos.type ||
-            "EMERGENCY"
-          )}
-          <br>
-          Priority:
-          ${escapeHTML(
-            sos.priority ||
-            "MEDIUM"
-          )}
-          <br>
-          Status:
-          ${escapeHTML(
-            sos.status ||
-            "PENDING"
-          )}
-        `);
-
-        const id =
-          sos._id ||
-          sos.sosId ||
-          crypto.randomUUID();
-
-        markers.sos.set(
-          String(id),
-          marker
-        );
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
       }
-    );
+
+      const marker = L.marker([lat, lng], {
+        icon: icons.sos,
+        zIndexOffset: 500,
+      });
+
+      marker.bindPopup(`
+        <div class="command-popup sos-popup">
+
+          <div class="popup-kicker">
+            EMERGENCY SOS
+          </div>
+
+          <h3>
+            ${escapeHTML(sos.sosId || "SOS REQUEST")}
+          </h3>
+
+          <div class="popup-row">
+            <span>Type</span>
+            <strong>
+              ${escapeHTML(sos.type || "EMERGENCY")}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>Priority</span>
+            <strong>
+              ${escapeHTML(sos.priority || "MEDIUM")}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>Status</span>
+            <strong>
+              ${escapeHTML(sos.status || "PENDING")}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>People</span>
+            <strong>
+              ${Number(sos.peopleCount || 1)}
+            </strong>
+          </div>
+
+        </div>
+      `);
+
+      if (visibility.sos) {
+        marker.addTo(layers.sos);
+      }
+    });
   }
 
-  // ========================================================
+  // ==========================================================
   // MISSIONS
-  // ========================================================
+  // ==========================================================
 
-  function renderMissions(
-    missions = []
-  ) {
-
+  function renderMissions(missions = []) {
     if (!map) return;
 
-    clearGroup(
-      markers.missions
-    );
+    clearLayer(layers.missions);
 
-    missions.forEach(
-      (mission) => {
+    missions.forEach((mission) => {
+      const destination = mission.destination;
 
-        const destination =
-          mission.destination;
+      if (!destination) return;
 
-        if (!destination) return;
+      const { lat, lng } = getCoordinates(destination);
 
-        const {
-          lat,
-          lng
-        } = getCoordinates(
-          destination
-        );
-
-        if (
-          !Number.isFinite(lat) ||
-          !Number.isFinite(lng)
-        ) {
-          console.warn(
-            "⚠️ Invalid mission destination:",
-            mission
-          );
-
-          return;
-        }
-
-        const marker =
-          L.marker([
-            lat,
-            lng
-          ])
-          .addTo(map);
-
-        marker.bindPopup(`
-          <strong>
-            🎯 ${escapeHTML(
-              mission.title ||
-              "Mission"
-            )}
-          </strong>
-          <br>
-          Priority:
-          ${escapeHTML(
-            mission.priority ||
-            "NORMAL"
-          )}
-          <br>
-          Status:
-          ${escapeHTML(
-            mission.status ||
-            "CREATED"
-          )}
-        `);
-
-        const id =
-          mission._id ||
-          mission.missionId ||
-          crypto.randomUUID();
-
-        markers.missions.set(
-          String(id),
-          marker
-        );
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return;
       }
-    );
+
+      const marker = L.marker([lat, lng], {
+        icon: icons.mission,
+        zIndexOffset: 400,
+      });
+
+      marker.bindPopup(`
+        <div class="command-popup mission-popup">
+
+          <div class="popup-kicker">
+            FIELD MISSION
+          </div>
+
+          <h3>
+            ${escapeHTML(mission.title || "Mission")}
+          </h3>
+
+          <div class="popup-row">
+            <span>Priority</span>
+            <strong>
+              ${escapeHTML(mission.priority || "NORMAL")}
+            </strong>
+          </div>
+
+          <div class="popup-row">
+            <span>Status</span>
+            <strong>
+              ${escapeHTML(mission.status || "CREATED")}
+            </strong>
+          </div>
+
+        </div>
+      `);
+
+      if (visibility.missions) {
+        marker.addTo(layers.missions);
+      }
+
+      // Safe route
+      if (
+        mission.route &&
+        Array.isArray(mission.route.coordinates) &&
+        mission.route.coordinates.length >= 2
+      ) {
+        const routePoints = mission.route.coordinates
+          .map((point) => {
+            if (Array.isArray(point) && point.length >= 2) {
+              return [Number(point[1]), Number(point[0])];
+            }
+
+            return null;
+          })
+          .filter(Boolean);
+
+        if (routePoints.length >= 2) {
+          const route = L.polyline(routePoints, {
+            weight: 4,
+            opacity: 0.8,
+            dashArray: "8 8",
+            className: "mission-route",
+          });
+
+          if (visibility.missions) {
+            route.addTo(layers.missions);
+          }
+        }
+      }
+    });
   }
 
-  // ========================================================
-  // MAP RESOURCES
-  // ========================================================
+  // ==========================================================
+  // RESOURCES
+  // ==========================================================
 
-  function renderResources(
-    resourceData = {}
-  ) {
-
+  function renderResources(resourceData = {}) {
     if (!map) return;
 
-    clearGroup(
-      markers.resources
-    );
+    clearLayer(layers.resources);
 
-    const categories = [
-      "hospitals",
-      "policeStations",
-      "fireStations",
-      "pharmacies",
-      "schools",
-      "shelters"
-    ];
+    const categories = {
+      hospitals: {
+        icon: icons.hospital,
+        label: "Hospital",
+      },
+
+      policeStations: {
+        icon: icons.police,
+        label: "Police Station",
+      },
+
+      fireStations: {
+        icon: icons.fire,
+        label: "Fire Station",
+      },
+
+      pharmacies: {
+        icon: icons.pharmacy,
+        label: "Pharmacy",
+      },
+
+      schools: {
+        icon: icons.school,
+        label: "School",
+      },
+
+      shelters: {
+        icon: icons.shelter,
+        label: "Shelter",
+      },
+    };
 
     let rendered = 0;
 
-    categories.forEach(
-      (category) => {
+    Object.entries(categories).forEach(([category, config]) => {
+      const items = Array.isArray(resourceData[category])
+        ? resourceData[category]
+        : [];
 
-        const items =
-          Array.isArray(
-            resourceData[category]
-          )
-            ? resourceData[category]
-            : [];
+      items.forEach((item) => {
+        const { lat, lng } = getCoordinates(item);
 
-        console.log(
-          `📍 Rendering ${category}:`,
-          items.length
-        );
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+          return;
+        }
 
-        items.forEach(
-          (item, index) => {
+        const name = item.name || item.properties?.name || config.label;
 
-            const {
-              lat,
-              lng
-            } = getCoordinates(item);
+        const marker = L.marker([lat, lng], {
+          icon: config.icon,
+          zIndexOffset: 100,
+        });
 
-            if (
-              !Number.isFinite(lat) ||
-              !Number.isFinite(lng)
-            ) {
+        marker.bindPopup(`
+            <div class="command-popup resource-popup">
 
-              console.warn(
-                `⚠️ Invalid ${category} coordinates:`,
-                item
-              );
+              <div class="popup-kicker">
+                FIELD RESOURCE
+              </div>
 
-              return;
-            }
+              <h3>
+                ${escapeHTML(name)}
+              </h3>
 
-            const marker =
-              L.marker([
-                lat,
-                lng
-              ])
-              .addTo(map);
+              <div class="popup-row">
+                <span>Type</span>
+                <strong>
+                  ${escapeHTML(config.label)}
+                </strong>
+              </div>
 
-            marker.bindPopup(`
-              <strong>
-                ${escapeHTML(
-                  item.name ||
-                  item.properties?.name ||
-                  category
-                )}
-              </strong>
-              <br>
-              Type:
-              ${escapeHTML(
-                category
-              )}
-            `);
+              ${
+                item.address || item.properties?.address
+                  ? `
+                    <div class="popup-address">
+                      ${escapeHTML(item.address || item.properties.address)}
+                    </div>
+                  `
+                  : ""
+              }
 
-            markers.resources.set(
-              `${category}-${index}`,
-              marker
-            );
+            </div>
+          `);
 
-            rendered++;
-          }
-        );
+        if (visibility.resources) {
+          marker.addTo(layers.resources);
+        }
+
+        rendered++;
+      });
+    });
+
+    console.log("✅ Map resources rendered:", rendered);
+  }
+
+  // ==========================================================
+  // LAYER VISIBILITY
+  // ==========================================================
+
+  function setLayerVisibility(layerName, visible) {
+    if (!map) {
+      console.warn("⚠️ Map not initialized.");
+      return;
+    }
+
+    if (!layers[layerName]) {
+      console.warn("⚠️ Unknown map layer:", layerName);
+      return;
+    }
+
+    visibility[layerName] = Boolean(visible);
+
+    const layer = layers[layerName];
+
+    if (visibility[layerName]) {
+      if (!map.hasLayer(layer)) {
+        map.addLayer(layer);
       }
-    );
+    } else {
+      if (map.hasLayer(layer)) {
+        map.removeLayer(layer);
+      }
+    }
 
     console.log(
-      "✅ Map resources rendered:",
-      rendered
+      `🎚️ Layer ${layerName}:`,
+      visibility[layerName] ? "VISIBLE" : "HIDDEN",
     );
   }
 
-  // ========================================================
+  // ==========================================================
+  // GET VISIBILITY
+  // ==========================================================
+
+  function getLayerVisibility() {
+    return {
+      ...visibility,
+    };
+  }
+
+  // ==========================================================
   // RENDER ALL
-  // ========================================================
+  // ==========================================================
 
-  function renderAll(state) {
-
+  function renderAll(state = {}) {
     if (!map) return;
 
-    state = state || {};
+    renderIncidents(state.incidents || []);
 
-    renderIncidents(
-      state.incidents || []
-    );
+    renderSOS(state.sos || []);
 
-    renderSOS(
-      state.sos || []
-    );
+    renderMissions(state.missions || []);
 
-    renderMissions(
-      state.missions || []
-    );
-
-    renderResources(
-      state.mapResources || {}
-    );
+    renderResources(state.mapResources || {});
   }
 
-  // ========================================================
+  // ==========================================================
   // ESCAPE HTML
-  // ========================================================
+  // ==========================================================
 
   function escapeHTML(value) {
-
-    if (
-      typeof window.escapeCommandHTML ===
-      "function"
-    ) {
-      return window.escapeCommandHTML(
-        value
-      );
+    if (typeof window.escapeCommandHTML === "function") {
+      return window.escapeCommandHTML(value);
     }
 
     return String(value ?? "")
@@ -613,29 +604,24 @@ const CommandCenterMap = (() => {
       .replace(/'/g, "&#039;");
   }
 
-  // ========================================================
-  // DATA STORE SUBSCRIPTION
-  // ========================================================
+  // ==========================================================
+  // DATA SUBSCRIPTION
+  // ==========================================================
 
-  CommandCenterData.subscribe(
-    (state) => {
+  CommandCenterData.subscribe((state) => {
+    if (!map) return;
 
-      if (!map) return;
-
-      renderAll(state);
-    }
-  );
+    renderAll(state);
+  });
 
   return {
     initialize,
-    renderAll
+    renderAll,
+    setLayerVisibility,
+    getLayerVisibility,
   };
-
 })();
 
-window.CommandCenterMap =
-  CommandCenterMap;
+window.CommandCenterMap = CommandCenterMap;
 
-console.log(
-  "✅ Command Center Map Engine Ready"
-);
+console.log("✅ Command Center Map Engine Ready");

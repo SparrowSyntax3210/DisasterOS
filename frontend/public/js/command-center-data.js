@@ -1,14 +1,26 @@
+"use strict";
+
 console.log("📦 Command Center Data Store Loaded");
 
 const CommandCenterData = (() => {
 
+  const emptyMapResources = () => ({
+    hospitals: [],
+    policeStations: [],
+    fireStations: [],
+    pharmacies: [],
+    schools: [],
+    shelters: []
+  });
+
   const state = {
+
     loading: false,
 
     location: {
       lat: null,
       lng: null,
-      name: null,
+      name: null
     },
 
     incidents: [],
@@ -16,16 +28,11 @@ const CommandCenterData = (() => {
     resources: [],
     sos: [],
 
-    mapResources: {
-      hospitals: [],
-      policeStations: [],
-      fireStations: [],
-      pharmacies: [],
-      schools: [],
-      shelters: [],
-    },
+    mapResources:
+      emptyMapResources(),
 
     stats: {
+
       incidents: 0,
       activeIncidents: 0,
       criticalIncidents: 0,
@@ -37,16 +44,21 @@ const CommandCenterData = (() => {
 
       sos: 0,
       pendingSOS: 0,
-      criticalSOS: 0,
+      criticalSOS: 0
     },
 
-    lastUpdated: null,
+    lastUpdated: null
   };
 
-  const listeners = new Set();
+  const listeners =
+    new Set();
 
   function subscribe(callback) {
-    if (typeof callback !== "function") return;
+
+    if (
+      typeof callback !==
+      "function"
+    ) return;
 
     listeners.add(callback);
 
@@ -56,18 +68,28 @@ const CommandCenterData = (() => {
   }
 
   function notify(type = "state") {
-    state.lastUpdated = new Date();
 
-    listeners.forEach((callback) => {
-      try {
-        callback(state, type);
-      } catch (error) {
-        console.error(
-          "Command Data Listener Error:",
-          error
-        );
+    state.lastUpdated =
+      new Date();
+
+    listeners.forEach(
+      callback => {
+
+        try {
+          callback(
+            state,
+            type
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Command Data Listener Error:",
+            error
+          );
+        }
       }
-    });
+    );
   }
 
   function getState() {
@@ -75,7 +97,9 @@ const CommandCenterData = (() => {
   }
 
   function normalizeArray(value) {
-    return Array.isArray(value) ? value : [];
+    return Array.isArray(value)
+      ? value
+      : [];
   }
 
   function calculateStats() {
@@ -84,52 +108,59 @@ const CommandCenterData = (() => {
       state.incidents.length;
 
     state.stats.activeIncidents =
-      state.incidents.filter((incident) => {
-        const status =
-          String(incident.status || "")
-            .toUpperCase();
+      state.incidents.filter(
+        incident => {
 
-        return ![
-          "RESOLVED",
-          "CLOSED",
-          "COMPLETED",
-        ].includes(status);
-      }).length;
+          const status =
+            String(
+              incident.status || ""
+            ).toUpperCase();
+
+          return ![
+            "RESOLVED",
+            "CLOSED",
+            "COMPLETED"
+          ].includes(status);
+        }
+      ).length;
 
     state.stats.criticalIncidents =
-      state.incidents.filter((incident) => {
+      state.incidents.filter(
+        incident => {
 
-        const severity =
-          String(
-            incident.severity ||
-            incident.priority ||
-            ""
-          ).toUpperCase();
+          const severity =
+            String(
+              incident.severity ||
+              incident.priority ||
+              ""
+            ).toUpperCase();
 
-        return [
-          "CRITICAL",
-          "EXTREME",
-        ].includes(severity);
-
-      }).length;
+          return [
+            "CRITICAL",
+            "EXTREME"
+          ].includes(severity);
+        }
+      ).length;
 
     state.stats.missions =
       state.missions.length;
 
     state.stats.activeMissions =
-      state.missions.filter((mission) => {
+      state.missions.filter(
+        mission => {
 
-        const status =
-          String(mission.status || "")
-            .toUpperCase();
+          const status =
+            String(
+              mission.status || ""
+            ).toUpperCase();
 
-        return ![
-          "COMPLETED",
-          "CANCELLED",
-          "CLOSED",
-        ].includes(status);
-
-      }).length;
+          return ![
+            "COMPLETED",
+            "CANCELLED",
+            "CLOSED"
+          ].includes(status);
+        }
+      ).length;
 
     state.stats.resources =
       state.resources.length;
@@ -138,82 +169,69 @@ const CommandCenterData = (() => {
       state.sos.length;
 
     state.stats.pendingSOS =
-      state.sos.filter((item) => {
-
-        return String(
-          item.status || ""
-        ).toUpperCase() === "PENDING";
-
-      }).length;
+      state.sos.filter(
+        sos =>
+          String(
+            sos.status || ""
+          ).toUpperCase() ===
+          "PENDING"
+      ).length;
 
     state.stats.criticalSOS =
-      state.sos.filter((item) => {
-
-        return String(
-          item.priority || ""
-        ).toUpperCase() === "CRITICAL";
-
-      }).length;
+      state.sos.filter(
+        sos =>
+          String(
+            sos.priority || ""
+          ).toUpperCase() ===
+          "CRITICAL"
+      ).length;
   }
+
+  // ==========================================================
+  // LOCATION
+  // ==========================================================
 
   function setLocation(location) {
-  if (!location) return;
 
-  const lat = Number(
-    location.lat ??
-    location.latitude
-  );
+    if (!location) return;
 
-  const lng = Number(
-    location.lng ??
-    location.longitude
-  );
+    const lat =
+      Number(
+        location.lat ??
+        location.latitude
+      );
 
-  if (
-    !Number.isFinite(lat) ||
-    !Number.isFinite(lng)
-  ) {
-    console.error(
-      "❌ Invalid command location:",
-      location
-    );
+    const lng =
+      Number(
+        location.lng ??
+        location.longitude
+      );
 
-    return;
-  }
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lng)
+    ) {
+      console.error(
+        "❌ Invalid command location:",
+        location
+      );
 
-  const changed =
-    state.location.lat !== lat ||
-    state.location.lng !== lng;
+      return;
+    }
 
-  state.location = {
-    lat,
-    lng,
-    name:
-      location.name || null,
-  };
-
-  if (changed) {
-    // Clear location-dependent map resources.
-    state.mapResources = {
-      hospitals: [],
-      policeStations: [],
-      fireStations: [],
-      pharmacies: [],
-      schools: [],
-      shelters: [],
+    state.location = {
+      lat,
+      lng,
+      name:
+        location.name || null
     };
 
-    // Clear previous location data.
-    state.incidents = [];
-    state.missions = [];
-    state.resources = [];
-    state.sos = [];
-
-    calculateStats();
+    notify("location");
   }
 
-  notify("location");
-}
+  // ==========================================================
+  // SETTERS
+  // ==========================================================
 
   function setIncidents(items) {
 
@@ -257,115 +275,152 @@ const CommandCenterData = (() => {
 
   function setMapResources(data) {
 
-    const resources = data || {};
+    data =
+      data || {};
 
     state.mapResources = {
+
       hospitals:
-        normalizeArray(resources.hospitals),
+        normalizeArray(
+          data.hospitals
+        ),
 
       policeStations:
         normalizeArray(
-          resources.policeStations
+          data.policeStations
         ),
 
       fireStations:
         normalizeArray(
-          resources.fireStations
+          data.fireStations
         ),
 
       pharmacies:
-        normalizeArray(resources.pharmacies),
+        normalizeArray(
+          data.pharmacies
+        ),
 
       schools:
-        normalizeArray(resources.schools),
+        normalizeArray(
+          data.schools
+        ),
 
       shelters:
-        normalizeArray(resources.shelters),
+        normalizeArray(
+          data.shelters
+        )
     };
 
-    notify("map-resources");
+    notify(
+      "map-resources"
+    );
   }
 
-  function upsert(listName, item) {
+  // ==========================================================
+  // REALTIME UPSERT
+  // ==========================================================
+
+  function getItemId(item) {
+
+    return (
+      item?._id ||
+      item?.id ||
+      item?.incidentId ||
+      item?.sosId ||
+      item?.missionId ||
+      item?.resourceId
+    );
+  }
+
+  function upsert(
+    listName,
+    item
+  ) {
 
     if (!item) return;
 
     const list =
       state[listName];
 
-    if (!Array.isArray(list)) return;
+    if (!Array.isArray(list)) {
+      return;
+    }
 
     const id =
-      item._id ||
-      item.id ||
-      item.incidentId ||
-      item.sosId ||
-      item.missionId;
+      getItemId(item);
 
     const index =
-      list.findIndex((existing) => {
-
-        const existingId =
-          existing._id ||
-          existing.id ||
-          existing.incidentId ||
-          existing.sosId ||
-          existing.missionId;
-
-        return String(existingId) ===
-          String(id);
-      });
+      list.findIndex(
+        existing =>
+          String(
+            getItemId(existing)
+          ) === String(id)
+      );
 
     if (index === -1) {
+
       list.unshift(item);
+
     } else {
+
       list[index] = item;
     }
 
     calculateStats();
 
-    notify(`${listName}:updated`);
+    notify(
+      `${listName}:updated`
+    );
   }
 
-  function remove(listName, id) {
+  // ==========================================================
+  // REMOVE
+  // ==========================================================
+
+  function remove(
+    listName,
+    id
+  ) {
 
     const list =
       state[listName];
 
-    if (!Array.isArray(list)) return;
+    if (!Array.isArray(list)) {
+      return;
+    }
 
     state[listName] =
-      list.filter((item) => {
-
-        const itemId =
-          item._id ||
-          item.id ||
-          item.incidentId ||
-          item.sosId ||
-          item.missionId;
-
-        return String(itemId) !==
-          String(id);
-      });
+      list.filter(
+        item =>
+          String(
+            getItemId(item)
+          ) !== String(id)
+      );
 
     calculateStats();
 
-    notify(`${listName}:deleted`);
+    notify(
+      `${listName}:deleted`
+    );
   }
 
   function setLoading(value) {
 
-    state.loading = Boolean(value);
+    state.loading =
+      Boolean(value);
 
     notify("loading");
   }
 
   return {
+
     state,
+
     subscribe,
     getState,
 
     setLocation,
+
     setIncidents,
     setMissions,
     setResources,
@@ -376,7 +431,7 @@ const CommandCenterData = (() => {
     remove,
 
     calculateStats,
-    setLoading,
+    setLoading
   };
 
 })();
