@@ -1,7 +1,4 @@
 "use strict";
-
-console.log("📍 Command Center Location Loaded");
-
 const CommandCenterLocation = (() => {
   let currentLocation = null;
   let initialized = false;

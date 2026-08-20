@@ -1,0 +1,348 @@
+/* =========================================================
+   DISASTEROS - LIVE WEATHER MODULE
+   ========================================================= */
+
+#weatherModule {
+    width: 100%;
+    min-height: 100%;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+#weatherModule .module-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+#weatherModule .module-kicker {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: 0.55;
+    margin-bottom: 8px;
+}
+
+#weatherModule .module-header h1 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 700;
+}
+
+#weatherModule .module-header p {
+    margin: 8px 0 0;
+    opacity: 0.6;
+    font-size: 14px;
+}
+
+/* =========================================================
+   BUTTON
+   ========================================================= */
+
+#weatherModule .module-action-btn {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+
+    padding: 11px 17px;
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+#weatherModule .module-action-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.weather-loading {
+    min-height: 300px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    font-size: 14px;
+    opacity: 0.65;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.weather-error {
+    padding: 16px 18px;
+
+    border-radius: 12px;
+
+    background: rgba(180, 40, 40, 0.12);
+    border: 1px solid rgba(255, 80, 80, 0.2);
+
+    font-size: 14px;
+
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================================
+   MAIN WEATHER CARD
+   ========================================================= */
+
+.weather-main-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 25px;
+
+    padding: 28px;
+
+    border-radius: 20px;
+
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    margin-bottom: 20px;
+}
+
+.weather-location {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.weather-label {
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    font-weight: 700;
+    opacity: 0.5;
+}
+
+.weather-location h2 {
+    font-size: 28px;
+    margin: 9px 0 5px;
+}
+
+.weather-location p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.55;
+}
+
+/* =========================================================
+   CURRENT WEATHER
+   ========================================================= */
+
+.weather-current {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 15px;
+}
+
+.weather-icon {
+    font-size: 54px;
+}
+
+.temperature {
+    display: flex;
+    align-items: flex-start;
+
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.temperature span:last-child {
+    font-size: 20px;
+    opacity: 0.6;
+    margin-top: 5px;
+}
+
+#weatherCondition {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.weather-current small {
+    opacity: 0.45;
+    font-size: 11px;
+}
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.weather-stats-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 14px;
+
+    margin-bottom: 20px;
+}
+
+.weather-stat-card {
+    padding: 20px;
+
+    min-height: 110px;
+
+    border-radius: 16px;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.weather-stat-card span {
+    font-size: 11px;
+    opacity: 0.5;
+    margin-bottom: 8px;
+}
+
+.weather-stat-card strong {
+    font-size: 25px;
+}
+
+.weather-stat-card small {
+    font-size: 10px;
+    opacity: 0.45;
+    margin-top: 3px;
+}
+
+/* =========================================================
+   DISASTER INTELLIGENCE
+   ========================================================= */
+
+.weather-alert-card {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 22px;
+
+    border-radius: 17px;
+
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    margin-bottom: 20px;
+}
+
+.weather-alert-icon {
+    width: 48px;
+    height: 48px;
+
+    border-radius: 13px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 180, 50, 0.12);
+
+    font-size: 22px;
+}
+
+.weather-alert-card h3 {
+    margin: 6px 0;
+
+    font-size: 17px;
+}
+
+.weather-alert-card p {
+    margin: 0;
+
+    font-size: 13px;
+    line-height: 1.6;
+
+    opacity: 0.6;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.weather-footer {
+    display: flex;
+    justify-content: space-between;
+
+    padding: 12px 4px;
+
+    font-size: 11px;
+
+    opacity: 0.45;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .weather-main-card {
+        grid-template-columns: 1fr;
+    }
+
+    .weather-current {
+        justify-content: flex-start;
+    }
+
+    .weather-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+
+    #weatherModule {
+        padding: 18px;
+    }
+
+    #weatherModule .module-header {
+        flex-direction: column;
+    }
+
+    .weather-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .weather-current {
+        flex-wrap: wrap;
+    }
+
+    .temperature {
+        font-size: 42px;
+    }
+}

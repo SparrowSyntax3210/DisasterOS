@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS | Location</title>
+
+    <link rel="stylesheet" href="../css/global.css" />
+    <link rel="stylesheet" href="../css/users/user-common.css">
+  </head>
+
+  <body>
+    <main class="location-page">
+      <!-- Background -->
+      <div class="location-background"></div>
+
+      <section class="location-card">
+        <!-- Logo -->
+        <div class="brand">
+          <div class="brand-icon">D</div>
+
+          <div>
+            <h1>DisasterOS</h1>
+            <p>Disaster Intelligence Platform</p>
+          </div>
+        </div>
+
+        <!-- Heading -->
+        <div class="location-heading">
+          <span class="eyebrow"> LOCATION SETUP </span>
+
+          <h2>Where are you located?</h2>
+
+          <p>
+            DisasterOS uses your location to provide real-time risk, weather,
+            emergency resources and disaster information for your area.
+          </p>
+        </div>
+
+        <!-- Current Location -->
+        <button id="useLocationBtn" class="location-primary-btn">
+          <span class="btn-icon"> ◎ </span>
+
+          <span> Use My Current Location </span>
+        </button>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <!-- Search Location -->
+        <div class="location-search">
+          <label for="locationSearch"> Search Location </label>
+
+          <div class="search-row">
+            <input
+              type="text"
+              id="locationSearch"
+              placeholder="e.g. Ghaziabad, Delhi"
+              autocomplete="off"
+            />
+
+            <button id="searchLocationBtn" type="button">Search</button>
+          </div>
+        </div>
+
+        <!-- Coordinates -->
+        <div class="coordinate-section">
+          <div class="field">
+            <label for="latitude"> Latitude </label>
+
+            <input
+              type="number"
+              id="latitude"
+              step="any"
+              placeholder="28.6139"
+            />
+          </div>
+
+          <div class="field">
+            <label for="longitude"> Longitude </label>
+
+            <input
+              type="number"
+              id="longitude"
+              step="any"
+              placeholder="77.2090"
+            />
+          </div>
+        </div>
+
+        <button id="continueBtn" class="continue-btn" type="button">
+          Continue to Dashboard →
+        </button>
+
+        <!-- Status -->
+        <div id="locationStatus" class="location-status"></div>
+
+        <!-- Existing Location -->
+        <div id="savedLocation" class="saved-location hidden">
+          <div class="saved-location-icon">✓</div>
+
+          <div>
+            <strong> Previous location detected </strong>
+
+            <p id="savedLocationText">Location</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="../js/users/config.js"></script>
+    <script src="../js/users/location.js"></script>
+  </body>
+</html>
