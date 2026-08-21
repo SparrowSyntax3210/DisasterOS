@@ -1,3 +1,7 @@
+// =========================================================
+// DISASTEROS LOCATION
+// =========================================================
+
 let currentLocation = {
   latitude: null,
   longitude: null,
@@ -13,9 +17,17 @@ function getCurrentLocation() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        currentLocation.latitude = position.coords.latitude;
+        currentLocation = {
+          latitude: position.coords.latitude,
 
-        currentLocation.longitude = position.coords.longitude;
+          longitude: position.coords.longitude,
+        };
+
+        // IMPORTANT:
+        // Make it available to every overlay
+        window.currentLocation = currentLocation;
+
+        console.log("📍 Global location updated:", currentLocation);
 
         resolve(currentLocation);
       },
@@ -23,7 +35,13 @@ function getCurrentLocation() {
       (error) => {
         console.warn("Location access failed:", error);
 
-        currentLocation = APP_CONFIG.DEFAULT_LOCATION;
+        currentLocation = {
+          ...APP_CONFIG.DEFAULT_LOCATION,
+        };
+
+        window.currentLocation = currentLocation;
+
+        console.log("📍 Using default location:", currentLocation);
 
         resolve(currentLocation);
       },
@@ -38,5 +56,5 @@ function getCurrentLocation() {
 }
 
 function formatCoordinates(latitude, longitude) {
-  return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+  return `${Number(latitude).toFixed(4)}, ${Number(longitude).toFixed(4)}`;
 }

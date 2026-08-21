@@ -3,10 +3,36 @@
 // =========================================================
 
 (function () {
+  "use strict";
+
+  console.log("🗺 Loading DisasterOS Live Map...");
+
+  // =========================================================
+  // STATE
+  // =========================================================
+
   let map = null;
+
   let markers = [];
+
+  let userLocationMarker = null;
+
   let initialized = false;
-  let resourceData = {};
+
+  let resourceData = {
+    hospitals: [],
+    policeStations: [],
+    fireStations: [],
+    pharmacies: [],
+    shelters: [],
+    schools: [],
+  };
+
+  let currentCategory = "hospitals";
+
+  // =========================================================
+  // CATEGORY NAMES
+  // =========================================================
 
   const categoryNames = {
     hospitals: "Hospitals",
@@ -18,12 +44,16 @@
   };
 
   // =========================================================
-  // GET DASHBOARD DATA
+  // GET DASHBOARD
   // =========================================================
 
   function getDashboard() {
     return window.DisasterOSDashboard || null;
   }
+
+  // =========================================================
+  // GET LOCATION
+  // =========================================================
 
   function getLocation() {
     const dashboard = getDashboard();
@@ -36,41 +66,45 @@
   }
 
   // =========================================================
-  // API
-  // =========================================================
-
-  function getAPI() {
-    return window.API || "http://localhost:4000";
-  }
-
-  // =========================================================
   // INIT
   // =========================================================
 
   async function initMapOverlay() {
-    console.log("🗺 Initializing DisasterOS Live Map...");
+    console.log("🗺 Initializing Live Map...");
 
     const location = getLocation();
 
     if (
       !location ||
-      location.latitude === null ||
-      location.longitude === null
+      !isValidCoordinate(location.latitude) ||
+      !isValidCoordinate(location.longitude)
     ) {
-      console.warn("⚠ Map location is not available yet.");
+      console.warn("⚠️ Map waiting for dashboard location...");
 
       return;
     }
 
-    console.log("📍 Map location:", location);
+    // -------------------------------------------------------
+    // CREATE MAP
+    // -------------------------------------------------------
 
     if (!initialized) {
-      initialized = true;
-
       createMap();
 
       bindControls();
+
+      initialized = true;
     }
+
+    // -------------------------------------------------------
+    // UPDATE USER LOCATION
+    // -------------------------------------------------------
+
+    updateUserLocation(location);
+
+    // -------------------------------------------------------
+    // INVALIDATE SIZE
+    // -------------------------------------------------------
 
     setTimeout(() => {
       if (map) {
@@ -78,7 +112,15 @@
       }
     }, 150);
 
-    await loadResources();
+    // -------------------------------------------------------
+    // USE DASHBOARD RESOURCE DATA
+    // -------------------------------------------------------
+
+    const dashboard = getDashboard();
+
+    if (dashboard && dashboard.resources) {
+      setResources(dashboard.resources);
+    }
   }
 
   // =========================================================
@@ -88,7 +130,19 @@
   function createMap() {
     const location = getLocation();
 
-    if (!location) {
+    if (
+      !location ||
+      !isValidCoordinate(location.latitude) ||
+      !isValidCoordinate(location.longitude)
+    ) {
+      return;
+    }
+
+    const mapElement = document.getElementById("liveMap");
+
+    if (!mapElement) {
+      console.warn("⚠️ #liveMap element not found");
+
       return;
     }
 
@@ -96,82 +150,144 @@
       return;
     }
 
-    map = L.map("liveMap").setView(
+    map = L.map(mapElement).setView(
       [Number(location.latitude), Number(location.longitude)],
       13,
     );
 
+    // =======================================================
+    // OPENSTREETMAP
+    // =======================================================
+
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
+
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
 
-    // =====================================================
+    // =======================================================
     // USER LOCATION
-    // =====================================================
+    // =======================================================
 
-    L.marker([Number(location.latitude), Number(location.longitude)])
-      .addTo(map)
-      .bindPopup("<strong>Your Location</strong>");
+    updateUserLocation(location);
+
+    console.log("✅ Map created");
   }
 
   // =========================================================
-  // LOAD ALL RESOURCES
+  // UPDATE USER LOCATION
   // =========================================================
 
-  async function loadResources() {
-    const location = getLocation();
-
+  function updateUserLocation(location) {
     if (
+      !map ||
       !location ||
-      location.latitude === null ||
-      location.longitude === null
+      !isValidCoordinate(location.latitude) ||
+      !isValidCoordinate(location.longitude)
     ) {
       return;
     }
 
-    try {
-      console.log("📡 Fetching nearby resources...");
+    const lat = Number(location.latitude);
 
-      const response = await fetch(
-        `${getAPI()}/api/map/resources?lat=${encodeURIComponent(
-          location.latitude,
-        )}&lng=${encodeURIComponent(location.longitude)}`,
-      );
+    const lng = Number(location.longitude);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+    // -------------------------------------------------------
+    // EXISTING MARKER
+    // -------------------------------------------------------
 
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || "Unable to load resources");
-      }
-
-      resourceData = result.resources || result.data || {};
-
-      console.log("🏥 Nearby resources:", resourceData);
-
-      renderResourceTotals();
-
-      /*
-       * Default category
-       */
-      const activeButton = document.querySelector(".map-filter.active");
-
-      const category = activeButton?.dataset.category || "hospitals";
-
-      renderCategory(category);
-    } catch (error) {
-      console.error("❌ Map Resources Error:", error);
-
-      resourceData = {};
-
-      renderResourceTotals();
-
-      renderCategory("hospitals");
+    if (userLocationMarker) {
+      userLocationMarker.setLatLng([lat, lng]);
+    } else {
+      userLocationMarker = L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup("<strong>Your Location</strong>");
     }
+
+    // -------------------------------------------------------
+    // MOVE MAP
+    // -------------------------------------------------------
+
+    map.setView([lat, lng], map.getZoom() || 13, {
+      animate: true,
+    });
+  }
+
+  // =========================================================
+  // SET RESOURCES
+  // =========================================================
+
+  function setResources(resources) {
+    resourceData = normalizeResources(resources);
+
+    console.log("📦 Map received resources:", resourceData);
+
+    renderResourceTotals();
+
+    renderCategory(currentCategory);
+  }
+
+  // =========================================================
+  // NORMALIZE RESOURCES
+  // =========================================================
+
+  function normalizeResources(resources) {
+    if (!resources || typeof resources !== "object") {
+      return createEmptyResources();
+    }
+
+    return {
+      hospitals: normalizeResourceArray(resources.hospitals),
+
+      policeStations: normalizeResourceArray(
+        resources.policeStations || resources.police,
+      ),
+
+      fireStations: normalizeResourceArray(
+        resources.fireStations || resources.fire,
+      ),
+
+      pharmacies: normalizeResourceArray(resources.pharmacies),
+
+      shelters: normalizeResourceArray(resources.shelters),
+
+      schools: normalizeResourceArray(resources.schools),
+    };
+  }
+
+  // =========================================================
+  // EMPTY RESOURCES
+  // =========================================================
+
+  function createEmptyResources() {
+    return {
+      hospitals: [],
+      policeStations: [],
+      fireStations: [],
+      pharmacies: [],
+      shelters: [],
+      schools: [],
+    };
+  }
+
+  // =========================================================
+  // NORMALIZE RESOURCE ARRAY
+  // =========================================================
+
+  function normalizeResourceArray(value) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (value && Array.isArray(value.places)) {
+      return value.places;
+    }
+
+    if (value && Array.isArray(value.results)) {
+      return value.results;
+    }
+
+    return [];
   }
 
   // =========================================================
@@ -179,56 +295,49 @@
   // =========================================================
 
   function renderResourceTotals() {
-    const categories = Object.keys(categoryNames);
+    const possibleIds = {
+      hospitals: ["hospitalCount", "hospitalsCount", "mapHospitalCount"],
+
+      policeStations: ["policeCount", "policeStationsCount", "mapPoliceCount"],
+
+      fireStations: ["fireCount", "fireStationsCount", "mapFireCount"],
+
+      pharmacies: ["pharmacyCount", "pharmaciesCount", "mapPharmacyCount"],
+
+      shelters: ["shelterCount", "sheltersCount", "mapShelterCount"],
+
+      schools: ["schoolCount", "schoolsCount", "mapSchoolCount"],
+    };
 
     let total = 0;
 
-    categories.forEach((category) => {
-      const places = Array.isArray(resourceData[category])
-        ? resourceData[category]
-        : [];
+    Object.keys(categoryNames).forEach((category) => {
+      const places = normalizeResourceArray(resourceData[category]);
 
       total += places.length;
-
-      /*
-       * Supports IDs such as:
-       *
-       * hospitalCount
-       * policeCount
-       * fireCount
-       * pharmacyCount
-       * shelterCount
-       * schoolCount
-       */
-
-      const possibleIds = {
-        hospitals: ["hospitalCount", "hospitalsCount", "mapHospitalCount"],
-
-        policeStations: [
-          "policeCount",
-          "policeStationsCount",
-          "mapPoliceCount",
-        ],
-
-        fireStations: ["fireCount", "fireStationsCount", "mapFireCount"],
-
-        pharmacies: ["pharmacyCount", "pharmaciesCount", "mapPharmacyCount"],
-
-        shelters: ["shelterCount", "sheltersCount", "mapShelterCount"],
-
-        schools: ["schoolCount", "schoolsCount", "mapSchoolCount"],
-      };
 
       (possibleIds[category] || []).forEach((id) => {
         setText(id, places.length);
       });
     });
 
-    /*
-     * Optional overall resource counter
-     */
-
     setText("mapTotalResources", total);
+
+    console.log("📊 Map resource totals:", {
+      hospitals: resourceData.hospitals.length,
+
+      police: resourceData.policeStations.length,
+
+      fire: resourceData.fireStations.length,
+
+      pharmacies: resourceData.pharmacies.length,
+
+      shelters: resourceData.shelters.length,
+
+      schools: resourceData.schools.length,
+
+      total,
+    });
   }
 
   // =========================================================
@@ -236,26 +345,71 @@
   // =========================================================
 
   function bindControls() {
+    // -------------------------------------------------------
+    // CATEGORY BUTTONS
+    // -------------------------------------------------------
+
     document.querySelectorAll(".map-filter").forEach((button) => {
-      button.addEventListener("click", function () {
+      /*
+       * Prevent duplicate listeners.
+       */
+      if (button.dataset.mapBound === "true") {
+        return;
+      }
+
+      button.dataset.mapBound = "true";
+
+      button.addEventListener("click", () => {
+        const category = button.dataset.category;
+
+        if (!category || !categoryNames[category]) {
+          console.warn("⚠️ Invalid map category:", category);
+
+          return;
+        }
+
+        currentCategory = category;
+
         document.querySelectorAll(".map-filter").forEach((btn) => {
-          btn.classList.remove("active");
+          btn.classList.toggle("active", btn === button);
         });
 
-        this.classList.add("active");
-
-        renderCategory(this.dataset.category);
+        renderCategory(category);
       });
     });
 
+    // -------------------------------------------------------
+    // REFRESH
+    // -------------------------------------------------------
+
     const refresh = document.getElementById("mapRefresh");
 
-    if (refresh) {
+    if (refresh && refresh.dataset.mapBound !== "true") {
+      refresh.dataset.mapBound = "true";
+
       refresh.addEventListener("click", async () => {
         refresh.disabled = true;
 
         try {
-          await loadResources();
+          /*
+           * Ask dashboard to refresh.
+           *
+           * Dashboard will:
+           *
+           * 1. Get location
+           * 2. Fetch resources
+           * 3. Dispatch resources-ready event
+           * 4. Map receives updated data
+           */
+          const dashboard = getDashboard();
+
+          if (dashboard && typeof dashboard.refresh === "function") {
+            await dashboard.refresh();
+          } else {
+            console.warn("⚠️ Dashboard refresh API unavailable");
+          }
+        } catch (error) {
+          console.error("❌ Map refresh error:", error);
         } finally {
           refresh.disabled = false;
         }
@@ -269,16 +423,30 @@
 
   function renderCategory(category) {
     if (!map) {
+      console.warn("⚠️ Cannot render category: map unavailable");
+
       return;
     }
 
+    if (!categoryNames[category]) {
+      category = "hospitals";
+    }
+
+    currentCategory = category;
+
+    // -------------------------------------------------------
+    // CLEAR OLD MARKERS
+    // -------------------------------------------------------
+
     clearMarkers();
 
-    const places = Array.isArray(resourceData[category])
-      ? resourceData[category]
-      : [];
+    // -------------------------------------------------------
+    // GET PLACES
+    // -------------------------------------------------------
 
-    console.log(`📍 Rendering ${category}:`, places.length);
+    const places = normalizeResourceArray(resourceData[category]);
+
+    console.log(`📍 Rendering ${category}: ${places.length}`);
 
     const title = document.getElementById("mapResultTitle");
 
@@ -286,51 +454,59 @@
 
     const list = document.getElementById("mapResultList");
 
-    // =====================================================
+    // -------------------------------------------------------
     // HEADER
-    // =====================================================
+    // -------------------------------------------------------
 
     if (title) {
-      title.textContent = categoryNames[category] || category;
+      title.textContent = categoryNames[category];
     }
 
     if (count) {
-      count.textContent = places.length;
+      count.textContent = String(places.length);
     }
 
-    // =====================================================
-    // EMPTY STATE
-    // =====================================================
+    // -------------------------------------------------------
+    // CLEAR SIDE PANEL
+    // -------------------------------------------------------
 
     if (list) {
       list.innerHTML = "";
+    }
 
-      if (places.length === 0) {
+    // -------------------------------------------------------
+    // EMPTY
+    // -------------------------------------------------------
+
+    if (places.length === 0) {
+      if (list) {
         list.innerHTML = `
           <div class="map-empty-state">
+
             <strong>
-              No ${escapeHTML(categoryNames[category] || category)} found
+              No ${escapeHTML(categoryNames[category])} found
             </strong>
 
             <p>
               No nearby resources were found.
             </p>
+
           </div>
         `;
-
-        return;
       }
+
+      return;
     }
 
-    // =====================================================
-    // MARKERS + SIDE PANEL
-    // =====================================================
+    // -------------------------------------------------------
+    // MARKERS + LIST
+    // -------------------------------------------------------
 
     places.forEach((place, index) => {
       const marker = addMarker(place, category, index);
 
-      if (list) {
-        const item = createResultItem(place, category, marker);
+      if (list && marker) {
+        const item = createResultItem(place, category, marker, index);
 
         list.appendChild(item);
       }
@@ -338,19 +514,21 @@
   }
 
   // =========================================================
-  // CREATE SIDE PANEL ITEM
+  // CREATE SIDE ITEM
   // =========================================================
 
-  function createResultItem(place, category, marker) {
+  function createResultItem(place, category, marker, index) {
     const item = document.createElement("div");
 
     item.className = "map-result-item";
 
-    const name = place.name || categoryNames[category] || "Unknown resource";
+    item.dataset.index = String(index);
 
-    const address = place.address || "Address unavailable";
+    const name = getPlaceName(place, category);
 
-    const distance = formatDistance(place.distance);
+    const address = getPlaceAddress(place);
+
+    const distance = formatDistance(getPlaceDistance(place));
 
     item.innerHTML = `
       <div class="map-result-content">
@@ -364,24 +542,16 @@
         </p>
 
         <span class="map-distance">
-          ${distance}
+          ${escapeHTML(distance)}
         </span>
 
       </div>
     `;
 
-    // =====================================================
-    // CLICK SIDE PANEL ITEM
-    // =====================================================
-
     item.addEventListener("click", () => {
       focusPlace(place, marker);
 
-      document.querySelectorAll(".map-result-item").forEach((element) => {
-        element.classList.remove("active");
-      });
-
-      item.classList.add("active");
+      highlightSidePanelItem(index);
     });
 
     return item;
@@ -396,27 +566,23 @@
       return null;
     }
 
-    const lat = Number(place.latitude);
+    const coordinates = getPlaceCoordinates(place);
 
-    const lng = Number(place.longitude);
-
-    if (Number.isNaN(lat) || Number.isNaN(lng)) {
-      console.warn("⚠ Invalid resource coordinates:", place);
+    if (!coordinates) {
+      console.warn("⚠️ Invalid resource coordinates:", place);
 
       return null;
     }
 
-    const marker = L.marker([lat, lng]).addTo(map);
+    const { latitude, longitude } = coordinates;
 
-    const name = place.name || categoryNames[category] || "Unknown resource";
+    const marker = L.marker([latitude, longitude]).addTo(map);
 
-    const address = place.address || "Address unavailable";
+    const name = getPlaceName(place, category);
 
-    const distance = formatDistance(place.distance);
+    const address = getPlaceAddress(place);
 
-    // =====================================================
-    // POPUP
-    // =====================================================
+    const distance = formatDistance(getPlaceDistance(place));
 
     marker.bindPopup(`
       <div class="resource-popup">
@@ -440,15 +606,13 @@
       </div>
     `);
 
-    // =====================================================
-    // MARKER CLICK
-    // =====================================================
-
     marker.on("click", () => {
       console.log("📍 Resource selected:", place);
 
       highlightSidePanelItem(index);
     });
+
+    marker._disasterOSIndex = index;
 
     markers.push(marker);
 
@@ -456,19 +620,23 @@
   }
 
   // =========================================================
-  // FOCUS RESOURCE
+  // FOCUS PLACE
   // =========================================================
 
   function focusPlace(place, marker) {
-    const lat = Number(place.latitude);
-
-    const lng = Number(place.longitude);
-
-    if (!map || Number.isNaN(lat) || Number.isNaN(lng)) {
+    if (!map) {
       return;
     }
 
-    map.setView([lat, lng], 16, {
+    const coordinates = getPlaceCoordinates(place);
+
+    if (!coordinates) {
+      return;
+    }
+
+    const { latitude, longitude } = coordinates;
+
+    map.setView([latitude, longitude], 16, {
       animate: true,
     });
 
@@ -503,8 +671,14 @@
   // =========================================================
 
   function clearMarkers() {
+    if (!map) {
+      markers = [];
+
+      return;
+    }
+
     markers.forEach((marker) => {
-      if (map && marker) {
+      if (marker) {
         map.removeLayer(marker);
       }
     });
@@ -513,21 +687,126 @@
   }
 
   // =========================================================
-  // HELPERS
+  // PLACE NAME
   // =========================================================
 
-  function setText(id, value) {
-    const element = document.getElementById(id);
-
-    if (element) {
-      element.textContent = value;
-    }
+  function getPlaceName(place, category) {
+    return (
+      place?.name ||
+      place?.properties?.name ||
+      categoryNames[category] ||
+      "Unknown resource"
+    );
   }
+
+  // =========================================================
+  // PLACE ADDRESS
+  // =========================================================
+
+  function getPlaceAddress(place) {
+    return (
+      place?.address ||
+      place?.formatted ||
+      place?.properties?.formatted ||
+      place?.properties?.address_line1 ||
+      place?.properties?.address_line2 ||
+      "Address unavailable"
+    );
+  }
+
+  // =========================================================
+  // PLACE DISTANCE
+  // =========================================================
+
+  function getPlaceDistance(place) {
+    return place?.distance ?? place?.properties?.distance ?? null;
+  }
+
+  // =========================================================
+  // PLACE COORDINATES
+  // =========================================================
+
+  function getPlaceCoordinates(place) {
+    if (!place) {
+      return null;
+    }
+
+    // -------------------------------------------------------
+    // Standard backend format
+    // -------------------------------------------------------
+
+    let latitude = place.latitude;
+
+    let longitude = place.longitude;
+
+    // -------------------------------------------------------
+    // Alternative format
+    // -------------------------------------------------------
+
+    if (latitude === undefined || latitude === null) {
+      latitude = place.lat;
+    }
+
+    if (longitude === undefined || longitude === null) {
+      longitude = place.lng ?? place.lon;
+    }
+
+    // -------------------------------------------------------
+    // Geoapify properties
+    // -------------------------------------------------------
+
+    if (latitude === undefined || longitude === undefined) {
+      latitude = place.properties?.lat;
+
+      longitude = place.properties?.lon ?? place.properties?.lng;
+    }
+
+    // -------------------------------------------------------
+    // GeoJSON geometry
+    // -------------------------------------------------------
+
+    if (
+      (latitude === undefined || latitude === null) &&
+      Array.isArray(place.geometry?.coordinates)
+    ) {
+      const [geoLng, geoLat] = place.geometry.coordinates;
+
+      longitude = geoLng;
+
+      latitude = geoLat;
+    }
+
+    latitude = Number(latitude);
+
+    longitude = Number(longitude);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return null;
+    }
+
+    if (
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
+      return null;
+    }
+
+    return {
+      latitude,
+      longitude,
+    };
+  }
+
+  // =========================================================
+  // DISTANCE
+  // =========================================================
 
   function formatDistance(distance) {
     const value = Number(distance);
 
-    if (Number.isNaN(value) || value <= 0) {
+    if (!Number.isFinite(value) || value < 0) {
       return "Distance unavailable";
     }
 
@@ -537,6 +816,30 @@
 
     return `${(value / 1000).toFixed(1)} km away`;
   }
+
+  // =========================================================
+  // TEXT
+  // =========================================================
+
+  function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.textContent = String(value);
+    }
+  }
+
+  // =========================================================
+  // COORDINATE VALIDATION
+  // =========================================================
+
+  function isValidCoordinate(value) {
+    return Number.isFinite(Number(value));
+  }
+
+  // =========================================================
+  // ESCAPE HTML
+  // =========================================================
 
   function escapeHTML(value) {
     return String(value ?? "").replace(
@@ -553,15 +856,10 @@
   }
 
   // =========================================================
-  // EXPOSE
+  // PUBLIC API
   // =========================================================
 
   window.initMapOverlay = initMapOverlay;
-
-  /*
-   * Make resource data accessible to other
-   * DisasterOS components if required.
-   */
 
   window.DisasterOSMap = {
     get resources() {
@@ -572,28 +870,72 @@
       return map;
     },
 
-    refresh: loadResources,
+    refresh: async function () {
+      const dashboard = getDashboard();
+
+      if (dashboard && typeof dashboard.refresh === "function") {
+        await dashboard.refresh();
+      }
+    },
 
     showCategory: renderCategory,
   };
 
-  console.log("✅ DisasterOS map.js loaded");
+  // =========================================================
+  // DASHBOARD DATA READY
+  // =========================================================
+
+  window.addEventListener("disasterOSDataReady", (event) => {
+    console.log("📡 Dashboard data ready → updating map");
+
+    const detail = event.detail || {};
+
+    if (detail.location) {
+      updateUserLocation(detail.location);
+    }
+
+    if (detail.resources) {
+      setResources(detail.resources);
+    }
+
+    initMapOverlay();
+  });
 
   // =========================================================
-  // AUTO INITIALIZATION
+  // RESOURCES READY
+  // =========================================================
+
+  window.addEventListener("disasterOSResourcesReady", (event) => {
+    console.log("📡 Resources ready → updating map markers");
+
+    const detail = event.detail || {};
+
+    if (detail.location) {
+      updateUserLocation(detail.location);
+    }
+
+    if (detail.resources) {
+      setResources(detail.resources);
+    }
+  });
+
+  // =========================================================
+  // DOM READY
   // =========================================================
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      initMapOverlay();
-    });
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+        initMapOverlay();
+      },
+      {
+        once: true,
+      },
+    );
   } else {
     initMapOverlay();
   }
 
-  window.addEventListener("disasterOSDataReady", () => {
-    console.log("📡 Dashboard data ready → initializing map");
-
-    initMapOverlay();
-  });
+  console.log("✅ DisasterOS map.js loaded");
 })();
