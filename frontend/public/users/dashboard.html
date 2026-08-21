@@ -2,783 +2,405 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>DisasterOS | User Dashboard</title>
+    <title>DisasterOS | Citizen Dashboard</title>
 
-    <!-- =====================================================
-         COMMON CSS
-    ====================================================== -->
-    <link rel="stylesheet" href="../css/users/dashboard.css" />
+    <link rel="stylesheet" href="../css/global.css" />
 
-    <!-- =====================================================
-         MODULE CSS
-    ====================================================== -->
-    <link rel="stylesheet" href="../css/users/risk.css" />
-    <link rel="stylesheet" href="../css/users/weather.css" />
-    <link rel="stylesheet" href="../css/users/map.css" />
-    <link rel="stylesheet" href="../css/users/incident.css" />
-    <link rel="stylesheet" href="../css/users/sos.css" />
-    <link rel="stylesheet" href="../css/users/evacuation.css" />
-    <link rel="stylesheet" href="../css/users/alerts.css" />
-    <link rel="stylesheet" href="../css/users/resources.css" />
+    <link rel="stylesheet" href="../css/layout.css" />
 
-    <!-- =====================================================
-         LEAFLET CSS
-    ====================================================== -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <link rel="stylesheet" href="../css/dashboard.css" />
   </head>
 
   <body>
-    <!-- =====================================================
-         APPLICATION
-    ====================================================== -->
+    <!-- =========================
+         APPLICATION SHELL
+    ========================== -->
 
-    <div class="app-layout">
-      <!-- =================================================
-           SIDEBAR
-      ================================================== -->
+    <div class="app-shell">
+      <!-- SIDEBAR -->
 
-      <aside class="sidebar" id="sidebar">
-        <!-- BRAND -->
-        <div class="sidebar-brand">
-          <div class="brand-mark">D</div>
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">D</div>
 
-          <div class="brand-text">
-            <h1>DisasterOS</h1>
-            <span>USER PORTAL</span>
+          <div>
+            <h2>DisasterOS</h2>
+            <span>Citizen Network</span>
           </div>
         </div>
 
-        <!-- =================================================
-             NAVIGATION
-        ================================================== -->
+        <!-- NAVIGATION -->
 
-        <nav class="sidebar-navigation">
-          <!-- OVERVIEW -->
-          <div class="nav-section">
-            <span class="nav-section-title"> OVERVIEW </span>
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item active">
+            <span>◉</span>
+            <span>Dashboard</span>
+          </a>
 
-            <a
-              href="#dashboard"
-              class="nav-item active"
-              data-module="dashboard"
-            >
-              <span class="nav-icon">⌂</span>
-              <span class="nav-label">Dashboard</span>
-            </a>
-          </div>
+          <a href="risk.html" class="nav-item">
+            <span>⚠</span>
+            <span>Risk & Weather</span>
+          </a>
 
-          <!-- INTELLIGENCE -->
-          <div class="nav-section">
-            <span class="nav-section-title"> INTELLIGENCE </span>
+          <a href="map.html" class="nav-item">
+            <span>◉</span>
+            <span>Live Map</span>
+          </a>
 
-            <a href="#risk" class="nav-item" data-module="risk">
-              <span class="nav-icon">◈</span>
-              <span class="nav-label">Risk Assessment</span>
-            </a>
+          <a href="report.html" class="nav-item">
+            <span>＋</span>
+            <span>Report Incident</span>
+          </a>
 
-            <a href="#weather" class="nav-item" data-module="weather">
-              <span class="nav-icon">☁</span>
-              <span class="nav-label">Live Weather</span>
-            </a>
+          <a href="sos.html" class="nav-item emergency-nav">
+            <span>🆘</span>
+            <span>SOS</span>
+          </a>
 
-            <a href="#map" class="nav-item" data-module="map">
-              <span class="nav-icon">⌖</span>
-              <span class="nav-label">Live Map</span>
-            </a>
-          </div>
+          <a href="evacuation.html" class="nav-item">
+            <span>→</span>
+            <span>Evacuation</span>
+          </a>
 
-          <!-- EMERGENCY -->
-          <div class="nav-section">
-            <span class="nav-section-title"> EMERGENCY </span>
+          <a href="alerts.html" class="nav-item">
+            <span>🔔</span>
+            <span>Alerts</span>
+          </a>
 
-            <a href="#incident" class="nav-item" data-module="incident">
-              <span class="nav-icon">!</span>
-              <span class="nav-label">Report Incident</span>
-            </a>
-
-            <a href="#sos" class="nav-item sos-nav-item" data-module="sos">
-              <span class="nav-icon">SOS</span>
-              <span class="nav-label">Emergency SOS</span>
-            </a>
-
-            <a href="#evacuation" class="nav-item" data-module="evacuation">
-              <span class="nav-icon">⇥</span>
-              <span class="nav-label">Evacuation</span>
-            </a>
-          </div>
-
-          <!-- INFORMATION -->
-          <div class="nav-section">
-            <span class="nav-section-title"> INFORMATION </span>
-
-            <a href="#alerts" class="nav-item" data-module="alerts">
-              <span class="nav-icon">♢</span>
-              <span class="nav-label">Alerts</span>
-            </a>
-
-            <a href="#resources" class="nav-item" data-module="resources">
-              <span class="nav-icon">+</span>
-              <span class="nav-label">Resources</span>
-            </a>
-          </div>
+          <a href="resources.html" class="nav-item">
+            <span>🏥</span>
+            <span>Resources</span>
+          </a>
         </nav>
 
-        <!-- =================================================
-             SIDEBAR BOTTOM
-        ================================================== -->
+        <!-- SIDEBAR FOOTER -->
 
-        <div class="sidebar-bottom">
+        <div class="sidebar-footer">
+          <a href="#" class="nav-item">
+            <span>⚙</span>
+            <span>Settings</span>
+          </a>
+
           <div class="system-status">
             <span class="status-dot"></span>
 
             <div>
               <strong>System Online</strong>
-              <small>DisasterOS services active</small>
+              <small>DisasterOS Network</small>
             </div>
           </div>
-
-          <button class="sidebar-settings" id="settingsBtn" type="button">
-            ⚙
-            <span>Settings</span>
-          </button>
         </div>
       </aside>
 
-      <!-- =================================================
-           MAIN AREA
-      ================================================== -->
+      <!-- =========================
+             MAIN APPLICATION
+        ========================== -->
 
-      <div class="main-area">
-        <!-- =================================================
-             TOP NAVBAR
-        ================================================== -->
+      <main class="main-content">
+        <!-- TOPBAR -->
 
         <header class="topbar">
-          <!-- MOBILE MENU -->
-          <button id="sidebarToggle" class="sidebar-toggle" type="button">
-            ☰
-          </button>
+          <div class="mobile-menu">☰</div>
 
-          <!-- PAGE TITLE -->
-          <div class="topbar-title">
-            <span id="pageEyebrow"> DISASTER INTELLIGENCE </span>
-
-            <h2 id="pageTitle">User Dashboard</h2>
+          <div class="page-title">
+            <span>Citizen Dashboard</span>
           </div>
 
-          <!-- LOCATION -->
-          <div class="topbar-location">
-            <span class="location-status-dot"></span>
-
-            <div>
-              <span> CURRENT LOCATION </span>
-
-              <strong id="currentLocationText"> Loading location... </strong>
-            </div>
-          </div>
-
-          <!-- ACTIONS -->
           <div class="topbar-actions">
-            <button
-              id="refreshBtn"
-              class="topbar-btn"
-              title="Refresh"
-              type="button"
-            >
-              ↻
+            <button class="location-button" id="locationButton">
+              📍
+              <span id="locationText"> Detecting location... </span>
             </button>
 
-            <button
-              id="notificationBtn"
-              class="topbar-btn notification-btn"
-              title="Notifications"
-              type="button"
-            >
-              ♢
-
-              <span id="notificationBadge" class="notification-badge"> 0 </span>
+            <button class="notification-button" id="notificationButton">
+              🔔
+              <span class="notification-badge"> 3 </span>
             </button>
 
-            <!-- USER -->
-            <div class="user-profile">
-              <div class="user-avatar">U</div>
+            <div class="profile">
+              <div class="profile-avatar">H</div>
 
-              <div class="user-info">
-                <strong id="userName"> User </strong>
+              <div class="profile-info">
+                <strong id="userName"> Citizen </strong>
 
-                <span> Citizen </span>
+                <small> Citizen </small>
               </div>
             </div>
           </div>
         </header>
 
-        <!-- =================================================
-             LOCATION BAR
-        ================================================== -->
+        <!-- PAGE -->
 
-        <div class="location-bar">
-          <div class="location-bar-left">
-            <span class="location-pin"> ⌖ </span>
+        <section class="dashboard-page">
+          <!-- HERO -->
 
+          <div class="dashboard-hero">
             <div>
-              <span> MONITORING AREA </span>
-
-              <strong id="monitoringLocation">
-                Detecting your location...
-              </strong>
-            </div>
-          </div>
-
-          <button
-            id="changeLocationBtn"
-            class="change-location-btn"
-            type="button"
-          >
-            Change Location
-          </button>
-        </div>
-
-        <!-- =================================================
-             MODULE CONTENT
-        ================================================== -->
-
-        <main id="moduleContent" class="module-content">
-          <!-- =================================================
-               DASHBOARD MODULE
-          ================================================== -->
-
-          <section id="dashboardModule" class="module-view">
-            <!-- PAGE HEADER -->
-            <div class="page-header">
-              <div>
-                <span class="page-kicker"> OVERVIEW </span>
-
-                <h1>Disaster Situation Dashboard</h1>
-
-                <p>
-                  Monitor your area's disaster risk, weather conditions,
-                  emergency alerts and available resources.
-                </p>
-              </div>
-
-              <div class="last-updated">
-                <span> LAST UPDATED </span>
-
-                <strong id="lastUpdated"> Just now </strong>
-              </div>
-            </div>
-
-            <!-- =================================================
-                 DASHBOARD STATS
-            ================================================== -->
-
-            <section class="dashboard-stats">
-              <!-- RISK -->
-              <article class="stat-card">
-                <div class="stat-icon">◈</div>
-
-                <div class="stat-content">
-                  <span> CURRENT RISK </span>
-
-                  <strong id="dashboardRisk"> — </strong>
-
-                  <small id="dashboardRiskText"> Awaiting assessment </small>
-                </div>
-              </article>
-
-              <!-- WEATHER -->
-              <article class="stat-card">
-                <div class="stat-icon">☁</div>
-
-                <div class="stat-content">
-                  <span> WEATHER </span>
-
-                  <strong id="dashboardTemperature"> — </strong>
-
-                  <small id="dashboardWeather"> Loading... </small>
-                </div>
-              </article>
-
-              <!-- ALERTS -->
-              <article class="stat-card">
-                <div class="stat-icon">♢</div>
-
-                <div class="stat-content">
-                  <span> ACTIVE ALERTS </span>
-
-                  <strong id="dashboardAlerts"> 0 </strong>
-
-                  <small> In your area </small>
-                </div>
-              </article>
-
-              <!-- RESOURCES -->
-              <article class="stat-card">
-                <div class="stat-icon">+</div>
-
-                <div class="stat-content">
-                  <span> RESOURCES </span>
-
-                  <strong id="dashboardResources"> — </strong>
-
-                  <small> Nearby facilities </small>
-                </div>
-              </article>
-            </section>
-
-            <!-- =================================================
-                 QUICK ACTIONS
-            ================================================== -->
-
-            <section class="quick-actions-section">
-              <div class="section-heading">
-                <div>
-                  <span> EMERGENCY SERVICES </span>
-
-                  <h2>Quick Actions</h2>
-                </div>
-              </div>
-
-              <div class="quick-actions-grid">
-                <!-- SOS -->
-                <a href="#sos" class="quick-action emergency" data-module="sos">
-                  <span class="quick-action-icon"> SOS </span>
-
-                  <div>
-                    <strong> Emergency SOS </strong>
-
-                    <small> Request immediate help </small>
-                  </div>
-                </a>
-
-                <!-- INCIDENT -->
-                <a href="#incident" class="quick-action" data-module="incident">
-                  <span class="quick-action-icon"> ! </span>
-
-                  <div>
-                    <strong> Report Incident </strong>
-
-                    <small> Report a disaster or hazard </small>
-                  </div>
-                </a>
-
-                <!-- EVACUATION -->
-                <a
-                  href="#evacuation"
-                  class="quick-action"
-                  data-module="evacuation"
-                >
-                  <span class="quick-action-icon"> ⇥ </span>
-
-                  <div>
-                    <strong> Evacuation </strong>
-
-                    <small> Find safe evacuation routes </small>
-                  </div>
-                </a>
-
-                <!-- RESOURCES -->
-                <a
-                  href="#resources"
-                  class="quick-action"
-                  data-module="resources"
-                >
-                  <span class="quick-action-icon"> + </span>
-
-                  <div>
-                    <strong> Nearby Resources </strong>
-
-                    <small> Hospitals, police & shelters </small>
-                  </div>
-                </a>
-              </div>
-            </section>
-
-            <!-- =================================================
-                 DASHBOARD GRID
-            ================================================== -->
-
-            <section class="dashboard-grid">
-              <!-- MAP -->
-              <div class="dashboard-panel">
-                <div class="panel-header">
-                  <div>
-                    <span> LIVE SITUATION </span>
-
-                    <h2>Area Overview</h2>
-                  </div>
-
-                  <a href="#map"> Open Map → </a>
-                </div>
-
-                <div id="dashboardMap" class="dashboard-map"></div>
-              </div>
-
-              <!-- ALERTS -->
-              <div class="dashboard-panel">
-                <div class="panel-header">
-                  <div>
-                    <span> EMERGENCY </span>
-
-                    <h2>Latest Alerts</h2>
-                  </div>
-
-                  <a href="#alerts"> View All → </a>
-                </div>
-
-                <div id="dashboardAlertsList" class="alerts-preview">
-                  <div class="empty-state">
-                    <div>♢</div>
-
-                    <p>No active alerts</p>
-
-                    <small> Alerts for your location will appear here. </small>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </section>
-
-          <!-- =================================================
-               RISK ASSESSMENT
-          ================================================== -->
-
-          <section id="riskModule" class="module-view dynamic-module hidden">
-            <div class="module-loading">
-              <div class="module-loading-icon">◈</div>
-
-              <h2>Risk Assessment</h2>
-
-              <p>Loading disaster risk intelligence...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               LIVE WEATHER
-          ================================================== -->
-
-          <section id="weatherModule" class="module-view dynamic-module hidden">
-            <div class="module-loading">
-              <div class="module-loading-icon">☁</div>
-
-              <h2>Live Weather</h2>
-
-              <p>Loading current weather conditions...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               LIVE MAP
-          ================================================== -->
-
-          <section id="mapModule" class="module-view dynamic-module hidden">
-            <div class="module-loading">
-              <div class="module-loading-icon">⌖</div>
-
-              <h2>Live Disaster Map</h2>
-
-              <p>Loading nearby emergency infrastructure...</p>
-
-              <div id="userLiveMap" class="module-map-container"></div>
-            </div>
-          </section>
-
-          <!-- =================================================
-               REPORT INCIDENT
-          ================================================== -->
-
-          <section
-            id="incidentModule"
-            class="module-view dynamic-module hidden"
-          >
-            <div class="module-loading">
-              <div class="module-loading-icon">!</div>
-
-              <h2>Report Incident</h2>
-
-              <p>Loading incident reporting system...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               SOS
-          ================================================== -->
-
-          <section id="sosModule" class="module-view dynamic-module hidden">
-            <div class="module-loading">
-              <div class="module-loading-icon">SOS</div>
-
-              <h2>Emergency SOS</h2>
-
-              <p>Loading emergency response system...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               EVACUATION / MISSIONS
-          ================================================== -->
-
-          <section
-            id="evacuationModule"
-            class="module-view dynamic-module hidden"
-          >
-            <div class="module-loading">
-              <div class="module-loading-icon">⇥</div>
-
-              <h2>Evacuation & Missions</h2>
-
-              <p>Loading evacuation and safe-movement information...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               ALERTS
-          ================================================== -->
-
-          <section id="alertsModule" class="module-view dynamic-module hidden">
-            <div class="module-loading">
-              <div class="module-loading-icon">♢</div>
-
-              <h2>Emergency Alerts</h2>
-
-              <p>Loading disaster alerts for your area...</p>
-            </div>
-          </section>
-
-          <!-- =================================================
-               RESOURCES
-          ================================================== -->
-
-          <section
-            id="resourcesModule"
-            class="module-view dynamic-module hidden"
-          >
-            <div class="module-loading">
-              <div class="module-loading-icon">+</div>
-
-              <h2>Emergency Resources</h2>
+              <span class="eyebrow"> DISASTEROS CITIZEN NETWORK </span>
+
+              <h1>
+                Stay informed.<br />
+                Stay prepared.
+              </h1>
 
               <p>
-                Loading nearby hospitals, police stations, fire stations and
-                shelters...
+                Real-time disaster intelligence, emergency assistance and local
+                safety information.
               </p>
             </div>
-          </section>
-        </main>
 
-        <!-- =================================================
-             FOOTER
-        ================================================== -->
+            <div class="hero-status">
+              <div class="hero-status-icon">✓</div>
 
-        <footer class="dashboard-footer">
-          <span> DisasterOS </span>
-
-          <span> Disaster Response Intelligence Platform </span>
-
-          <span id="connectionStatus"> ● Connected </span>
-        </footer>
-      </div>
-    </div>
-
-    <!-- =====================================================
-         LOCATION MODAL
-    ====================================================== -->
-
-    <div id="locationModal" class="modal hidden">
-      <div class="modal-overlay"></div>
-
-      <div class="modal-card">
-        <button class="modal-close" id="closeLocationModal" type="button">
-          ×
-        </button>
-
-        <span class="modal-kicker"> LOCATION </span>
-
-        <h2>Change Monitoring Location</h2>
-
-        <p>
-          Update the location used by DisasterOS for risk, weather and emergency
-          resources.
-        </p>
-
-        <!-- LOCATION SEARCH -->
-
-        <input
-          type="text"
-          id="modalLocationSearch"
-          placeholder="Search location"
-          autocomplete="off"
-        />
-
-        <!-- SEARCH RESULT -->
-
-        <div id="locationSearchResults" class="location-search-results"></div>
-
-        <!-- COORDINATES -->
-
-        <div class="modal-coordinate-row">
-          <input
-            type="number"
-            id="modalLatitude"
-            step="any"
-            placeholder="Latitude"
-          />
-
-          <input
-            type="number"
-            id="modalLongitude"
-            step="any"
-            placeholder="Longitude"
-          />
-        </div>
-
-        <!-- CURRENT LOCATION -->
-
-        <button
-          id="modalUseCurrentLocation"
-          class="modal-secondary-btn"
-          type="button"
-        >
-          ◎ Use Current Location
-        </button>
-
-        <!-- SAVE -->
-
-        <button id="saveLocationBtn" class="modal-primary-btn" type="button">
-          Save Location
-        </button>
-
-        <!-- STATUS -->
-
-        <div id="modalLocationStatus" class="modal-status"></div>
-      </div>
-    </div>
-
-    <!-- =====================================================
-         NOTIFICATION PANEL
-    ====================================================== -->
-
-    <div id="notificationPanel" class="notification-panel hidden">
-      <div class="notification-panel-header">
-        <div>
-          <span> DISASTEROS </span>
-
-          <h3>Notifications</h3>
-        </div>
-
-        <button id="closeNotificationPanel" type="button">×</button>
-      </div>
-
-      <div id="notificationList" class="notification-list">
-        <div class="empty-state">
-          <div>♢</div>
-
-          <p>No notifications</p>
-
-          <small> New emergency alerts will appear here. </small>
-        </div>
-      </div>
-    </div>
-
-    <!-- =====================================================
-         SETTINGS MODAL
-    ====================================================== -->
-
-    <div id="settingsModal" class="modal hidden">
-      <div class="modal-overlay"></div>
-
-      <div class="modal-card settings-card">
-        <button class="modal-close" id="closeSettingsModal" type="button">
-          ×
-        </button>
-
-        <span class="modal-kicker"> DISASTEROS </span>
-
-        <h2>Settings</h2>
-
-        <p>Manage your DisasterOS user preferences.</p>
-
-        <div class="settings-list">
-          <div class="setting-row">
-            <div>
-              <strong> Location Access </strong>
-
-              <small> Allow DisasterOS to use your current location. </small>
+              <div>
+                <span>YOUR STATUS</span>
+                <strong>SAFE</strong>
+                <small> No immediate threat detected </small>
+              </div>
             </div>
-
-            <button
-              id="settingsLocationBtn"
-              class="modal-secondary-btn"
-              type="button"
-            >
-              Update
-            </button>
           </div>
 
-          <div class="setting-row">
-            <div>
-              <strong> Notifications </strong>
+          <!-- INTELLIGENCE CARDS -->
 
-              <small> Receive important disaster alerts. </small>
+          <div class="section-heading">
+            <div>
+              <span class="section-label"> LIVE INTELLIGENCE </span>
+
+              <h2>Your Area</h2>
             </div>
 
-            <button
-              id="settingsNotificationBtn"
-              class="modal-secondary-btn"
-              type="button"
-            >
-              Enabled
-            </button>
+            <span id="lastUpdated"> Updating... </span>
           </div>
-        </div>
-      </div>
+
+          <div class="intelligence-grid">
+            <!-- RISK -->
+
+            <div class="info-card risk-card">
+              <div class="card-top">
+                <div class="card-icon">⚠</div>
+
+                <span> CURRENT RISK </span>
+              </div>
+
+              <div class="card-value">
+                <strong id="riskLevel"> LOW </strong>
+
+                <span id="riskProbability"> 0% probability </span>
+              </div>
+
+              <div class="progress">
+                <div
+                  id="riskProgress"
+                  class="progress-fill"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <!-- WEATHER -->
+
+            <div class="info-card">
+              <div class="card-top">
+                <div class="card-icon">☁</div>
+
+                <span> WEATHER </span>
+              </div>
+
+              <div class="weather-value">
+                <strong id="temperature"> --° </strong>
+
+                <div>
+                  <span id="weatherCondition"> Loading... </span>
+
+                  <small id="weatherLocation"> Your location </small>
+                </div>
+              </div>
+
+              <div class="weather-meta">
+                <span>
+                  💧
+                  <b id="humidity">--</b>%
+                </span>
+
+                <span>
+                  💨
+                  <b id="windSpeed">--</b>
+                </span>
+              </div>
+            </div>
+
+            <!-- ALERTS -->
+
+            <div class="info-card">
+              <div class="card-top">
+                <div class="card-icon">🔔</div>
+
+                <span> ACTIVE ALERTS </span>
+              </div>
+
+              <div class="card-value">
+                <strong id="alertCount"> 0 </strong>
+
+                <span> in your area </span>
+              </div>
+
+              <a href="alerts.html" class="card-link"> View all alerts → </a>
+            </div>
+          </div>
+
+          <!-- QUICK ACTIONS -->
+
+          <div class="section-heading">
+            <div>
+              <span class="section-label"> EMERGENCY TOOLS </span>
+
+              <h2>Quick Actions</h2>
+            </div>
+          </div>
+
+          <div class="quick-actions">
+            <a href="sos.html" class="action-card emergency-action">
+              <div class="action-icon">🆘</div>
+
+              <div>
+                <strong> Send SOS </strong>
+
+                <span> Request immediate help </span>
+              </div>
+
+              <span class="action-arrow"> → </span>
+            </a>
+
+            <a href="report.html" class="action-card">
+              <div class="action-icon">⚠</div>
+
+              <div>
+                <strong> Report Incident </strong>
+
+                <span> Report danger in your area </span>
+              </div>
+
+              <span class="action-arrow"> → </span>
+            </a>
+
+            <a href="map.html" class="action-card">
+              <div class="action-icon">🗺</div>
+
+              <div>
+                <strong> Find Safe Places </strong>
+
+                <span> Shelters and emergency services </span>
+              </div>
+
+              <span class="action-arrow"> → </span>
+            </a>
+
+            <a href="evacuation.html" class="action-card">
+              <div class="action-icon">🚶</div>
+
+              <div>
+                <strong> Evacuation </strong>
+
+                <span> Find your safest route </span>
+              </div>
+
+              <span class="action-arrow"> → </span>
+            </a>
+          </div>
+
+          <!-- LOWER GRID -->
+
+          <div class="dashboard-grid">
+            <!-- RECENT ALERTS -->
+
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <div>
+                  <span class="section-label"> NOTIFICATIONS </span>
+
+                  <h2>Recent Alerts</h2>
+                </div>
+
+                <a href="alerts.html"> View all </a>
+              </div>
+
+              <div id="recentAlerts" class="alert-list">
+                <div class="empty-state">
+                  <span>✓</span>
+                  <p>No recent alerts</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- NEARBY RESOURCES -->
+
+            <div class="dashboard-panel">
+              <div class="panel-header">
+                <div>
+                  <span class="section-label"> EMERGENCY SERVICES </span>
+
+                  <h2>Nearby Resources</h2>
+                </div>
+
+                <a href="resources.html"> View map </a>
+              </div>
+
+              <div id="nearbyResources" class="resource-list">
+                <div class="resource-row">
+                  <span class="resource-icon"> 🏥 </span>
+
+                  <div>
+                    <strong> Hospitals </strong>
+
+                    <small id="hospitalCount"> Loading... </small>
+                  </div>
+                </div>
+
+                <div class="resource-row">
+                  <span class="resource-icon"> 🚒 </span>
+
+                  <div>
+                    <strong> Fire Stations </strong>
+
+                    <small id="fireCount"> Loading... </small>
+                  </div>
+                </div>
+
+                <div class="resource-row">
+                  <span class="resource-icon"> 👮 </span>
+
+                  <div>
+                    <strong> Police Stations </strong>
+
+                    <small id="policeCount"> Loading... </small>
+                  </div>
+                </div>
+
+                <div class="resource-row">
+                  <span class="resource-icon"> 🏠 </span>
+
+                  <div>
+                    <strong> Shelters </strong>
+
+                    <small id="shelterCount"> Loading... </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
 
-    <!-- =====================================================
-         GLOBAL TOAST
-    ====================================================== -->
+    <!-- JAVASCRIPT -->
 
-    <div id="toastContainer" class="toast-container"></div>
-
-    <!-- =====================================================
-         LEAFLET JS
-    ====================================================== -->
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- =====================================================
-         COMMON JAVASCRIPT
-    ====================================================== -->
-
-    <script src="../js/users/config.js"></script>
-
-    <script src="../js/users/location.js"></script>
-
-    <script src="../js/users/dashboard.js"></script>
-
-    <!-- =====================================================
-         MODULE JAVASCRIPT
-    ====================================================== -->
-
-    <script src="../js/users/risk.js"></script>
-
-    <script src="../js/users/weather.js"></script>
-
-    <script src="../js/users/map.js"></script>
-
-    <script src="../js/users/incident.js"></script>
-
-    <script src="../js/users/sos.js"></script>
-
-    <script src="../js/users/evacuation.js"></script>
-
-    <script src="../js/users/alerts.js"></script>
-
-    <script src="../js/users/resources.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/location.js"></script>
+    <script src="../js/navigation.js"></script>
+    <script src="../js/dashboard.js"></script>
   </body>
 </html>

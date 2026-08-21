@@ -2,116 +2,133 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>DisasterOS | Location</title>
+    <title>DisasterOS | Select Location</title>
 
-    <link rel="stylesheet" href="../css/global.css" />
-    <link rel="stylesheet" href="../css/users/user-common.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link rel="stylesheet" href="./css/user-location.css" />
   </head>
 
   <body>
-    <main class="location-page">
-      <!-- Background -->
-      <div class="location-background"></div>
+    <!-- NAVBAR -->
 
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">🌊</div>
+
+        <div>
+          <h2>Disaster<span>OS</span></h2>
+          <p>AI Flood Intelligence Platform</p>
+        </div>
+      </div>
+
+      <div class="status">
+        <span></span>
+        Live Monitoring
+      </div>
+    </header>
+
+    <!-- LOCATION PAGE -->
+
+    <main class="location-page">
       <section class="location-card">
-        <!-- Logo -->
-        <div class="brand">
-          <div class="brand-icon">D</div>
+        <div class="location-icon">📍</div>
+
+        <div class="badge">DISASTEROS INTELLIGENCE</div>
+
+        <h1>
+          Where should we
+          <span>monitor?</span>
+        </h1>
+
+        <p class="description">
+          Select the area you want DisasterOS to analyse. We'll use real-time
+          weather, terrain and geographical intelligence to assess disaster
+          risk.
+        </p>
+
+        <!-- CURRENT LOCATION -->
+
+        <button id="currentLocationBtn" class="current-location-btn">
+          <span>📍</span>
 
           <div>
-            <h1>DisasterOS</h1>
-            <p>Disaster Intelligence Platform</p>
+            <strong>Use Current Location</strong>
+            <small>Automatically detect your location</small>
           </div>
-        </div>
-
-        <!-- Heading -->
-        <div class="location-heading">
-          <span class="eyebrow"> LOCATION SETUP </span>
-
-          <h2>Where are you located?</h2>
-
-          <p>
-            DisasterOS uses your location to provide real-time risk, weather,
-            emergency resources and disaster information for your area.
-          </p>
-        </div>
-
-        <!-- Current Location -->
-        <button id="useLocationBtn" class="location-primary-btn">
-          <span class="btn-icon"> ◎ </span>
-
-          <span> Use My Current Location </span>
         </button>
 
         <div class="divider">
           <span>OR</span>
         </div>
 
-        <!-- Search Location -->
-        <div class="location-search">
-          <label for="locationSearch"> Search Location </label>
+        <!-- SEARCH -->
 
-          <div class="search-row">
+        <div class="search-section">
+          <label> Search Location </label>
+
+          <div class="search-box">
             <input
+              id="locationInput"
               type="text"
-              id="locationSearch"
-              placeholder="e.g. Ghaziabad, Delhi"
+              placeholder="City, district, village..."
               autocomplete="off"
             />
 
-            <button id="searchLocationBtn" type="button">Search</button>
+            <button id="searchBtn">Search</button>
           </div>
+
+          <div id="suggestions" class="suggestions"></div>
         </div>
 
-        <!-- Coordinates -->
-        <div class="coordinate-section">
-          <div class="field">
-            <label for="latitude"> Latitude </label>
+        <!-- SELECTED LOCATION -->
 
-            <input
-              type="number"
-              id="latitude"
-              step="any"
-              placeholder="28.6139"
-            />
-          </div>
-
-          <div class="field">
-            <label for="longitude"> Longitude </label>
-
-            <input
-              type="number"
-              id="longitude"
-              step="any"
-              placeholder="77.2090"
-            />
-          </div>
-        </div>
-
-        <button id="continueBtn" class="continue-btn" type="button">
-          Continue to Dashboard →
-        </button>
-
-        <!-- Status -->
-        <div id="locationStatus" class="location-status"></div>
-
-        <!-- Existing Location -->
-        <div id="savedLocation" class="saved-location hidden">
-          <div class="saved-location-icon">✓</div>
+        <div id="selectedLocation" class="selected-location hidden">
+          <div class="selected-icon">✓</div>
 
           <div>
-            <strong> Previous location detected </strong>
+            <small>SELECTED LOCATION</small>
 
-            <p id="savedLocationText">Location</p>
+            <h3 id="selectedName">--</h3>
+
+            <p id="selectedCoordinates">--</p>
           </div>
         </div>
+
+        <!-- MAP -->
+
+        <div class="map-container">
+          <div id="locationMap"></div>
+
+          <div class="map-hint">
+            Click anywhere on the map to select a location
+          </div>
+        </div>
+
+        <!-- CONFIRM -->
+
+        <button id="continueBtn" class="continue-btn" disabled>
+          Analyse This Location
+          <span>→</span>
+        </button>
       </section>
     </main>
 
-    <script src="../js/users/config.js"></script>
-    <script src="../js/users/location.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="./js/user-location.js"></script>
   </body>
 </html>
