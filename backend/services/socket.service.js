@@ -6,16 +6,6 @@ function initializeSocket(socketIO) {
   io.on("connection", (socket) => {
     console.log(`🟢 Socket connected: ${socket.id}`);
 
-    /*
-     * Client can identify itself.
-     *
-     * Example:
-     * socket.emit("client:identify", {
-     *   role: "field",
-     *   userId: "..."
-     * });
-     */
-
     socket.on("client:identify", (data) => {
       console.log(`👤 Client identified:`, data);
 

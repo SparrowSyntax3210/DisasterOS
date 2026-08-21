@@ -1,12 +1,3 @@
-/* =========================================================
-   DISASTEROS
-   CITIZEN DASHBOARD
-========================================================= */
-
-/* =========================================================
-   STATE
-========================================================= */
-
 let dashboardLocation = {
   latitude: null,
   longitude: null,
@@ -71,10 +62,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 ========================================================= */
 
 function loadUser() {
-  /*
-   * This supports your existing authentication
-   * if the user object is stored in localStorage.
-   */
 
   const possibleKeys = ["user", "authUser", "currentUser", "loggedInUser"];
 
@@ -112,21 +99,11 @@ async function initializeDashboard() {
   try {
     setDashboardLoading(true);
 
-    /*
-     * STEP 1
-     * Get current location
-     */
-
     dashboardLocation = await getCurrentLocation();
 
     console.log("📍 Location:", dashboardLocation);
 
     updateLocationUI();
-
-    /*
-     * STEP 2
-     * Load prediction + weather + resources
-     */
 
     await Promise.all([
       loadPrediction(),
@@ -136,6 +113,10 @@ async function initializeDashboard() {
     ]);
 
     updateLastUpdated();
+
+    window.dispatchEvent(new CustomEvent("disasterOSDataReady"));
+
+    console.log("📡 DisasterOS data ready event dispatched");
   } catch (error) {
     console.error("Dashboard initialization failed:", error);
 
@@ -397,14 +378,6 @@ async function loadAlerts() {
 
     const incidents = response.data || [];
 
-    /*
-     * For now incidents are displayed
-     * as citizen alerts.
-     *
-     * Later we will create a dedicated
-     * alerts collection/API.
-     */
-
     renderAlerts(incidents);
   } catch (error) {
     console.warn("Alerts unavailable:", error);
@@ -607,20 +580,33 @@ function formatDate(date) {
   });
 }
 
-/* =========================================================
-   DEBUG
-========================================================= */
 
 window.DisasterOSDashboard = {
   refresh: refreshDashboard,
 
-  location: () => dashboardLocation,
+  get location() {
+    return dashboardLocation;
+  },
 
-  prediction: () => predictionData,
+  get prediction() {
+    return predictionData;
+  },
 
-  weather: () => weatherData,
+  get weather() {
+    return weatherData;
+  },
 
-  resources: () => resourcesData,
+  get resources() {
+    return resourcesData;
+  },
+
+  isReady() {
+    return (
+      dashboardLocation.latitude !== null &&
+      predictionData !== null &&
+      weatherData !== null
+    );
+  },
 };
 
 console.log("✅ DisasterOS dashboard.js loaded");
