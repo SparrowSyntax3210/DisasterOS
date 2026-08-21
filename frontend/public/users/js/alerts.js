@@ -1,8 +1,11 @@
 // =========================================================
 // DISASTEROS ALERTS
+// Full incident + SOS alert view
 // =========================================================
 
 (function () {
+  "use strict";
+
   let initialized = false;
 
   let incidents = [];
@@ -11,108 +14,295 @@
   let activeFilter = "all";
 
   // =====================================================
+  // API
+  // =====================================================
+
+  function getAPI() {
+    return window.API || "http://localhost:4000";
+  }
+
+  // =====================================================
   // INIT
   // =====================================================
 
   function initAlertsOverlay() {
+    console.log("🚨 Initializing DisasterOS Alerts...");
+
     if (!initialized) {
       initialized = true;
 
-      // -------------------------------------------------
-      // FILTER TABS
-      // -------------------------------------------------
-
-      document.querySelectorAll(".alert-tab").forEach((tab) => {
-        tab.addEventListener("click", function () {
-          document
-            .querySelectorAll(".alert-tab")
-            .forEach((item) => item.classList.remove("active"));
-
-          this.classList.add("active");
-
-          activeFilter = this.dataset.alertType || "all";
-
-          renderAlerts();
-        });
-      });
-
-      // -------------------------------------------------
-      // REFRESH
-      // -------------------------------------------------
-
-      const refresh = document.getElementById("alertsRefresh");
-
-      if (refresh) {
-        refresh.addEventListener("click", loadAlerts);
-      }
+      bindControls();
     }
 
-    // Always load fresh data when opening Alerts
+    // Always refresh when the overlay/page is opened
     loadAlerts();
   }
 
   // =====================================================
-  // LOAD ALERTS
+  // CONTROLS
+  // =====================================================
+
+  function bindControls() {
+    // -------------------------------------------------
+    // ALERT FILTER TABS
+    // -------------------------------------------------
+
+    document.querySelectorAll(".alert-tab").forEach((tab) => {
+      tab.addEventListener("click", function () {
+        document
+          .querySelectorAll(".alert-tab")
+          .forEach((item) => item.classList.remove("active"));
+
+        this.classList.add("active");
+
+        activeFilter = this.dataset.alertType || "all";
+
+        console.log("🔎 Alert filter:", activeFilter);
+
+        renderAlerts();
+      });
+    });
+
+    // -------------------------------------------------
+    // REFRESH
+    // -------------------------------------------------
+
+    const refresh = document.getElementById("alertsRefresh");
+
+    if (refresh) {
+      refresh.addEventListener("click", async () => {
+        refresh.disabled = true;
+
+        try {
+          await loadAlerts();
+        } finally {
+          refresh.disabled = false;
+        }
+      });
+    }
+  }
+
+  // =====================================================
+  // LOAD ALL ALERTS
   // =====================================================
 
   async function loadAlerts() {
+    console.log("🚨 Loading DisasterOS alerts...");
+
+    showLoadingState();
+
     try {
-      console.log("🚨 Loading alerts...");
-
-      // -------------------------------------------------
+      // =================================================
       // INCIDENTS
-      // Uses the SAME working helper as dashboard.js
-      // -------------------------------------------------
+      // =================================================
 
-      const incidentResponse = await getIncidents();
+      let incidentResponse;
 
-      if (!incidentResponse.success) {
-        throw new Error(incidentResponse.message || "Unable to load incidents");
+      try {
+        incidentResponse = await getIncidents();
+
+        console.log("📦 Raw incident response:", incidentResponse);
+
+        if (!incidentResponse || incidentResponse.success === false) {
+          throw new Error(
+            incidentResponse?.message || "Unable to load incidents",
+          );
+        }
+
+        incidents = extractIncidents(incidentResponse);
+
+        console.log(`⚠ Incidents loaded: ${incidents.length}`, incidents);
+      } catch (incidentError) {
+        console.warn("⚠ Incident loading failed:", incidentError);
+
+        incidents = [];
       }
 
-      incidents = Array.isArray(incidentResponse.data)
-        ? incidentResponse.data
-        : [];
-
-      console.log("⚠ Incidents:", incidents);
-
-      // -------------------------------------------------
+      // =================================================
       // SOS
-      // -------------------------------------------------
+      // =================================================
 
-      const sosResponse = await fetch(
-        `${window.API || "http://localhost:4000"}/api/sos`,
-        {
+      try {
+        const sosResponse = await fetch(`${getAPI()}/api/sos`, {
+          method: "GET",
           credentials: "include",
-        },
-      );
 
-      const sosResult = await sosResponse.json();
+          headers: {
+            Accept: "application/json",
+          },
+        });
 
-      if (!sosResponse.ok || !sosResult.success) {
-        throw new Error(sosResult.message || "Unable to load SOS requests");
+        const sosResult = await sosResponse.json();
+
+        console.log("📦 Raw SOS response:", sosResult);
+
+        if (!sosResponse.ok || sosResult.success === false) {
+          throw new Error(
+            sosResult?.message || `SOS API returned ${sosResponse.status}`,
+          );
+        }
+
+        sosRequests = extractSOS(sosResult);
+
+        console.log(
+          `🆘 SOS requests loaded: ${sosRequests.length}`,
+          sosRequests,
+        );
+      } catch (sosError) {
+        console.warn("⚠ SOS loading failed:", sosError);
+
+        sosRequests = [];
       }
 
-      sosRequests = Array.isArray(sosResult.data) ? sosResult.data : [];
-
-      console.log("🆘 SOS:", sosRequests);
-
-      // -------------------------------------------------
+      // =================================================
       // UPDATE UI
-      // -------------------------------------------------
+      // =================================================
 
       updateSummary();
 
       renderAlerts();
+
+      // =================================================
+      // GLOBAL DATA
+      // =================================================
+
+      window.disasterOSAlertsData = {
+        incidents,
+        sos: sosRequests,
+      };
+
+      window.dispatchEvent(
+        new CustomEvent("disasterOSAlertsReady", {
+          detail: {
+            incidents,
+            sos: sosRequests,
+          },
+        }),
+      );
+
+      console.log("📡 Alerts data ready");
     } catch (error) {
-      console.error("❌ Alerts Error:", error);
+      console.error("❌ Alerts initialization error:", error);
 
       incidents = [];
       sosRequests = [];
 
       updateSummary();
+
       renderAlerts();
     }
+  }
+
+  // =====================================================
+  // EXTRACT INCIDENTS
+  // =====================================================
+
+  function extractIncidents(response) {
+    if (!response) {
+      return [];
+    }
+
+    // ---------------------------------------------
+    // response.data
+    // ---------------------------------------------
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // ---------------------------------------------
+    // response.incidents
+    // ---------------------------------------------
+
+    if (Array.isArray(response.incidents)) {
+      return response.incidents;
+    }
+
+    // ---------------------------------------------
+    // response.data.incidents
+    // ---------------------------------------------
+
+    if (response.data && Array.isArray(response.data.incidents)) {
+      return response.data.incidents;
+    }
+
+    // ---------------------------------------------
+    // response.results
+    // ---------------------------------------------
+
+    if (Array.isArray(response.results)) {
+      return response.results;
+    }
+
+    // ---------------------------------------------
+    // response.data.results
+    // ---------------------------------------------
+
+    if (response.data && Array.isArray(response.data.results)) {
+      return response.data.results;
+    }
+
+    return [];
+  }
+
+  // =====================================================
+  // EXTRACT SOS
+  // =====================================================
+
+  function extractSOS(response) {
+    if (!response) {
+      return [];
+    }
+
+    // ---------------------------------------------
+    // response.data
+    // ---------------------------------------------
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // ---------------------------------------------
+    // response.sos
+    // ---------------------------------------------
+
+    if (Array.isArray(response.sos)) {
+      return response.sos;
+    }
+
+    // ---------------------------------------------
+    // response.requests
+    // ---------------------------------------------
+
+    if (Array.isArray(response.requests)) {
+      return response.requests;
+    }
+
+    // ---------------------------------------------
+    // response.data.sos
+    // ---------------------------------------------
+
+    if (response.data && Array.isArray(response.data.sos)) {
+      return response.data.sos;
+    }
+
+    // ---------------------------------------------
+    // response.data.requests
+    // ---------------------------------------------
+
+    if (response.data && Array.isArray(response.data.requests)) {
+      return response.data.requests;
+    }
+
+    // ---------------------------------------------
+    // response.results
+    // ---------------------------------------------
+
+    if (Array.isArray(response.results)) {
+      return response.results;
+    }
+
+    return [];
   }
 
   // =====================================================
@@ -121,13 +311,13 @@
 
   function updateSummary() {
     // -------------------------------------------------
-    // INCIDENT COUNT
+    // INCIDENTS
     // -------------------------------------------------
 
     setText("incidentAlertCount", incidents.length);
 
     // -------------------------------------------------
-    // SOS COUNT
+    // SOS
     // -------------------------------------------------
 
     setText("sosAlertCount", sosRequests.length);
@@ -136,31 +326,46 @@
     // CRITICAL INCIDENTS
     // -------------------------------------------------
 
-    const criticalIncidents = incidents.filter(
-      (item) => String(item.severity || "").toUpperCase() === "CRITICAL",
-    );
+    const criticalIncidents = incidents.filter((incident) => {
+      const severity = String(
+        incident.severity || incident.priority || "",
+      ).toUpperCase();
+
+      return severity === "CRITICAL" || severity === "EXTREME";
+    });
 
     // -------------------------------------------------
     // CRITICAL SOS
     // -------------------------------------------------
 
-    const criticalSOS = sosRequests.filter(
-      (item) => String(item.priority || "").toUpperCase() === "CRITICAL",
-    );
+    const criticalSOS = sosRequests.filter((sos) => {
+      const priority = String(sos.priority || sos.severity || "").toUpperCase();
+
+      return priority === "CRITICAL" || priority === "EXTREME";
+    });
 
     const criticalTotal = criticalIncidents.length + criticalSOS.length;
 
     setText("criticalAlertCount", criticalTotal);
 
     // -------------------------------------------------
-    // TOTAL ALERTS
+    // TOTAL
     // -------------------------------------------------
 
     const totalAlerts = incidents.length + sosRequests.length;
 
     setText("navAlertCount", totalAlerts);
+
     setText("notificationBadge", totalAlerts);
+
     setText("alertCount", totalAlerts);
+
+    console.log("📊 Alert summary:", {
+      incidents: incidents.length,
+      sos: sosRequests.length,
+      critical: criticalTotal,
+      total: totalAlerts,
+    });
   }
 
   // =====================================================
@@ -171,8 +376,14 @@
     const list = document.getElementById("alertsList");
 
     if (!list) {
+      console.warn("⚠ alertsList element not found");
+
       return;
     }
+
+    // =================================================
+    // COMBINE DATA
+    // =================================================
 
     let items = [];
 
@@ -181,12 +392,12 @@
     // -------------------------------------------------
 
     if (activeFilter === "all" || activeFilter === "incident") {
-      items = items.concat(
-        incidents.map((incident) => ({
+      incidents.forEach((incident) => {
+        items.push({
           source: "incident",
           data: incident,
-        })),
-      );
+        });
+      });
     }
 
     // -------------------------------------------------
@@ -194,165 +405,395 @@
     // -------------------------------------------------
 
     if (activeFilter === "all" || activeFilter === "sos") {
-      items = items.concat(
-        sosRequests.map((sos) => ({
+      sosRequests.forEach((sos) => {
+        items.push({
           source: "sos",
           data: sos,
-        })),
-      );
+        });
+      });
     }
 
-    // -------------------------------------------------
+    // =================================================
     // SORT NEWEST FIRST
-    // -------------------------------------------------
+    // =================================================
 
     items.sort((a, b) => {
-      return new Date(b.data.createdAt || 0) - new Date(a.data.createdAt || 0);
+      const dateA = getDateValue(
+        a.data.createdAt || a.data.created_at || a.data.timestamp,
+      );
+
+      const dateB = getDateValue(
+        b.data.createdAt || b.data.created_at || b.data.timestamp,
+      );
+
+      return dateB - dateA;
     });
 
-    // -------------------------------------------------
-    // EMPTY STATE
-    // -------------------------------------------------
+    // =================================================
+    // EMPTY
+    // =================================================
 
-    if (!items.length) {
+    if (items.length === 0) {
       list.innerHTML = `
         <div class="empty-state">
+
           <span>✓</span>
 
           <p>
-            No active alerts
+            ${
+              activeFilter === "incident"
+                ? "No incidents reported"
+                : activeFilter === "sos"
+                  ? "No SOS requests"
+                  : "No active alerts"
+            }
           </p>
+
         </div>
       `;
+
+      setText("alertResultCount", 0);
 
       return;
     }
 
-    // -------------------------------------------------
-    // CLEAR LIST
-    // -------------------------------------------------
+    // =================================================
+    // RESULT COUNT
+    // =================================================
+
+    setText("alertResultCount", items.length);
+
+    // =================================================
+    // CLEAR
+    // =================================================
 
     list.innerHTML = "";
 
-    // -------------------------------------------------
+    // =================================================
     // RENDER
-    // -------------------------------------------------
+    // =================================================
 
     items.forEach((item) => {
-      const data = item.data;
+      const element = createAlertElement(item);
 
-      const element = document.createElement("div");
-
-      element.className = "full-alert-item";
-
-      const isSOS = item.source === "sos";
-
-      // -------------------------------------------------
-      // SEVERITY / PRIORITY
-      // -------------------------------------------------
-
-      const level = String(
-        isSOS ? data.priority : data.severity || "MEDIUM",
-      ).toUpperCase();
-
-      let icon = "⚠";
-
-      if (isSOS) {
-        icon = "🆘";
-      } else if (level === "CRITICAL" || level === "HIGH") {
-        icon = "🚨";
+      if (element) {
+        list.appendChild(element);
       }
-
-      // -------------------------------------------------
-      // TITLE
-      // -------------------------------------------------
-
-      const title = isSOS ? "SOS REQUEST" : data.type || "INCIDENT";
-
-      // -------------------------------------------------
-      // DESCRIPTION
-      // -------------------------------------------------
-
-      const description =
-        data.description ||
-        (isSOS
-          ? "Emergency SOS request received."
-          : "No description available.");
-
-      // -------------------------------------------------
-      // STATUS
-      // -------------------------------------------------
-
-      const status = data.status || "ACTIVE";
-
-      // -------------------------------------------------
-      // ID
-      // -------------------------------------------------
-
-      const alertId = isSOS
-        ? data.sosId || data._id || "SOS"
-        : data.incidentId || data._id || "INCIDENT";
-
-      element.innerHTML = `
-        <div class="full-alert-icon">
-          ${icon}
-        </div>
-
-        <div class="full-alert-content">
-
-          <div class="alert-header">
-
-            <strong>
-              ${escapeHTML(title)}
-            </strong>
-
-            <span class="alert-severity alert-${level.toLowerCase()}">
-              ${escapeHTML(level)}
-            </span>
-
-          </div>
-
-          <p>
-            ${escapeHTML(description)}
-          </p>
-
-          <div class="alert-meta">
-
-            <span>
-              ${escapeHTML(alertId)}
-            </span>
-
-            <span>
-              ${escapeHTML(status)}
-            </span>
-
-            <time>
-              ${formatDate(data.createdAt)}
-            </time>
-
-          </div>
-
-        </div>
-      `;
-
-      list.appendChild(element);
     });
+
+    console.log(`📋 Rendered ${items.length} alerts`);
   }
 
   // =====================================================
-  // SET TEXT
+  // CREATE ALERT ELEMENT
   // =====================================================
 
-  function setText(id, value) {
-    const element = document.getElementById(id);
+  function createAlertElement(item) {
+    const data = item.data || {};
 
-    if (element) {
-      element.textContent = value;
+    const isSOS = item.source === "sos";
+
+    const element = document.createElement("div");
+
+    element.className = "full-alert-item";
+
+    // =================================================
+    // LEVEL
+    // =================================================
+
+    const level = String(
+      isSOS
+        ? data.priority || data.severity || "HIGH"
+        : data.severity || data.priority || "MEDIUM",
+    ).toUpperCase();
+
+    // =================================================
+    // ICON
+    // =================================================
+
+    let icon = "⚠";
+
+    if (isSOS) {
+      icon = "🆘";
+    } else if (level === "CRITICAL" || level === "EXTREME") {
+      icon = "🚨";
+    } else if (level === "HIGH") {
+      icon = "🔴";
+    } else if (level === "MEDIUM") {
+      icon = "🟠";
+    } else if (level === "LOW") {
+      icon = "🟢";
     }
+
+    // =================================================
+    // TITLE
+    // =================================================
+
+    const title = isSOS ? getSOSName(data) : getIncidentName(data);
+
+    // =================================================
+    // DESCRIPTION
+    // =================================================
+
+    const description =
+      data.description ||
+      data.message ||
+      data.details ||
+      (isSOS
+        ? "Emergency SOS request received."
+        : "Emergency incident reported.");
+
+    // =================================================
+    // STATUS
+    // =================================================
+
+    const status = String(
+      data.status || (isSOS ? "ACTIVE" : "REPORTED"),
+    ).toUpperCase();
+
+    // =================================================
+    // ID
+    // =================================================
+
+    const alertId = isSOS
+      ? data.sosId || data.sosID || data.requestId || data._id || "SOS"
+      : data.incidentId || data.incidentID || data._id || "INCIDENT";
+
+    // =================================================
+    // REPORTER
+    // =================================================
+
+    const reporter =
+      data.reportedBy ||
+      data.reporter ||
+      data.user?.name ||
+      data.user?.username ||
+      data.createdBy ||
+      "";
+
+    // =================================================
+    // LOCATION
+    // =================================================
+
+    const location = getAlertLocation(data);
+
+    // =================================================
+    // DATE
+    // =================================================
+
+    const date = data.createdAt || data.created_at || data.timestamp;
+
+    // =================================================
+    // BUILD META
+    // =================================================
+
+    const reporterHTML = reporter
+      ? `
+        <span>
+          👤 ${escapeHTML(getPersonName(reporter))}
+        </span>
+      `
+      : "";
+
+    const locationHTML = location
+      ? `
+        <span>
+          📍 ${escapeHTML(location)}
+        </span>
+      `
+      : "";
+
+    // =================================================
+    // HTML
+    // =================================================
+
+    element.innerHTML = `
+      <div class="full-alert-icon">
+        ${icon}
+      </div>
+
+      <div class="full-alert-content">
+
+        <div class="alert-header">
+
+          <strong>
+            ${escapeHTML(title)}
+          </strong>
+
+          <span
+            class="alert-severity alert-${escapeHTML(level.toLowerCase())}"
+          >
+            ${escapeHTML(level)}
+          </span>
+
+        </div>
+
+        <p>
+          ${escapeHTML(description)}
+        </p>
+
+        <div class="alert-meta">
+
+          <span>
+            ${escapeHTML(alertId)}
+          </span>
+
+          <span>
+            ${escapeHTML(status)}
+          </span>
+
+          ${reporterHTML}
+
+          ${locationHTML}
+
+          <time>
+            ${escapeHTML(formatDate(date))}
+          </time>
+
+        </div>
+
+      </div>
+    `;
+
+    // =================================================
+    // CLICK
+    // =================================================
+
+    element.addEventListener("click", () => {
+      console.log("🚨 Alert selected:", {
+        source: item.source,
+        data,
+      });
+
+      window.dispatchEvent(
+        new CustomEvent("disasterOSAlertSelected", {
+          detail: {
+            source: item.source,
+            data,
+          },
+        }),
+      );
+    });
+
+    return element;
   }
 
   // =====================================================
-  // DATE
+  // INCIDENT NAME
+  // =====================================================
+
+  function getIncidentName(data) {
+    return (
+      data.type ||
+      data.incidentType ||
+      data.category ||
+      data.title ||
+      "INCIDENT"
+    );
+  }
+
+  // =====================================================
+  // SOS NAME
+  // =====================================================
+
+  function getSOSName(data) {
+    return data.title || data.type || data.requestType || "SOS REQUEST";
+  }
+
+  // =====================================================
+  // PERSON NAME
+  // =====================================================
+
+  function getPersonName(person) {
+    if (!person) {
+      return "";
+    }
+
+    if (typeof person === "string") {
+      return person;
+    }
+
+    return (
+      person.name ||
+      person.username ||
+      person.fullName ||
+      person.email ||
+      "Unknown"
+    );
+  }
+
+  // =====================================================
+  // LOCATION
+  // =====================================================
+
+  function getAlertLocation(data) {
+    // ---------------------------------------------
+    // Direct address
+    // ---------------------------------------------
+
+    if (data.address) {
+      return data.address;
+    }
+
+    if (data.locationName) {
+      return data.locationName;
+    }
+
+    if (data.location?.address) {
+      return data.location.address;
+    }
+
+    if (data.location?.name) {
+      return data.location.name;
+    }
+
+    // ---------------------------------------------
+    // Coordinates
+    // ---------------------------------------------
+
+    const latitude =
+      data.latitude ??
+      data.lat ??
+      data.location?.latitude ??
+      data.location?.lat;
+
+    const longitude =
+      data.longitude ??
+      data.lng ??
+      data.lon ??
+      data.location?.longitude ??
+      data.location?.lng;
+
+    if (
+      latitude !== undefined &&
+      longitude !== undefined &&
+      latitude !== null &&
+      longitude !== null
+    ) {
+      return `${Number(latitude).toFixed(4)}, ${Number(longitude).toFixed(4)}`;
+    }
+
+    return "";
+  }
+
+  // =====================================================
+  // DATE VALUE
+  // =====================================================
+
+  function getDateValue(date) {
+    if (!date) {
+      return 0;
+    }
+
+    const parsed = new Date(date);
+
+    const time = parsed.getTime();
+
+    return Number.isNaN(time) ? 0 : time;
+  }
+
+  // =====================================================
+  // DATE FORMAT
   // =====================================================
 
   function formatDate(date) {
@@ -373,6 +814,42 @@
       hour: "2-digit",
       minute: "2-digit",
     });
+  }
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  function showLoadingState() {
+    const list = document.getElementById("alertsList");
+
+    if (!list) {
+      return;
+    }
+
+    list.innerHTML = `
+      <div class="loading-state">
+
+        <span>⟳</span>
+
+        <p>
+          Loading alerts...
+        </p>
+
+      </div>
+    `;
+  }
+
+  // =====================================================
+  // SET TEXT
+  // =====================================================
+
+  function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+      element.textContent = String(value);
+    }
   }
 
   // =====================================================
@@ -399,6 +876,8 @@
 
   window.initAlertsOverlay = initAlertsOverlay;
 
+  window.refreshAlerts = loadAlerts;
+
   window.DisasterOSAlerts = {
     refresh: loadAlerts,
 
@@ -409,7 +888,33 @@
     get sos() {
       return sosRequests;
     },
+
+    get all() {
+      return [
+        ...incidents.map((incident) => ({
+          source: "incident",
+          data: incident,
+        })),
+
+        ...sosRequests.map((sos) => ({
+          source: "sos",
+          data: sos,
+        })),
+      ];
+    },
   };
 
   console.log("✅ DisasterOS alerts.js loaded");
+
+  // =====================================================
+  // AUTO INITIALIZATION
+  // =====================================================
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initAlertsOverlay();
+    });
+  } else {
+    initAlertsOverlay();
+  }
 })();
