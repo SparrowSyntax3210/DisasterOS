@@ -6,7 +6,6 @@
 
     <title>DisasterOS | Command Center</title>
 
-    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -15,512 +14,2524 @@
       rel="stylesheet"
     />
 
-    <!-- Leaflet -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    <style>
+      /* =====================================================
+           ROOT
+        ===================================================== */
 
-    <!-- Command Center CSS -->
-    <link rel="stylesheet" href="./css/command-center.css" />
+      :root {
+        --bg: #050f15;
+        --bg-soft: #07141c;
+        --sidebar: #07151d;
+        --panel: #0a1b24;
+        --panel-2: #0c2029;
+
+        --border: #173642;
+        --border-light: #1b4350;
+
+        --text: #f2f8fb;
+        --muted: #6d93a4;
+        --muted-2: #527080;
+
+        --cyan: #18d5d1;
+        --cyan-light: #32e7ff;
+
+        --blue: #199ee0;
+        --green: #25d6a2;
+        --yellow: #f4c95d;
+        --orange: #ff9e43;
+        --red: #ff4f79;
+        --purple: #a77cff;
+
+        --radius: 14px;
+      }
+
+      /* =====================================================
+           RESET
+        ===================================================== */
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        font-size: 13px;
+        overflow-x: hidden;
+      }
+
+      button,
+      input {
+        font-family: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* =====================================================
+           APP
+        ===================================================== */
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+        width: 100%;
+      }
+
+      /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+
+        width: 210px;
+
+        background: var(--sidebar);
+        border-right: 1px solid var(--border);
+
+        display: flex;
+        flex-direction: column;
+
+        z-index: 100;
+      }
+
+      /* LOGO */
+
+      .brand {
+        height: 70px;
+
+        display: flex;
+        align-items: center;
+
+        padding: 0 20px;
+
+        border-bottom: 1px solid var(--border);
+      }
+
+      .brand-icon {
+        width: 34px;
+        height: 34px;
+
+        border: 1px solid #17646a;
+        border-radius: 9px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: var(--cyan);
+        font-weight: 800;
+
+        background: rgba(24, 213, 209, 0.07);
+
+        margin-right: 10px;
+      }
+
+      .brand-name {
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .brand-subtitle {
+        margin-top: 3px;
+
+        font-size: 7px;
+        letter-spacing: 1.5px;
+
+        color: #456675;
+      }
+
+      /* NAVIGATION */
+
+      .nav {
+        padding: 18px 10px;
+      }
+
+      .nav-label {
+        padding: 0 10px;
+        margin-bottom: 9px;
+
+        font-size: 8px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+
+        color: #426474;
+      }
+
+      .nav-item {
+        position: relative;
+
+        height: 39px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 11px;
+
+        padding: 0 12px;
+
+        margin-bottom: 4px;
+
+        color: #6e8d9a;
+
+        border-radius: 8px;
+
+        font-size: 11px;
+        font-weight: 500;
+
+        transition: 0.2s ease;
+      }
+
+      .nav-item:hover {
+        color: #c9e9ed;
+        background: rgba(24, 213, 209, 0.05);
+      }
+
+      .nav-item.active {
+        color: var(--cyan);
+
+        background: rgba(24, 213, 209, 0.1);
+      }
+
+      .nav-item.active::before {
+        content: "";
+
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+
+        width: 3px;
+
+        background: var(--cyan);
+        border-radius: 0 3px 3px 0;
+      }
+
+      .nav-icon {
+        width: 17px;
+        text-align: center;
+        font-size: 13px;
+      }
+
+      /* SIDEBAR BOTTOM */
+
+      .sidebar-bottom {
+        margin-top: auto;
+
+        border-top: 1px solid var(--border);
+
+        padding: 14px 10px;
+      }
+
+      .system-status {
+        margin-top: 10px;
+
+        padding: 12px;
+
+        border: 1px solid var(--border);
+        border-radius: 10px;
+
+        background: rgba(255, 255, 255, 0.015);
+      }
+
+      .system-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+
+        border-radius: 50%;
+
+        background: var(--green);
+
+        box-shadow: 0 0 10px rgba(37, 214, 162, 0.7);
+      }
+
+      .system-sub {
+        margin-top: 5px;
+        margin-left: 14px;
+
+        font-size: 8px;
+        color: #466675;
+      }
+
+      /* =====================================================
+           MAIN
+        ===================================================== */
+
+      .main {
+        margin-left: 210px;
+
+        width: calc(100% - 210px);
+
+        min-height: 100vh;
+      }
+
+      /* =====================================================
+           TOPBAR
+        ===================================================== */
+
+      .topbar {
+        height: 70px;
+
+        border-bottom: 1px solid var(--border);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 0 25px;
+
+        background: rgba(5, 15, 21, 0.9);
+      }
+
+      .top-title {
+        font-size: 10px;
+        color: #7799a8;
+      }
+
+      .top-title strong {
+        color: #d7e9ef;
+        font-size: 11px;
+      }
+
+      .top-right {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .location-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 8px 12px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 8px;
+
+        color: #87a9b7;
+
+        font-size: 9px;
+      }
+
+      .location-pin {
+        color: var(--red);
+      }
+
+      .notification {
+        position: relative;
+
+        font-size: 16px;
+        color: #839eaa;
+      }
+
+      .notification-count {
+        position: absolute;
+
+        top: -6px;
+        right: -7px;
+
+        width: 13px;
+        height: 13px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: var(--red);
+
+        color: white;
+
+        font-size: 7px;
+      }
+
+      .operator {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+
+        padding-left: 14px;
+
+        border-left: 1px solid var(--border);
+      }
+
+      .operator-avatar {
+        width: 30px;
+        height: 30px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: rgba(24, 213, 209, 0.12);
+        border: 1px solid #18565b;
+
+        color: var(--cyan);
+
+        font-weight: 700;
+      }
+
+      .operator-name {
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .operator-role {
+        margin-top: 3px;
+
+        color: #527180;
+        font-size: 7px;
+      }
+
+      /* =====================================================
+           CONTENT
+        ===================================================== */
+
+      .content {
+        padding: 25px;
+
+        max-width: 1800px;
+        margin: auto;
+      }
+
+      /* =====================================================
+           HEADER
+        ===================================================== */
+
+      .command-header {
+        min-height: 130px;
+
+        padding: 25px 28px;
+
+        border: 1px solid var(--border);
+        border-radius: 16px;
+
+        background:
+          radial-gradient(
+            circle at 90% 30%,
+            rgba(24, 213, 209, 0.08),
+            transparent 35%
+          ),
+          linear-gradient(120deg, #091a23, #0a1c23);
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        overflow: hidden;
+      }
+
+      .header-label {
+        color: var(--cyan);
+
+        font-size: 8px;
+        font-weight: 700;
+
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+
+        margin-bottom: 8px;
+      }
+
+      .command-header h1 {
+        font-size: 29px;
+        line-height: 1.1;
+        letter-spacing: -1px;
+      }
+
+      .command-header p {
+        margin-top: 9px;
+
+        color: #7095a5;
+
+        font-size: 10px;
+      }
+
+      .operation-status {
+        padding: 14px 18px;
+
+        min-width: 185px;
+
+        border: 1px solid #17565a;
+        border-radius: 11px;
+
+        background: rgba(24, 213, 209, 0.05);
+      }
+
+      .operation-status small {
+        display: block;
+
+        color: #547d89;
+
+        font-size: 7px;
+        letter-spacing: 1px;
+      }
+
+      .operation-status strong {
+        display: block;
+
+        margin-top: 5px;
+
+        color: var(--green);
+
+        font-size: 14px;
+      }
+
+      .operation-status span {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #577784;
+
+        font-size: 7px;
+      }
+
+      /* =====================================================
+           SECTION TITLE
+        ===================================================== */
+
+      .section-heading {
+        margin-top: 25px;
+        margin-bottom: 12px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .section-heading h2 {
+        font-size: 15px;
+      }
+
+      .section-heading span {
+        color: #527482;
+        font-size: 8px;
+      }
+
+      /* =====================================================
+           KPI CARDS
+        ===================================================== */
+
+      .kpis {
+        display: grid;
+
+        grid-template-columns: repeat(5, 1fr);
+
+        gap: 12px;
+      }
+
+      .kpi {
+        padding: 17px;
+
+        min-height: 110px;
+
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+
+        background: var(--panel);
+      }
+
+      .kpi-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .kpi-label {
+        color: #628492;
+
+        font-size: 8px;
+
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .kpi-icon {
+        width: 27px;
+        height: 27px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 7px;
+
+        background: rgba(24, 213, 209, 0.08);
+
+        color: var(--cyan);
+      }
+
+      .kpi-value {
+        margin-top: 13px;
+
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .kpi-change {
+        margin-top: 3px;
+
+        color: #557986;
+
+        font-size: 8px;
+      }
+
+      .kpi-change.good {
+        color: var(--green);
+      }
+
+      .kpi-change.warning {
+        color: var(--orange);
+      }
+
+      .kpi-change.danger {
+        color: var(--red);
+      }
+
+      /* =====================================================
+           MAIN GRID
+        ===================================================== */
+
+      .command-grid {
+        display: grid;
+
+        grid-template-columns: 1.6fr 0.85fr;
+
+        gap: 14px;
+
+        margin-top: 14px;
+      }
+
+      /* =====================================================
+           GENERIC PANEL
+        ===================================================== */
+
+      .panel {
+        background: var(--panel);
+
+        border: 1px solid var(--border);
+
+        border-radius: var(--radius);
+
+        overflow: hidden;
+      }
+
+      .panel-header {
+        min-height: 50px;
+
+        padding: 0 16px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        border-bottom: 1px solid var(--border);
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .panel-title h3 {
+        font-size: 11px;
+      }
+
+      .panel-title span {
+        color: #547785;
+
+        font-size: 7px;
+
+        letter-spacing: 1px;
+      }
+
+      /* =====================================================
+           MAP
+        ===================================================== */
+
+      .map-panel {
+        height: 420px;
+      }
+
+      .map-controls {
+        display: flex;
+        gap: 6px;
+      }
+
+      .map-control {
+        padding: 6px 9px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 6px;
+
+        background: transparent;
+
+        color: #62818e;
+
+        font-size: 7px;
+      }
+
+      .map-control.active {
+        color: var(--cyan);
+        border-color: #176067;
+        background: rgba(24, 213, 209, 0.06);
+      }
+
+      .map {
+        position: relative;
+
+        height: calc(100% - 50px);
+
+        overflow: hidden;
+
+        background:
+          linear-gradient(rgba(24, 213, 209, 0.035) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(24, 213, 209, 0.035) 1px,
+            transparent 1px
+          ),
+          #08151d;
+
+        background-size: 45px 45px;
+      }
+
+      /* fake map terrain */
+
+      .terrain {
+        position: absolute;
+
+        inset: 0;
+
+        opacity: 0.55;
+
+        background:
+          radial-gradient(
+            ellipse at 25% 40%,
+            rgba(27, 76, 72, 0.45),
+            transparent 30%
+          ),
+          radial-gradient(
+            ellipse at 70% 65%,
+            rgba(20, 64, 71, 0.35),
+            transparent 32%
+          ),
+          radial-gradient(
+            ellipse at 55% 20%,
+            rgba(42, 77, 68, 0.2),
+            transparent 25%
+          );
+      }
+
+      /* roads */
+
+      .road {
+        position: absolute;
+
+        height: 1px;
+
+        background: rgba(102, 149, 159, 0.25);
+
+        transform-origin: left;
+      }
+
+      .road-1 {
+        width: 90%;
+        left: 2%;
+        top: 43%;
+        transform: rotate(9deg);
+      }
+
+      .road-2 {
+        width: 75%;
+        left: 10%;
+        top: 65%;
+        transform: rotate(-18deg);
+      }
+
+      .road-3 {
+        width: 70%;
+        left: 25%;
+        top: 20%;
+        transform: rotate(26deg);
+      }
+
+      .road-4 {
+        width: 60%;
+        left: 5%;
+        top: 80%;
+        transform: rotate(-8deg);
+      }
+
+      /* map markers */
+
+      .map-marker {
+        position: absolute;
+
+        width: 13px;
+        height: 13px;
+
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 7px;
+
+        color: white;
+
+        box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.03);
+      }
+
+      .marker-red {
+        background: var(--red);
+        box-shadow: 0 0 15px rgba(255, 79, 121, 0.65);
+      }
+
+      .marker-yellow {
+        background: var(--yellow);
+        box-shadow: 0 0 15px rgba(244, 201, 93, 0.5);
+      }
+
+      .marker-green {
+        background: var(--green);
+        box-shadow: 0 0 15px rgba(37, 214, 162, 0.5);
+      }
+
+      .marker-blue {
+        background: var(--blue);
+        box-shadow: 0 0 15px rgba(25, 158, 224, 0.5);
+      }
+
+      .marker-1 {
+        left: 23%;
+        top: 38%;
+      }
+
+      .marker-2 {
+        left: 47%;
+        top: 27%;
+      }
+
+      .marker-3 {
+        left: 62%;
+        top: 55%;
+      }
+
+      .marker-4 {
+        left: 78%;
+        top: 35%;
+      }
+
+      .marker-5 {
+        left: 35%;
+        top: 72%;
+      }
+
+      .marker-6 {
+        left: 69%;
+        top: 76%;
+      }
+
+      /* danger zone */
+
+      .danger-zone {
+        position: absolute;
+
+        left: 30%;
+        top: 30%;
+
+        width: 190px;
+        height: 150px;
+
+        border-radius: 50%;
+
+        border: 1px dashed rgba(255, 79, 121, 0.45);
+
+        background: rgba(255, 79, 121, 0.04);
+
+        transform: rotate(-15deg);
+      }
+
+      /* selected incident */
+
+      .map-popup {
+        position: absolute;
+
+        left: 46%;
+        top: 34%;
+
+        width: 190px;
+
+        padding: 12px;
+
+        border: 1px solid #24525e;
+
+        border-radius: 9px;
+
+        background: rgba(5, 18, 25, 0.96);
+
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+      }
+
+      .popup-label {
+        color: var(--red);
+
+        font-size: 7px;
+        font-weight: 700;
+
+        letter-spacing: 1px;
+      }
+
+      .map-popup h4 {
+        margin-top: 5px;
+
+        font-size: 10px;
+      }
+
+      .popup-info {
+        margin-top: 7px;
+
+        display: flex;
+        justify-content: space-between;
+
+        color: #5f8290;
+
+        font-size: 7px;
+      }
+
+      /* map legend */
+
+      .map-legend {
+        position: absolute;
+
+        left: 13px;
+        bottom: 13px;
+
+        padding: 9px 11px;
+
+        display: flex;
+        gap: 12px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 7px;
+
+        background: rgba(5, 15, 21, 0.85);
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        color: #698692;
+
+        font-size: 7px;
+      }
+
+      .legend-dot {
+        width: 6px;
+        height: 6px;
+
+        border-radius: 50%;
+      }
+
+      /* =====================================================
+           AI PREDICTION
+        ===================================================== */
+
+      .prediction {
+        min-height: 420px;
+      }
+
+      .prediction-body {
+        padding: 18px;
+      }
+
+      .risk-box {
+        padding: 16px;
+
+        border-radius: 10px;
+
+        background: linear-gradient(
+          135deg,
+          rgba(255, 79, 121, 0.09),
+          rgba(255, 79, 121, 0.02)
+        );
+
+        border: 1px solid rgba(255, 79, 121, 0.18);
+      }
+
+      .risk-label {
+        color: #718f99;
+
+        font-size: 7px;
+
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .risk-value {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+
+        margin-top: 6px;
+      }
+
+      .risk-value strong {
+        color: var(--red);
+
+        font-size: 29px;
+      }
+
+      .risk-value span {
+        color: #8a5965;
+
+        font-size: 8px;
+      }
+
+      .prediction-grid {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 8px;
+
+        margin-top: 12px;
+      }
+
+      .prediction-stat {
+        padding: 11px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 8px;
+
+        background: rgba(255, 255, 255, 0.012);
+      }
+
+      .prediction-stat span {
+        color: #557683;
+
+        font-size: 7px;
+      }
+
+      .prediction-stat strong {
+        display: block;
+
+        margin-top: 5px;
+
+        font-size: 14px;
+      }
+
+      /* chart */
+
+      .chart {
+        position: relative;
+
+        height: 85px;
+
+        margin-top: 15px;
+
+        border-bottom: 1px solid var(--border);
+
+        overflow: hidden;
+      }
+
+      .chart-grid {
+        position: absolute;
+        inset: 0;
+
+        background: linear-gradient(
+          rgba(24, 213, 209, 0.05) 1px,
+          transparent 1px
+        );
+
+        background-size: 100% 21px;
+      }
+
+      .chart-line {
+        position: absolute;
+
+        left: 0;
+        right: 0;
+        top: 20px;
+
+        height: 50px;
+
+        border-bottom: 2px solid var(--cyan);
+
+        clip-path: polygon(
+          0 70%,
+          10% 65%,
+          20% 72%,
+          30% 45%,
+          40% 55%,
+          50% 30%,
+          60% 38%,
+          70% 20%,
+          80% 30%,
+          90% 8%,
+          100% 15%,
+          100% 100%,
+          0 100%
+        );
+
+        background: rgba(24, 213, 209, 0.05);
+      }
+
+      .predict-btn {
+        width: 100%;
+
+        margin-top: 16px;
+
+        padding: 11px;
+
+        border: none;
+
+        border-radius: 8px;
+
+        background: var(--cyan);
+
+        color: #031317;
+
+        font-size: 10px;
+        font-weight: 800;
+      }
+
+      .predict-btn:hover {
+        filter: brightness(1.1);
+      }
+
+      /* =====================================================
+           QUICK COMMANDS
+        ===================================================== */
+
+      .quick-actions {
+        display: grid;
+
+        grid-template-columns: repeat(4, 1fr);
+
+        gap: 10px;
+
+        margin-top: 14px;
+      }
+
+      .action {
+        min-height: 80px;
+
+        padding: 14px;
+
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 11px;
+
+        background: var(--panel);
+
+        transition: 0.2s;
+      }
+
+      .action:hover {
+        border-color: #27616c;
+        transform: translateY(-2px);
+      }
+
+      .action-icon {
+        width: 35px;
+        height: 35px;
+
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 9px;
+
+        background: rgba(24, 213, 209, 0.08);
+
+        color: var(--cyan);
+
+        font-size: 15px;
+      }
+
+      .action h4 {
+        font-size: 9px;
+      }
+
+      .action p {
+        margin-top: 4px;
+
+        color: #507381;
+
+        font-size: 7px;
+      }
+
+      .action-arrow {
+        margin-left: auto;
+
+        color: #527887;
+      }
+
+      /* =====================================================
+           LOWER GRID
+        ===================================================== */
+
+      .lower-grid {
+        display: grid;
+
+        grid-template-columns: 1.4fr 1fr 0.8fr;
+
+        gap: 14px;
+
+        margin-top: 14px;
+      }
+
+      /* =====================================================
+           INCIDENTS
+        ===================================================== */
+
+      .panel-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .small-btn {
+        padding: 7px 10px;
+
+        border: 1px solid var(--border);
+
+        border-radius: 6px;
+
+        background: transparent;
+
+        color: #6b8c99;
+
+        font-size: 7px;
+      }
+
+      .small-btn.primary {
+        color: var(--cyan);
+        border-color: #176067;
+        background: rgba(24, 213, 209, 0.05);
+      }
+
+      .incident {
+        min-height: 60px;
+
+        padding: 11px 15px;
+
+        display: grid;
+
+        grid-template-columns: 1.5fr 1fr 0.6fr 0.7fr;
+
+        align-items: center;
+
+        border-bottom: 1px solid rgba(23, 54, 66, 0.7);
+      }
+
+      .incident:last-child {
+        border-bottom: none;
+      }
+
+      .incident-name {
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .incident-location {
+        margin-top: 4px;
+
+        color: #527381;
+
+        font-size: 7px;
+      }
+
+      .severity {
+        width: fit-content;
+
+        padding: 4px 7px;
+
+        border-radius: 5px;
+
+        font-size: 6px;
+
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .critical {
+        color: #ff7794;
+        background: rgba(255, 79, 121, 0.09);
+      }
+
+      .medium {
+        color: var(--yellow);
+        background: rgba(244, 201, 93, 0.08);
+      }
+
+      .low {
+        color: var(--green);
+        background: rgba(37, 214, 162, 0.08);
+      }
+
+      .incident-status {
+        color: #668894;
+
+        font-size: 7px;
+      }
+
+      /* =====================================================
+           MISSIONS
+        ===================================================== */
+
+      .mission {
+        padding: 13px 15px;
+
+        border-bottom: 1px solid rgba(23, 54, 66, 0.7);
+      }
+
+      .mission:last-child {
+        border-bottom: none;
+      }
+
+      .mission-top {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .mission-name {
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .mission-status {
+        color: var(--cyan);
+
+        font-size: 7px;
+      }
+
+      .mission-meta {
+        margin-top: 5px;
+
+        display: flex;
+        justify-content: space-between;
+
+        color: #547582;
+
+        font-size: 7px;
+      }
+
+      .progress {
+        height: 4px;
+
+        margin-top: 9px;
+
+        border-radius: 5px;
+
+        background: #122a33;
+
+        overflow: hidden;
+      }
+
+      .progress span {
+        display: block;
+
+        height: 100%;
+
+        border-radius: inherit;
+
+        background: var(--cyan);
+      }
+
+      .progress-80 {
+        width: 80%;
+      }
+
+      .progress-55 {
+        width: 55%;
+      }
+
+      .progress-35 {
+        width: 35%;
+      }
+
+      /* =====================================================
+           RESOURCES
+        ===================================================== */
+
+      .resource {
+        min-height: 48px;
+
+        padding: 8px 15px;
+
+        display: flex;
+        align-items: center;
+
+        border-bottom: 1px solid rgba(23, 54, 66, 0.7);
+      }
+
+      .resource:last-child {
+        border-bottom: none;
+      }
+
+      .resource-icon {
+        width: 29px;
+        height: 29px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 7px;
+
+        background: rgba(24, 213, 209, 0.06);
+
+        color: var(--cyan);
+
+        margin-right: 9px;
+      }
+
+      .resource-name {
+        font-size: 8px;
+        font-weight: 600;
+      }
+
+      .resource-detail {
+        margin-top: 3px;
+
+        color: #527381;
+
+        font-size: 6px;
+      }
+
+      .resource-count {
+        margin-left: auto;
+
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .resource-available {
+        margin-left: 5px;
+
+        color: var(--green);
+
+        font-size: 6px;
+      }
+
+      /* =====================================================
+           CHAT
+        ===================================================== */
+
+      .bottom-grid {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 14px;
+
+        margin-top: 14px;
+      }
+
+      .chat-body {
+        height: 205px;
+
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-messages {
+        flex: 1;
+
+        padding: 12px 15px;
+
+        overflow: hidden;
+      }
+
+      .message {
+        display: flex;
+        gap: 8px;
+
+        margin-bottom: 12px;
+      }
+
+      .message-avatar {
+        width: 24px;
+        height: 24px;
+
+        flex-shrink: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background: #12313b;
+
+        color: var(--cyan);
+
+        font-size: 7px;
+        font-weight: 700;
+      }
+
+      .message-content {
+        padding: 7px 9px;
+
+        border-radius: 7px;
+
+        background: #0d242d;
+
+        max-width: 75%;
+      }
+
+      .message-name {
+        color: var(--cyan);
+
+        font-size: 7px;
+        font-weight: 600;
+      }
+
+      .message-text {
+        margin-top: 3px;
+
+        color: #72909c;
+
+        font-size: 7px;
+        line-height: 1.5;
+      }
+
+      .chat-input {
+        padding: 9px;
+
+        border-top: 1px solid var(--border);
+
+        display: flex;
+        gap: 7px;
+      }
+
+      .chat-input input {
+        flex: 1;
+
+        padding: 9px 10px;
+
+        background: #07161e;
+
+        border: 1px solid var(--border);
+
+        border-radius: 7px;
+
+        outline: none;
+
+        color: white;
+
+        font-size: 8px;
+      }
+
+      .chat-input button {
+        width: 34px;
+
+        border: none;
+
+        border-radius: 7px;
+
+        background: var(--cyan);
+
+        color: #031317;
+      }
+
+      /* =====================================================
+           ALERTS
+        ===================================================== */
+
+      .alert {
+        padding: 13px 15px;
+
+        display: flex;
+        gap: 10px;
+
+        border-bottom: 1px solid rgba(23, 54, 66, 0.7);
+      }
+
+      .alert:last-child {
+        border-bottom: none;
+      }
+
+      .alert-icon {
+        width: 27px;
+        height: 27px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 7px;
+
+        background: rgba(255, 79, 121, 0.08);
+
+        color: var(--red);
+      }
+
+      .alert h4 {
+        font-size: 8px;
+      }
+
+      .alert p {
+        margin-top: 3px;
+
+        color: #527582;
+
+        font-size: 7px;
+        line-height: 1.4;
+      }
+
+      .alert-time {
+        margin-top: 4px;
+
+        color: #3f606d;
+
+        font-size: 6px;
+      }
+
+      /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+      @media (max-width: 1250px) {
+        .kpis {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .command-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .lower-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .sidebar {
+          width: 70px;
+        }
+
+        .brand {
+          justify-content: center;
+          padding: 0;
+        }
+
+        .brand-name,
+        .brand-subtitle,
+        .nav-label,
+        .nav-item span:not(.nav-icon),
+        .system-status {
+          display: none;
+        }
+
+        .nav-item {
+          justify-content: center;
+          padding: 0;
+        }
+
+        .main {
+          margin-left: 70px;
+          width: calc(100% - 70px);
+        }
+
+        .quick-actions {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .lower-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .bottom-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 650px) {
+        .topbar {
+          padding: 0 12px;
+        }
+
+        .location-pill {
+          display: none;
+        }
+
+        .content {
+          padding: 12px;
+        }
+
+        .command-header {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 18px;
+        }
+
+        .operation-status {
+          width: 100%;
+        }
+
+        .kpis {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .quick-actions {
+          grid-template-columns: 1fr;
+        }
+
+        .map-panel {
+          height: 350px;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <!-- =========================================================
-         COMMAND CENTER LOCATION GATE
-    ========================================================== -->
+    <div class="app">
+      <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-    <section id="commandLocationGate" class="command-location-gate">
-      <div class="location-gate-card">
-        <div class="location-gate-icon">📍</div>
-
-        <div class="location-gate-badge">DISASTEROS COMMAND CENTER</div>
-
-        <h1>
-          Select Operational
-          <span>Location</span>
-        </h1>
-
-        <p>
-          Choose a city, district or village to load emergency operations,
-          incidents, responders and resources for that area.
-        </p>
-
-        <div class="location-search-box">
-          <input
-            id="commandLocationInput"
-            type="text"
-            autocomplete="off"
-            placeholder="Search City, District or Village"
-          />
-
-          <button id="commandLocationSearchBtn">Load Location</button>
-        </div>
-
-        <div class="location-divider">
-          <span>OR</span>
-        </div>
-
-        <button id="commandLiveLocationBtn" class="command-live-location-btn">
-          📍 Use Current Location
-        </button>
-
-        <div id="commandLocationStatus" class="command-location-status"></div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-         COMMAND CENTER
-    ========================================================== -->
-
-    <main id="commandCenter" style="display: none">
-      <!-- =======================================================
-           MAP
-      ======================================================== -->
-
-      <div id="commandMap"></div>
-
-      <!-- =======================================================
-           TOP BAR
-      ======================================================== -->
-
-      <header class="command-topbar">
+      <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">D</div>
-
-          <div class="brand-text">
-            <h1>Disaster<span>OS</span></h1>
-
-            <p>COMMAND &amp; CONTROL</p>
-          </div>
-        </div>
-
-        <div class="operation-status">
-          <div class="live-indicator">
-            <span></span>
-
-            LIVE OPERATIONS
-          </div>
-
-          <div id="currentTime">--:--:--</div>
-
-          <button
-            id="refreshBtn"
-            class="icon-button"
-            title="Refresh operational data"
-            type="button"
-          >
-            ↻
-          </button>
-
-          <div id="authUser"></div>
-        </div>
-      </header>
-
-      <!-- =======================================================
-           SITUATION OVERVIEW
-      ======================================================== -->
-
-      <section class="overlay situation-overlay">
-        <div class="overlay-label">SITUATION OVERVIEW</div>
-
-        <div class="status-grid">
-          <!-- INCIDENTS -->
-
-          <div class="status-item critical">
-            <span class="status-icon"> ! </span>
-
-            <div>
-              <strong id="incidentCount"> 0 </strong>
-
-              <small> INCIDENTS </small>
-            </div>
-          </div>
-
-          <!-- SOS -->
-
-          <div class="status-item danger">
-            <span class="status-icon"> SOS </span>
-
-            <div>
-              <strong id="sosCount"> 0 </strong>
-
-              <small> SOS </small>
-            </div>
-          </div>
-
-          <!-- MISSIONS -->
-
-          <div class="status-item">
-            <span class="status-icon"> ◆ </span>
-
-            <div>
-              <strong id="missionCount"> 0 </strong>
-
-              <small> MISSIONS </small>
-            </div>
-          </div>
-
-          <!-- RESPONDERS -->
-
-          <div class="status-item">
-            <span class="status-icon"> ● </span>
-
-            <div>
-              <strong id="teamCount"> 0 </strong>
-
-              <small> RESPONDERS </small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- =======================================================
-           AI / INTELLIGENCE
-      ======================================================== -->
-
-      <section class="overlay intelligence-overlay">
-        <div class="overlay-header">
-          <div>
-            <span class="eyebrow"> DISASTEROS INTELLIGENCE </span>
-
-            <h2>Situation Status</h2>
-          </div>
-
-          <div class="ai-status">AI</div>
-        </div>
-
-        <div class="intelligence-content">
-          <div class="risk-row">
-            <div>
-              <small> OPERATIONAL RISK </small>
-
-              <strong id="riskLevel"> AWAITING DATA </strong>
-            </div>
-
-            <div class="risk-score">
-              <span id="riskScore"> -- </span>
-            </div>
-          </div>
-
-          <div class="intelligence-line"></div>
-
-          <p id="situationSummary">
-            Monitoring operational data from active incidents, missions and
-            responder units.
-          </p>
-        </div>
-      </section>
-
-      <!-- =======================================================
-           PRIORITY ALERTS
-      ======================================================== -->
-
-      <section class="overlay alerts-overlay">
-        <div class="overlay-header">
-          <div>
-            <span class="eyebrow"> LIVE OPERATIONS </span>
-
-            <h2>Priority Alerts</h2>
-          </div>
-
-          <span id="alertCount" class="counter-badge"> 0 </span>
-        </div>
-
-        <div id="alertsList" class="alerts-list">
-          <div class="empty-state">No active alerts</div>
-        </div>
-      </section>
-
-      <!-- =======================================================
-           RESOURCES OVERLAY
-      ======================================================== -->
-
-      <section class="overlay resources-overlay">
-        <div class="overlay-header">
-          <div>
-            <span class="eyebrow"> FIELD CAPACITY </span>
-
-            <h2>Resources</h2>
-          </div>
-        </div>
-
-        <div class="resource-grid">
-          <!-- TEAMS -->
-
-          <div class="resource-stat">
-            <span class="resource-symbol"> ◉ </span>
-
-            <div>
-              <strong id="resourceTeams"> 0 </strong>
-
-              <small> TEAMS </small>
-            </div>
-          </div>
-
-          <!-- AMBULANCE -->
-
-          <div class="resource-stat">
-            <span class="resource-symbol"> + </span>
-
-            <div>
-              <strong id="resourceAmbulance"> 0 </strong>
-
-              <small> AMBULANCE </small>
-            </div>
-          </div>
-
-          <!-- BOATS -->
-
-          <div class="resource-stat">
-            <span class="resource-symbol"> ◈ </span>
-
-            <div>
-              <strong id="resourceBoats"> 0 </strong>
-
-              <small> BOATS </small>
-            </div>
-          </div>
-
-          <!-- SUPPLIES -->
-
-          <div class="resource-stat">
-            <span class="resource-symbol"> □ </span>
-
-            <div>
-              <strong id="resourceSupplies"> 0 </strong>
-
-              <small> SUPPLIES </small>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- =======================================================
-           SELECTED OPERATION
-      ======================================================== -->
-
-      <section id="selectedPanel" class="overlay selected-panel hidden">
-        <button id="closeSelected" class="close-button" type="button">×</button>
-
-        <div id="selectedType" class="selected-type">INCIDENT</div>
-
-        <h2 id="selectedTitle">--</h2>
-
-        <div class="selected-meta">
-          <div>
-            <span> STATUS </span>
-
-            <strong id="selectedStatus"> -- </strong>
-          </div>
+          <div class="brand-icon">D</div>
 
           <div>
-            <span> SEVERITY </span>
+            <div class="brand-name">DisasterOS</div>
 
-            <strong id="selectedSeverity"> -- </strong>
+            <div class="brand-subtitle">COMMAND NETWORK</div>
           </div>
         </div>
 
-        <p id="selectedDescription">--</p>
+        <nav class="nav">
+          <div class="nav-label">Operations</div>
 
-        <div class="selected-location">
-          <span> LOCATION </span>
+          <a href="#" class="nav-item active">
+            <span class="nav-icon">◉</span>
+            <span>Command Overview</span>
+          </a>
 
-          <strong id="selectedLocation"> -- </strong>
+          <a href="#" class="nav-item">
+            <span class="nav-icon">◈</span>
+            <span>Prediction</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">⚠</span>
+            <span>Incidents</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">→</span>
+            <span>Missions</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">▣</span>
+            <span>Resources</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">⌖</span>
+            <span>Live Map</span>
+          </a>
+
+          <div class="nav-label" style="margin-top: 20px">Coordination</div>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">◌</span>
+            <span>Communications</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">🔔</span>
+            <span>Alerts</span>
+          </a>
+
+          <a href="#" class="nav-item">
+            <span class="nav-icon">▥</span>
+            <span>Analytics</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+          <a href="#" class="nav-item">
+            <span class="nav-icon">⚙</span>
+            <span>Settings</span>
+          </a>
+
+          <div class="system-status">
+            <div class="system-row">
+              <span class="status-dot"></span>
+              System Online
+            </div>
+
+            <div class="system-sub">DisasterOS Network</div>
+          </div>
         </div>
+      </aside>
 
-        <div class="selected-actions">
-          <button id="assignOperationBtn" type="button">ASSIGN</button>
+      <!-- =====================================================
+         MAIN
+    ====================================================== -->
 
-          <button
-            id="createMissionBtn"
-            class="create-mission-btn"
-            type="button"
-          >
-            + Create Mission
-          </button>
+      <main class="main">
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+          <div class="top-title">
+            Emergency Operations /
+            <strong>Command Center</strong>
+          </div>
+
+          <div class="top-right">
+            <div class="location-pill">
+              <span class="location-pin">●</span>
+              28.6659, 77.3034
+            </div>
+
+            <div class="notification">
+              🔔
+              <span class="notification-count">7</span>
+            </div>
+
+            <div class="operator">
+              <div class="operator-avatar">H</div>
+
+              <div>
+                <div class="operator-name">Command Operator</div>
+
+                <div class="operator-role">Emergency Control</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- CONTENT -->
+
+        <div class="content">
+          <!-- =================================================
+                 COMMAND HEADER
+            ================================================== -->
+
+          <section class="command-header">
+            <div>
+              <div class="header-label">DisasterOS Intelligence Network</div>
+
+              <h1>Command Center</h1>
+
+              <p>
+                Real-time disaster intelligence, response coordination &
+                resource allocation.
+              </p>
+            </div>
+
+            <div class="operation-status">
+              <small> OPERATIONAL STATUS </small>
+
+              <strong> ● OPERATIONS NORMAL </strong>
+
+              <span> Last synchronized 01:58 PM </span>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 KPI
+            ================================================== -->
+
+          <div class="section-heading">
+            <h2>Operational Overview</h2>
+
+            <span> LIVE DATA </span>
+          </div>
+
+          <section class="kpis">
+            <div class="kpi">
+              <div class="kpi-top">
+                <span class="kpi-label"> Active Incidents </span>
+
+                <span class="kpi-icon"> ⚠ </span>
+              </div>
+
+              <div class="kpi-value">12</div>
+
+              <div class="kpi-change danger">↑ 3 since last hour</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <span class="kpi-label"> Critical </span>
+
+                <span class="kpi-icon"> ! </span>
+              </div>
+
+              <div class="kpi-value">04</div>
+
+              <div class="kpi-change warning">Requires attention</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <span class="kpi-label"> Active Missions </span>
+
+                <span class="kpi-icon"> → </span>
+              </div>
+
+              <div class="kpi-value">08</div>
+
+              <div class="kpi-change good">5 teams deployed</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <span class="kpi-label"> Resources </span>
+
+                <span class="kpi-icon"> ▣ </span>
+              </div>
+
+              <div class="kpi-value">36</div>
+
+              <div class="kpi-change good">82% available</div>
+            </div>
+
+            <div class="kpi">
+              <div class="kpi-top">
+                <span class="kpi-label"> Field Teams </span>
+
+                <span class="kpi-icon"> ◉ </span>
+              </div>
+
+              <div class="kpi-value">14</div>
+
+              <div class="kpi-change good">11 online</div>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 MAP + PREDICTION
+            ================================================== -->
+
+          <section class="command-grid">
+            <!-- LIVE MAP -->
+
+            <div class="panel map-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>⌖</span>
+
+                  <div>
+                    <h3>LIVE SITUATIONAL MAP</h3>
+                    <span>REAL-TIME FIELD INTELLIGENCE</span>
+                  </div>
+                </div>
+
+                <div class="map-controls">
+                  <button class="map-control active">Incidents</button>
+
+                  <button class="map-control">Resources</button>
+
+                  <button class="map-control">Routes</button>
+
+                  <button class="map-control">Zones</button>
+                </div>
+              </div>
+
+              <div class="map">
+                <div class="terrain"></div>
+
+                <div class="danger-zone"></div>
+
+                <div class="road road-1"></div>
+                <div class="road road-2"></div>
+                <div class="road road-3"></div>
+                <div class="road road-4"></div>
+
+                <div class="map-marker marker-red marker-1">!</div>
+
+                <div class="map-marker marker-yellow marker-2">!</div>
+
+                <div class="map-marker marker-red marker-3">!</div>
+
+                <div class="map-marker marker-green marker-4">+</div>
+
+                <div class="map-marker marker-blue marker-5">+</div>
+
+                <div class="map-marker marker-green marker-6">+</div>
+
+                <div class="map-popup">
+                  <div class="popup-label">CRITICAL INCIDENT</div>
+
+                  <h4>Severe Flood Warning</h4>
+
+                  <div class="popup-info">
+                    <span>Sector 04</span>
+                    <span>2 min ago</span>
+                  </div>
+
+                  <div class="popup-info">
+                    <span>Risk: HIGH</span>
+                    <span>12 affected</span>
+                  </div>
+                </div>
+
+                <div class="map-legend">
+                  <div class="legend-item">
+                    <span class="legend-dot" style="background: #ff4f79">
+                    </span>
+                    Critical
+                  </div>
+
+                  <div class="legend-item">
+                    <span class="legend-dot" style="background: #f4c95d">
+                    </span>
+                    Warning
+                  </div>
+
+                  <div class="legend-item">
+                    <span class="legend-dot" style="background: #25d6a2">
+                    </span>
+                    Resource
+                  </div>
+
+                  <div class="legend-item">
+                    <span class="legend-dot" style="background: #199ee0">
+                    </span>
+                    Team
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- AI PREDICTION -->
+
+            <div class="panel prediction">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>◈</span>
+
+                  <div>
+                    <h3>AI PREDICTION</h3>
+                    <span>DISASTER INTELLIGENCE ENGINE</span>
+                  </div>
+                </div>
+
+                <span style="color: #527582; font-size: 8px"> LIVE </span>
+              </div>
+
+              <div class="prediction-body">
+                <div class="risk-box">
+                  <div class="risk-label">Predicted Disaster Risk</div>
+
+                  <div class="risk-value">
+                    <strong> HIGH </strong>
+
+                    <span> Next 6 hours </span>
+                  </div>
+                </div>
+
+                <div class="prediction-grid">
+                  <div class="prediction-stat">
+                    <span> FLOOD PROBABILITY </span>
+
+                    <strong> 78% </strong>
+                  </div>
+
+                  <div class="prediction-stat">
+                    <span> CONFIDENCE </span>
+
+                    <strong> 91% </strong>
+                  </div>
+
+                  <div class="prediction-stat">
+                    <span> RAINFALL </span>
+
+                    <strong> 84 mm </strong>
+                  </div>
+
+                  <div class="prediction-stat">
+                    <span> WATER LEVEL </span>
+
+                    <strong> +1.8 m </strong>
+                  </div>
+                </div>
+
+                <div class="chart">
+                  <div class="chart-grid"></div>
+
+                  <div class="chart-line"></div>
+                </div>
+
+                <button class="predict-btn">RUN NEW PREDICTION</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
+
+          <div class="section-heading">
+            <h2>Command Actions</h2>
+
+            <span> RESPONSE TOOLS </span>
+          </div>
+
+          <section class="quick-actions">
+            <div class="action">
+              <div class="action-icon">◈</div>
+
+              <div>
+                <h4>Run Prediction</h4>
+
+                <p>Analyze current disaster risk</p>
+              </div>
+
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action">
+              <div class="action-icon">⚠</div>
+
+              <div>
+                <h4>Get Incidents</h4>
+
+                <p>Fetch latest field reports</p>
+              </div>
+
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action">
+              <div class="action-icon">+</div>
+
+              <div>
+                <h4>Create Mission</h4>
+
+                <p>Deploy a response team</p>
+              </div>
+
+              <div class="action-arrow">→</div>
+            </div>
+
+            <div class="action">
+              <div class="action-icon">▣</div>
+
+              <div>
+                <h4>Fetch Resources</h4>
+
+                <p>Check emergency availability</p>
+              </div>
+
+              <div class="action-arrow">→</div>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 INCIDENT / MISSION / RESOURCE
+            ================================================== -->
+
+          <section class="lower-grid">
+            <!-- INCIDENTS -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>⚠</span>
+
+                  <h3>INCIDENT COMMAND</h3>
+                </div>
+
+                <div class="panel-actions">
+                  <button class="small-btn">Refresh</button>
+
+                  <button class="small-btn primary">Get Incidents</button>
+                </div>
+              </div>
+
+              <div class="incident">
+                <div>
+                  <div class="incident-name">Severe Flood Warning</div>
+
+                  <div class="incident-location">
+                    Sector 04 · 28.6659, 77.3034
+                  </div>
+                </div>
+
+                <span class="severity critical"> Critical </span>
+
+                <span class="incident-status"> Active </span>
+
+                <span class="incident-status"> M-104 </span>
+              </div>
+
+              <div class="incident">
+                <div>
+                  <div class="incident-name">Road Blockage</div>
+
+                  <div class="incident-location">NH-24 · East Corridor</div>
+                </div>
+
+                <span class="severity medium"> Medium </span>
+
+                <span class="incident-status"> Assigned </span>
+
+                <span class="incident-status"> M-108 </span>
+              </div>
+
+              <div class="incident">
+                <div>
+                  <div class="incident-name">Medical Emergency</div>
+
+                  <div class="incident-location">Sector 07 · Central Zone</div>
+                </div>
+
+                <span class="severity critical"> Critical </span>
+
+                <span class="incident-status"> Responding </span>
+
+                <span class="incident-status"> M-111 </span>
+              </div>
+
+              <div class="incident">
+                <div>
+                  <div class="incident-name">Infrastructure Damage</div>
+
+                  <div class="incident-location">Sector 02 · North Zone</div>
+                </div>
+
+                <span class="severity low"> Low </span>
+
+                <span class="incident-status"> Monitoring </span>
+
+                <span class="incident-status"> — </span>
+              </div>
+            </div>
+
+            <!-- MISSIONS -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>→</span>
+
+                  <h3>MISSION CONTROL</h3>
+                </div>
+
+                <button class="small-btn primary">+ Mission</button>
+              </div>
+
+              <div class="mission">
+                <div class="mission-top">
+                  <span class="mission-name"> Flood Rescue · M-104 </span>
+
+                  <span class="mission-status"> ACTIVE </span>
+                </div>
+
+                <div class="mission-meta">
+                  <span> Team Alpha </span>
+
+                  <span> ETA 14 min </span>
+                </div>
+
+                <div class="progress">
+                  <span class="progress-80"></span>
+                </div>
+              </div>
+
+              <div class="mission">
+                <div class="mission-top">
+                  <span class="mission-name"> Medical Support · M-111 </span>
+
+                  <span class="mission-status"> ACTIVE </span>
+                </div>
+
+                <div class="mission-meta">
+                  <span> Team Delta </span>
+
+                  <span> ETA 08 min </span>
+                </div>
+
+                <div class="progress">
+                  <span class="progress-55"></span>
+                </div>
+              </div>
+
+              <div class="mission">
+                <div class="mission-top">
+                  <span class="mission-name"> Road Clearance · M-108 </span>
+
+                  <span class="mission-status"> DEPLOYING </span>
+                </div>
+
+                <div class="mission-meta">
+                  <span> Team Bravo </span>
+
+                  <span> ETA 21 min </span>
+                </div>
+
+                <div class="progress">
+                  <span class="progress-35"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RESOURCES -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>▣</span>
+
+                  <h3>RESOURCE READINESS</h3>
+                </div>
+
+                <button class="small-btn">Fetch</button>
+              </div>
+
+              <div class="resource">
+                <div class="resource-icon">+</div>
+
+                <div>
+                  <div class="resource-name">Hospitals</div>
+
+                  <div class="resource-detail">Emergency capacity</div>
+                </div>
+
+                <strong class="resource-count"> 20 </strong>
+
+                <span class="resource-available"> 14 </span>
+              </div>
+
+              <div class="resource">
+                <div class="resource-icon">⛺</div>
+
+                <div>
+                  <div class="resource-name">Shelters</div>
+
+                  <div class="resource-detail">Available beds</div>
+                </div>
+
+                <strong class="resource-count"> 12 </strong>
+
+                <span class="resource-available"> 9 </span>
+              </div>
+
+              <div class="resource">
+                <div class="resource-icon">🚒</div>
+
+                <div>
+                  <div class="resource-name">Fire Units</div>
+
+                  <div class="resource-detail">Ready for dispatch</div>
+                </div>
+
+                <strong class="resource-count"> 08 </strong>
+
+                <span class="resource-available"> 6 </span>
+              </div>
+
+              <div class="resource">
+                <div class="resource-icon">🚑</div>
+
+                <div>
+                  <div class="resource-name">Ambulances</div>
+
+                  <div class="resource-detail">Medical response</div>
+                </div>
+
+                <strong class="resource-count"> 16 </strong>
+
+                <span class="resource-available"> 11 </span>
+              </div>
+
+              <div class="resource">
+                <div class="resource-icon">◉</div>
+
+                <div>
+                  <div class="resource-name">Rescue Teams</div>
+
+                  <div class="resource-detail">Field personnel</div>
+                </div>
+
+                <strong class="resource-count"> 14 </strong>
+
+                <span class="resource-available"> 11 </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+                 CHAT + ALERTS
+            ================================================== -->
+
+          <section class="bottom-grid">
+            <!-- COMMAND CHAT -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>◌</span>
+
+                  <div>
+                    <h3>COMMAND CHAT</h3>
+
+                    <span> 11 RESPONDERS ONLINE </span>
+                  </div>
+                </div>
+
+                <span style="color: #25d6a2; font-size: 7px"> ● LIVE </span>
+              </div>
+
+              <div class="chat-body">
+                <div class="chat-messages">
+                  <div class="message">
+                    <div class="message-avatar">A</div>
+
+                    <div class="message-content">
+                      <div class="message-name">Team Alpha</div>
+
+                      <div class="message-text">
+                        Reached Sector 04. Water level increasing rapidly.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="message">
+                    <div class="message-avatar">C</div>
+
+                    <div class="message-content">
+                      <div class="message-name">Command</div>
+
+                      <div class="message-text">
+                        Copy. Proceed with evacuation protocol Alpha-2.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="message">
+                    <div class="message-avatar">D</div>
+
+                    <div class="message-content">
+                      <div class="message-name">Team Delta</div>
+
+                      <div class="message-text">
+                        Ambulance unit dispatched to Central Zone.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-input">
+                  <input type="text" placeholder="Message field teams..." />
+
+                  <button>→</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ALERT FEED -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span>🔔</span>
+
+                  <h3>PRIORITY ALERT FEED</h3>
+                </div>
+
+                <button class="small-btn">View All</button>
+              </div>
+
+              <div class="alert">
+                <div class="alert-icon">!</div>
+
+                <div>
+                  <h4>Flood probability increased</h4>
+
+                  <p>
+                    AI prediction engine detected increased water-level risk.
+                  </p>
+
+                  <div class="alert-time">2 minutes ago</div>
+                </div>
+              </div>
+
+              <div class="alert">
+                <div class="alert-icon">⚠</div>
+
+                <div>
+                  <h4>Critical incident reported</h4>
+
+                  <p>Severe flooding reported near Sector 04.</p>
+
+                  <div class="alert-time">5 minutes ago</div>
+                </div>
+              </div>
+
+              <div class="alert">
+                <div class="alert-icon">→</div>
+
+                <div>
+                  <h4>Mission M-104 deployed</h4>
+
+                  <p>Team Alpha has been assigned to flood rescue operation.</p>
+
+                  <div class="alert-time">8 minutes ago</div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
-
-      <!-- =======================================================
-           MAP LAYER CONTROL
-      ======================================================== -->
-
-      <section class="map-layer-control">
-        <div class="layer-title">MAP LAYERS</div>
-
-        <!-- RISK -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="zones" checked />
-
-          <span class="legend zone"></span>
-
-          Risk Zones
-        </label>
-
-        <!-- INCIDENTS -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="incidents" checked />
-
-          <span class="legend incident"></span>
-
-          Incidents
-        </label>
-
-        <!-- SOS -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="sos" checked />
-
-          <span class="legend sos"></span>
-
-          SOS
-        </label>
-
-        <!-- MISSIONS -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="missions" checked />
-
-          <span class="legend mission"></span>
-
-          Missions
-        </label>
-
-        <!-- RESPONDERS -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="teams" checked />
-
-          <span class="legend team"></span>
-
-          Responders
-        </label>
-
-        <!-- RESOURCES -->
-
-        <label class="layer-option">
-          <input type="checkbox" data-layer="resources" checked />
-
-          <span class="legend resource"></span>
-
-          Resources
-        </label>
-      </section>
-
-      <!-- =======================================================
-           BOTTOM OPERATION BAR
-      ======================================================== -->
-
-      <footer class="operation-bar">
-        <div class="map-status">
-          <span class="map-status-dot"></span>
-
-          GIS SYSTEM
-
-          <strong> ONLINE </strong>
-        </div>
-
-        <div class="map-legend">
-          <span>
-            <i class="legend-dot critical"></i>
-            Critical
-          </span>
-
-          <span>
-            <i class="legend-dot high"></i>
-            High
-          </span>
-
-          <span>
-            <i class="legend-dot medium"></i>
-            Medium
-          </span>
-
-          <span>
-            <i class="legend-dot low"></i>
-            Low
-          </span>
-        </div>
-
-        <div class="coordinates">
-          <span> LAT </span>
-
-          <strong id="mapLat"> -- </strong>
-
-          <span> LNG </span>
-
-          <strong id="mapLng"> -- </strong>
-        </div>
-      </footer>
-    </main>
-
-    <!-- ==========================================================
-     LIBRARIES
-========================================================== -->
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-
-    <!-- ==========================================================
-     COMMAND CENTER CORE
-========================================================== -->
-
-    <script src="./js/command-config.js"></script>
-    <script src="./js/command-utils.js"></script>
-    <script src="./js/command-api.js"></script>
-
-    <!-- ==========================================================
-     SOCKET
-========================================================== -->
-
-    <script src="./js/socket-client.js"></script>
-
-    <!-- ==========================================================
-     LOCATION
-========================================================== -->
-
-    <script src="./js/command-center-location.js"></script>
-
-    <!-- ==========================================================
-     CENTRAL DATA
-========================================================== -->
-
-    <script src="./js/command-center-data.js"></script>
-
-    <!-- ==========================================================
-     MAP
-========================================================== -->
-
-    <script src="./js/command-center-map.js"></script>
-    <script src="./js/command-center-layers.js"></script>
-
-    <!-- ==========================================================
-     UI / DASHBOARD
-========================================================== -->
-
-    <script src="./js/command-center-ui.js"></script>
-    <script src="./js/command-dashboard.js"></script>
-
-    <!-- ==========================================================
-     REALTIME
-========================================================== -->
-
-    <script src="./js/command-center-realtime.js"></script>
-
-    <!-- ==========================================================
-     MISSION CREATION
-========================================================== -->
-
-    <script src="./js/create-mission.js"></script>
-
-    <!-- ==========================================================
-     APPLICATION START
-========================================================== -->
-
-    <script src="./js/command-init.js"></script>
+      </main>
+    </div>
   </body>
 </html>

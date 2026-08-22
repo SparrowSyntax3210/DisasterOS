@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DisasterOS | Command Center</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Leaflet -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <link rel="stylesheet" href="./css/command-center.css" />
+  </head>
+
+  <body>
+    <div class="app-shell">
+      <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">D</div>
+
+          <div>
+            <div class="brand-name">DisasterOS</div>
+            <div class="brand-subtitle">COMMAND NETWORK</div>
+          </div>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">OPERATIONS</div>
+
+          <button class="nav-item active" data-section="overview">
+            <span class="nav-icon">◉</span>
+            <span>Command Overview</span>
+          </button>
+
+          <button class="nav-item" data-section="prediction">
+            <span class="nav-icon">◈</span>
+            <span>AI Prediction</span>
+          </button>
+
+          <button class="nav-item" data-section="incidents">
+            <span class="nav-icon">⚠</span>
+            <span>Incidents</span>
+            <span class="nav-badge" id="incidentNavCount">0</span>
+          </button>
+
+          <button class="nav-item" data-section="missions">
+            <span class="nav-icon">➜</span>
+            <span>Mission Control</span>
+            <span class="nav-badge" id="missionNavCount">0</span>
+          </button>
+
+          <button class="nav-item" data-section="resources">
+            <span class="nav-icon">▣</span>
+            <span>Resources</span>
+          </button>
+
+          <button class="nav-item" data-section="teams">
+            <span class="nav-icon">♙</span>
+            <span>Response Teams</span>
+          </button>
+
+          <button class="nav-item" data-section="map">
+            <span class="nav-icon">⌖</span>
+            <span>Live GIS Map</span>
+          </button>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">INTELLIGENCE</div>
+
+          <button class="nav-item" data-section="alerts">
+            <span class="nav-icon">🔔</span>
+            <span>Priority Alerts</span>
+            <span class="nav-badge danger" id="alertNavCount">0</span>
+          </button>
+
+          <button class="nav-item" data-section="activity">
+            <span class="nav-icon">⌁</span>
+            <span>Activity Feed</span>
+          </button>
+        </div>
+
+        <div class="sidebar-bottom">
+          <button class="nav-item">
+            <span class="nav-icon">⚙</span>
+            <span>Settings</span>
+          </button>
+
+          <div class="system-status">
+            <span class="status-dot"></span>
+
+            <div>
+              <strong>System Online</strong>
+              <small>DisasterOS Network</small>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+      <main class="main">
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+          <div>
+            <div class="topbar-title">Command Center</div>
+            <div class="topbar-subtitle">
+              Disaster response intelligence & coordination
+            </div>
+          </div>
+
+          <div class="topbar-right">
+            <div class="location-pill">
+              <span>📍</span>
+              <span id="topLocation">Detecting location...</span>
+            </div>
+
+            <div class="live-pill">
+              <span class="live-dot"></span>
+              OPERATIONS LIVE
+            </div>
+
+            <div class="commander">
+              <div class="commander-avatar">C</div>
+
+              <div>
+                <strong>Command Officer</strong>
+                <small>Operations</small>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- =====================================================
+         CONTENT
+    ====================================================== -->
+
+        <div class="content">
+          <!-- =================================================
+           HERO
+      ================================================== -->
+
+          <section class="hero">
+            <div class="hero-content">
+              <div class="eyebrow">DISASTEROS COMMAND INTELLIGENCE</div>
+
+              <h1>
+                Coordinate.
+                <span>Predict.</span>
+                Respond.
+              </h1>
+
+              <p>
+                Monitor incidents, predict disaster risk, deploy missions and
+                coordinate emergency resources from one operational view.
+              </p>
+
+              <div class="hero-actions">
+                <button class="primary-btn" id="runPredictionBtn">
+                  <span>◈</span>
+                  Run AI Prediction
+                </button>
+
+                <button class="secondary-btn" id="refreshAllBtn">
+                  ↻ Refresh Intelligence
+                </button>
+              </div>
+            </div>
+
+            <div class="hero-status">
+              <div class="radar">
+                <div class="radar-ring ring-one"></div>
+                <div class="radar-ring ring-two"></div>
+                <div class="radar-sweep"></div>
+                <div class="radar-center"></div>
+              </div>
+
+              <div>
+                <span>SYSTEM STATUS</span>
+                <strong>OPERATIONAL</strong>
+                <small>All command services active</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+           KPI GRID
+      ================================================== -->
+
+          <section class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span>ACTIVE INCIDENTS</span>
+                <div class="kpi-icon red">⚠</div>
+              </div>
+
+              <strong id="activeIncidents">--</strong>
+
+              <div class="kpi-footer">
+                <span class="danger-text" id="criticalIncidents">
+                  -- critical
+                </span>
+                <span>Live network</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span>ACTIVE MISSIONS</span>
+                <div class="kpi-icon blue">➜</div>
+              </div>
+
+              <strong id="activeMissions">--</strong>
+
+              <div class="kpi-footer">
+                <span class="positive-text">● Deployable</span>
+                <span>Command units</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span>RESOURCES</span>
+                <div class="kpi-icon purple">▣</div>
+              </div>
+
+              <strong id="resourceCount">--</strong>
+
+              <div class="kpi-footer">
+                <span class="positive-text">Available</span>
+                <span>Tracked assets</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <span>RESPONSE TEAMS</span>
+                <div class="kpi-icon cyan">♙</div>
+              </div>
+
+              <strong id="teamCount">--</strong>
+
+              <div class="kpi-footer">
+                <span class="positive-text">Connected</span>
+                <span>Field units</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+           MAIN GRID
+      ================================================== -->
+
+          <section class="command-grid">
+            <!-- MAP -->
+
+            <div class="panel map-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">SITUATIONAL AWARENESS</div>
+                  <h2>Live Operations Map</h2>
+                </div>
+
+                <button class="small-btn" id="centerMapBtn">⌖ My Area</button>
+              </div>
+
+              <div class="map-toolbar">
+                <button class="map-filter active" data-layer="all">All</button>
+
+                <button class="map-filter" data-layer="incidents">
+                  ⚠ Incidents
+                </button>
+
+                <button class="map-filter" data-layer="hospitals">
+                  + Hospitals
+                </button>
+
+                <button class="map-filter" data-layer="fire">🔥 Fire</button>
+
+                <button class="map-filter" data-layer="shelters">
+                  ⌂ Shelters
+                </button>
+              </div>
+
+              <div id="commandMap"></div>
+
+              <div class="map-legend">
+                <span>
+                  <i class="legend-dot incident"></i>
+                  Incident
+                </span>
+
+                <span>
+                  <i class="legend-dot hospital"></i>
+                  Hospital
+                </span>
+
+                <span>
+                  <i class="legend-dot shelter"></i>
+                  Shelter
+                </span>
+
+                <span>
+                  <i class="legend-dot fire"></i>
+                  Fire Station
+                </span>
+              </div>
+            </div>
+
+            <!-- AI PREDICTION -->
+
+            <div class="panel prediction-panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">AI INTELLIGENCE</div>
+                  <h2>Risk Prediction</h2>
+                </div>
+
+                <span class="ai-badge"> AI ENGINE </span>
+              </div>
+
+              <div class="prediction-main">
+                <div class="risk-circle" id="riskCircle">
+                  <div>
+                    <strong id="riskProbability">--%</strong>
+                    <span>RISK</span>
+                  </div>
+                </div>
+
+                <div class="risk-info">
+                  <span class="risk-label">CURRENT RISK</span>
+
+                  <h3 id="riskLevel">ANALYZING</h3>
+
+                  <p id="riskDescription">
+                    Run prediction to analyze the current area.
+                  </p>
+                </div>
+              </div>
+
+              <div class="prediction-stats">
+                <div>
+                  <span>Prediction</span>
+                  <strong id="predictionType">--</strong>
+                </div>
+
+                <div>
+                  <span>Confidence</span>
+                  <strong id="predictionConfidence">--</strong>
+                </div>
+
+                <div>
+                  <span>Updated</span>
+                  <strong id="predictionUpdated">--</strong>
+                </div>
+              </div>
+
+              <button class="full-btn" id="predictionDetailsBtn">
+                View Prediction Details →
+              </button>
+            </div>
+          </section>
+
+          <!-- =================================================
+           INCIDENTS + MISSIONS
+      ================================================== -->
+
+          <section class="two-column-grid">
+            <!-- INCIDENTS -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">FIELD REPORTS</div>
+                  <h2>Active Incidents</h2>
+                </div>
+
+                <button class="text-btn" data-section-target="incidents">
+                  View all →
+                </button>
+              </div>
+
+              <div class="incident-list" id="incidentList">
+                <div class="loading-state">Loading incidents...</div>
+              </div>
+            </div>
+
+            <!-- MISSIONS -->
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">RESPONSE OPERATIONS</div>
+                  <h2>Mission Control</h2>
+                </div>
+
+                <button class="text-btn" id="createMissionBtn">
+                  + Create mission
+                </button>
+              </div>
+
+              <div class="mission-list" id="missionList">
+                <div class="loading-state">Loading missions...</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+           RESOURCES
+      ================================================== -->
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-eyebrow">EMERGENCY CAPACITY</div>
+                <h2>Resource Network</h2>
+              </div>
+
+              <button class="text-btn" data-section-target="resources">
+                Open resource control →
+              </button>
+            </div>
+
+            <div class="resource-grid">
+              <div class="resource-card">
+                <div class="resource-icon">🏥</div>
+                <div>
+                  <span>Hospitals</span>
+                  <strong id="hospitalCount">--</strong>
+                </div>
+              </div>
+
+              <div class="resource-card">
+                <div class="resource-icon">🔥</div>
+                <div>
+                  <span>Fire Stations</span>
+                  <strong id="fireCount">--</strong>
+                </div>
+              </div>
+
+              <div class="resource-card">
+                <div class="resource-icon">⌂</div>
+                <div>
+                  <span>Shelters</span>
+                  <strong id="shelterCount">--</strong>
+                </div>
+              </div>
+
+              <div class="resource-card">
+                <div class="resource-icon">💊</div>
+                <div>
+                  <span>Pharmacies</span>
+                  <strong id="pharmacyCount">--</strong>
+                </div>
+              </div>
+
+              <div class="resource-card">
+                <div class="resource-icon">🚓</div>
+                <div>
+                  <span>Police</span>
+                  <strong id="policeCount">--</strong>
+                </div>
+              </div>
+
+              <div class="resource-card">
+                <div class="resource-icon">🏫</div>
+                <div>
+                  <span>Schools</span>
+                  <strong id="schoolCount">--</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- =================================================
+           ALERTS + ACTIVITY
+      ================================================== -->
+
+          <section class="two-column-grid">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">PRIORITY INTELLIGENCE</div>
+                  <h2>Command Alerts</h2>
+                </div>
+
+                <span class="alert-count" id="alertCount"> 0 </span>
+              </div>
+
+              <div id="alertList">
+                <div class="alert-item">
+                  <div class="alert-icon warning">⚠</div>
+
+                  <div>
+                    <strong>Monitoring active</strong>
+                    <span>
+                      Command intelligence is monitoring your operational area.
+                    </span>
+                  </div>
+
+                  <small>Now</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <div class="panel-eyebrow">NETWORK ACTIVITY</div>
+                  <h2>Command Activity</h2>
+                </div>
+
+                <button class="text-btn" id="clearActivityBtn">Clear</button>
+              </div>
+
+              <div id="activityFeed">
+                <div class="activity-item">
+                  <div class="activity-dot"></div>
+
+                  <div>
+                    <strong>Command Center initialized</strong>
+                    <span>System connected to DisasterOS network.</span>
+                  </div>
+
+                  <small>Now</small>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <!-- =====================================================
+     INCIDENT MODAL
+====================================================== -->
+
+    <div class="modal-overlay" id="incidentModal">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">COMMAND ACTION</span>
+            <h2>Create Incident</h2>
+          </div>
+
+          <button class="modal-close" data-close-modal>×</button>
+        </div>
+
+        <form id="incidentForm">
+          <label>
+            Incident Type
+
+            <select id="incidentType" required>
+              <option value="">Select type</option>
+              <option value="flood">Flood</option>
+              <option value="fire">Fire</option>
+              <option value="medical">Medical Emergency</option>
+              <option value="road_blockage">Road Blockage</option>
+              <option value="building_collapse">Building Collapse</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+
+          <label>
+            Severity
+
+            <select id="incidentSeverity">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+
+          <label>
+            Description
+
+            <textarea
+              id="incidentDescription"
+              rows="4"
+              placeholder="Describe the incident..."
+              required
+            ></textarea>
+          </label>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" data-close-modal>
+              Cancel
+            </button>
+
+            <button type="submit" class="primary-btn">Create Incident</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     MISSION MODAL
+====================================================== -->
+
+    <div class="modal-overlay" id="missionModal">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <span class="modal-eyebrow">RESPONSE OPERATIONS</span>
+            <h2>Create Mission</h2>
+          </div>
+
+          <button class="modal-close" data-close-modal>×</button>
+        </div>
+
+        <form id="missionForm">
+          <label>
+            Mission Name
+
+            <input
+              id="missionName"
+              type="text"
+              placeholder="e.g. Flood Rescue Sector 4"
+              required
+            />
+          </label>
+
+          <label>
+            Priority
+
+            <select id="missionPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+
+          <label>
+            Objective
+
+            <textarea
+              id="missionObjective"
+              rows="4"
+              placeholder="Mission objective..."
+              required
+            ></textarea>
+          </label>
+
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" data-close-modal>
+              Cancel
+            </button>
+
+            <button type="submit" class="primary-btn">Deploy Mission</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="./js/command-config.js"></script>
+    <script src="./js/command-utils.js"></script>
+    <script src="./js/command-api.js"></script>
+    <script src="./js/command-dashboard.js"></script>
+  </body>
+</html>
